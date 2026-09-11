@@ -1,26 +1,31 @@
-MIT License
+Copyright © 2026 Alexander Castillo and Pau Modolell Rodríguez.
+All rights reserved.
 
-Copyright (c) 2026 Alexander Castillo, Pau Modolell Rodríguez
+PassportTwin is an academic and research project developed as part of the
+Master's Degree in Industry 4.0 at Universitat Politècnica de Catalunya (UPC).
 
-Permission is hereby granted, free of charge, to any person obtaining a copy
-of this software and associated documentation files (the "Software"), to deal
-in the Software without restriction, including without limitation the rights
-to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
-copies of the Software, and to permit persons to whom the Software is
-furnished to do so, subject to the following conditions:
+This repository is made publicly available for academic review, demonstration,
+and portfolio purposes only.
 
-The above copyright notice and this permission notice shall be included in all
-copies or substantial portions of the Software.
+Except as otherwise permitted by the GitHub Terms of Service, no permission is
+granted to copy, reproduce, modify, distribute, sublicense, publish, sell,
+commercialize, or create derivative works from the source code, documentation,
+models, architecture, or other original materials contained in this repository
+without prior written permission from both authors.
 
-THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
-IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
-AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
-LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
-OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
-SOFTWARE.
+Any datasets, third-party materials, trademarks, software components, or other
+content not originally created by the authors remain subject to their respective
+licenses, terms, and ownership rights.
 
----
-NOTE: Confirm with ReiBus and your academic advisor whether MIT is appropriate
-given the industry partnership, or whether a more restrictive/academic license
-is required before making this repository public.
+No confidential, private, or third-party data is licensed for reuse through
+this repository.
+
+THE MATERIALS IN THIS REPOSITORY ARE PROVIDED "AS IS", WITHOUT WARRANTY OF ANY
+KIND, EXPRESS OR IMPLIED. THE AUTHORS SHALL NOT BE LIABLE FOR ANY CLAIM,
+DAMAGES, OR OTHER LIABILITY ARISING FROM THE USE OF THE MATERIALS.
+
+For permissions or reuse requests, please contact the authors.
+
+Alexander Castillo
+Pau Modolell Rodríguez
+2026

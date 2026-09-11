@@ -1,88 +1,386 @@
-# PassportTwin — Instrument Reliability & Circularity Twin
+# PassportTwin
 
-Master's in Industry 4.0 — TFM (Trabajo de Fin de Máster)
-Team: Alexander Castillo (Track A — Data/Backend/AAS) · Pau Modolell Rodríguez (Track B — AI/BI/Visualization)
-Partner: ReiBus
-Deadline: November 15, 2026
+### Instrument Reliability & Circularity Digital Twin
 
-## What this is
+> A digital twin platform for laboratory instrument fleets, combining digital product passports, operational data, predictive analytics and decision-support capabilities.
 
-A predictive digital twin for laboratory instrument fleets: real-time synchronization,
-calibration drift prediction, survival-analysis-based risk scoring, and a circularity/reuse
-recommender, built on an AAS-based digital passport for each instrument.
+**Master's Final Project — Industry 4.0**  
+Universitat Politècnica de Catalunya (UPC) · 2026
 
-## Quick start
+Developed by **[Alexander Castillo](https://github.com/alexanderj-castillo)** and **[Pau Modolell](https://github.com/paumr90)**.
+
+---
+
+## 🎯 The Challenge
+
+Laboratory instruments generate technical, operational, calibration and maintenance information throughout their lifecycle, but this information is often fragmented across different systems, formats and processes.
+
+This fragmentation makes it difficult to answer questions such as:
+
+- How reliable is an instrument today?
+- Is its calibration behaviour starting to drift?
+- What is its estimated risk of failure or intervention?
+- Which instruments could be reused, refurbished or reassigned?
+- How can technical and lifecycle information be consolidated into a digital passport?
+- How can this information support operational and circular-economy decisions?
+
+**PassportTwin** explores how Digital Twin concepts, data analytics and Asset Administration Shell standards can be combined to address these challenges.
+
+---
+
+## 💡 The Solution
+
+PassportTwin is designed as a digital representation of each laboratory instrument throughout its lifecycle.
+
+The platform combines:
+
+- **Digital Product Passport / AAS** → structured digital representation of each instrument
+- **Operational & calibration data** → historical and current instrument information
+- **Reliability analytics** → monitoring of instrument condition and performance
+- **Predictive models** → calibration drift and risk assessment
+- **Survival analysis** → estimation of reliability and intervention risk
+- **Circularity recommendations** → support for reuse, refurbishment and lifecycle decisions
+- **BI & visualization** → decision-support interfaces for technical and business users
+
+The objective is not only to monitor equipment, but to transform lifecycle data into **actionable operational and circularity insights**.
+
+---
+
+## 🏗️ Target Architecture
+
+```mermaid
+flowchart LR
+
+    Sources[Instrument & Lifecycle Data]
+        --> Ingestion[Data Ingestion]
+
+    Ingestion --> Backend[FastAPI Backend]
+
+    Backend --> DB[(PostgreSQL)]
+    Backend --> AAS[AAS Digital Passport]
+
+    DB --> Analytics[Analytics & AI]
+    AAS --> Analytics
+
+    Analytics --> Risk[Reliability & Risk Models]
+    Analytics --> Circularity[Circularity Engine]
+
+    Risk --> Decision[Decision Support Layer]
+    Circularity --> Decision
+
+    DB --> BI[BI & Visualization]
+    Decision --> BI
+
+    BI --> Users[Technical & Business Users]
+```
+
+The architecture separates operational data, digital passport representation, analytics and visualization so that each layer can evolve independently.
+
+---
+
+## 🧩 Core Capabilities
+
+### 🪪 Digital Instrument Passport
+
+Each instrument is represented through a structured digital passport based on **Asset Administration Shell (AAS)** concepts.
+
+The passport is designed to consolidate:
+
+- identification and technical characteristics;
+- operational information;
+- calibration history;
+- maintenance events;
+- lifecycle information;
+- reliability indicators;
+- circularity-related attributes.
+
+### 📊 Data & Reliability
+
+Instrument data is stored and exposed through a structured backend architecture designed to support:
+
+- instrument management;
+- calibration and operational records;
+- historical analysis;
+- reliability indicators;
+- future predictive models.
+
+### 🤖 Predictive Analytics
+
+The analytical layer is designed to support several types of models:
+
+- calibration drift prediction;
+- anomaly and inconsistency detection;
+- survival-analysis-based risk estimation;
+- instrument condition assessment.
+
+These capabilities are being developed incrementally as part of the Master's Final Project.
+
+### ♻️ Circularity
+
+PassportTwin explores how lifecycle and reliability information can support decisions such as:
+
+- continued use;
+- maintenance;
+- reassignment;
+- refurbishment;
+- reuse;
+- replacement.
+
+The goal is to connect **technical reliability with circular-economy decision making**.
+
+### 📈 BI & Visualization
+
+The visualization layer is designed to translate technical data into understandable decision-support information.
+
+Target views include:
+
+- fleet status;
+- instrument reliability;
+- calibration trends;
+- risk indicators;
+- lifecycle information;
+- circularity opportunities.
+
+---
+
+## 🚧 Current Development Status
+
+PassportTwin is under active development.
+
+The current project foundation includes:
+
+- Dockerized development environment;
+- FastAPI backend architecture;
+- PostgreSQL database integration;
+- initial instrument domain model;
+- instrument API and schemas;
+- database session management;
+- initial AAS builder service;
+- environment configuration;
+- modular project structure.
+
+The following areas are being developed progressively:
+
+- extended instrument lifecycle data;
+- AAS passport enrichment;
+- data generation and ingestion;
+- predictive models;
+- survival analysis;
+- circularity recommendation logic;
+- BI and visualization;
+- end-to-end integration and validation.
+
+---
+
+## 🛠️ Technology Stack
+
+### Backend & Data
+
+`Python` · `FastAPI` · `PostgreSQL` · `SQLAlchemy` · `Pydantic`
+
+### Digital Twin & Interoperability
+
+`Asset Administration Shell (AAS)` · `Digital Product Passport` · `Industry 4.0`
+
+### Analytics & AI
+
+`Python` · `Data Analytics` · `Predictive Modelling` · `Survival Analysis`
+
+### Visualization
+
+`Business Intelligence` · `Data Visualization` · `Dashboarding`
+
+### Infrastructure & Development
+
+`Docker` · `Docker Compose` · `Git` · `GitHub`
+
+---
+
+## 📁 Repository Structure
+
+```text
+passporttwin/
+│
+├── ai/                    # Analytics, datasets and model development
+│
+├── backend/
+│   └── app/
+│       ├── api/           # FastAPI endpoints
+│       ├── core/          # Application configuration
+│       ├── database/      # Database connection and sessions
+│       ├── models/        # Domain / database models
+│       ├── schemas/       # Data validation and API schemas
+│       └── services/      # Business logic and AAS services
+│
+├── frontend/              # Visualization / application frontend
+├── generators/            # Data and utility generators
+├── docs/                  # Architecture and project documentation
+├── infra/                 # Infrastructure configuration
+│   └── postgres/
+│
+├── .github/               # GitHub workflows and collaboration templates
+├── .env.example           # Environment configuration template
+├── docker-compose.yml     # Local multi-service environment
+├── CONTRIBUTING.md        # Collaboration workflow
+├── CHANGELOG.md           # Project evolution
+├── LICENSE                # Copyright and reuse terms
+└── README.md
+```
+
+---
+
+## 🚀 Quick Start
+
+### 1. Clone the repository
 
 ```bash
-cp .env.example .env
+git clone https://github.com/projects-i40-ap/passporttwin.git
+cd passporttwin
+```
+
+### 2. Configure the environment
+
+Copy:
+
+```text
+.env.example
+```
+
+to:
+
+```text
+.env
+```
+
+and configure the required local values.
+
+### 3. Start the environment
+
+```bash
 docker compose up
 ```
 
-- Backend API (FastAPI) → http://localhost:8000
-- Backend Swagger/OpenAPI docs → http://localhost:8000/docs
-- Frontend dashboard (React) → http://localhost:5173
-- PostgreSQL/TimescaleDB → localhost:5432
+The development environment exposes the services configured in `docker-compose.yml`, including the backend and database infrastructure.
 
-> Note: this is the v0.1 Foundation skeleton. Services return placeholder responses until
-> real endpoints, models, and components are implemented starting Sprint 1.
+---
 
-## Repository structure — what each folder is for
+## ✅ Development Principles
 
-| Path | Purpose |
-|---|---|
-| `README.md` | This file — orientation for anyone opening the repo. |
-| `CONTRIBUTING.md` | How Alexander and Pau branch, commit, and review each other's work. |
-| `LICENSE` | Legal terms for reuse of the code (relevant since ReiBus is a partner). |
-| `CHANGELOG.md` | Human-readable log of what changed each sprint — useful when writing the memoria. |
-| `.gitignore` | Tells Git which files to never track (secrets, build artifacts, datasets). |
-| `.editorconfig` | Forces consistent indentation/line endings between your and Pau's editors. |
-| `.env.example` | Template for environment variables — copy to `.env`, which is never committed. |
-| `docker-compose.yml` | Single command to start every service together (DB, backend, frontend). |
-| **`backend/`** | The FastAPI service — all Track A business logic lives here. |
-| `backend/app/` | Application entrypoint — `main.py`, app factory, startup/shutdown events. |
-| `backend/api/` | HTTP route definitions (endpoints), grouped by resource (e.g. `instruments.py`, `passports.py`). |
-| `backend/core/` | Cross-cutting configuration — settings, security, logging, dependency injection. |
-| `backend/database/` | DB connection/session setup, Alembic migrations. |
-| `backend/models/` | SQLAlchemy ORM models — the Python representation of your PostgreSQL tables. |
-| `backend/schemas/` | Pydantic schemas — define what data looks like coming in/out of the API (validation layer). |
-| `backend/services/` | Business logic that doesn't belong in a route handler (e.g. drift scoring, AAS export). |
-| `backend/tests/` | Automated tests for the backend (pytest). |
-| `backend/requirements.txt` | Python dependencies. |
-| `backend/Dockerfile` | Instructions to build the backend's container image. |
-| **`frontend/`** | The React dashboard — Track B visualization work. |
-| `frontend/src/` | React components, pages, hooks, API client calls. |
-| `frontend/public/` | Static assets (favicon, index.html, images) served as-is. |
-| `frontend/package.json` | Node.js dependencies and npm scripts. |
-| `frontend/Dockerfile` | Instructions to build the frontend's container image. |
-| **`ai/`** | Everything related to the drift/risk/circularity models — Track A/B boundary. |
-| `ai/datasets/` | Synthetic or real datasets used for training/validation (gitignored if large). |
-| `ai/notebooks/` | Jupyter notebooks for exploration — not production code, just analysis. |
-| `ai/preprocessing/` | Scripts that clean/transform raw data before it reaches a model. |
-| `ai/training/` | Scripts that train the drift-prediction / survival-analysis models. |
-| `ai/inference/` | Scripts/functions that load a trained model and score new data in production. |
-| `ai/models/` | Serialized trained model artifacts (`.pkl`, `.joblib` — gitignored, usually too large for Git). |
-| **`docs/`** | Everything that eventually feeds your memoria and defense. |
-| `docs/architecture/` | The six-layer architecture diagram and written architecture description. |
-| `docs/adr/` | Architecture Decision Records — one file per major decision, mirrored from Notion. |
-| `docs/api/` | API documentation beyond auto-generated Swagger (e.g. usage examples). |
-| `docs/diagrams/` | Data pipeline diagrams, ER diagrams, sequence diagrams. |
-| `docs/experiments/` | Write-ups of EXP-01 through EXP-07 and their results. |
-| `docs/thesis/` | Draft memoria chapters, written progressively sprint by sprint. |
-| **`infra/`** | Infrastructure configuration that isn't application code. |
-| `infra/postgres/` | Postgres-specific config (init scripts, tuning parameters). |
-| `infra/nginx/` | Reverse proxy config, if you expose the app behind Nginx later. |
-| `infra/docker/` | Shared Docker configuration not specific to one service. |
-| `infra/monitoring/` | Grafana dashboards/config, if used for operational monitoring. |
-| `infra/raspberry/` | Configuration for any Raspberry Pi used for MQTT sensor ingestion. |
-| **`scripts/`** | One-off utility scripts (data seeding, backups, deployment helpers). |
-| **`.github/workflows/`** | GitHub Actions — automated CI (run tests, lint, build Docker images on every push). |
-| **`.github/ISSUE_TEMPLATE/`** | Standard forms for opening bug reports / feature requests as GitHub Issues. |
-| **`.github/PULL_REQUEST_TEMPLATE.md`** | Checklist that appears automatically when either of you opens a PR. |
+PassportTwin is developed incrementally around several principles:
 
-## Definition of Done (per feature)
+1. **End-to-end value before unnecessary complexity**
+2. **Modular architecture**
+3. **Reproducible Docker-based development**
+4. **Traceable data and analytical results**
+5. **Validation of each major capability**
+6. **Documentation alongside implementation**
+7. **Collaborative development through Git and pull requests**
 
-1. Code merged to `main`, runs in Docker without manual steps.
-2. Meets that sprint's validation criterion (e.g., MAE for drift model, precision/recall for
-   inconsistency detection).
-3. Demonstrable end-to-end in the Sprint Review, not just unit-tested in isolation.
-4. Documented — even briefly — in `docs/`, since it feeds the memoria later.
+A feature is considered complete when it can be demonstrated end-to-end, validated against its defined criterion and documented sufficiently to support the Master's thesis.
+
+---
+
+## 🗺️ Roadmap
+
+### Foundation
+
+- [x] Repository and collaboration structure
+- [x] Docker development environment
+- [x] Backend modular architecture
+- [x] PostgreSQL integration
+- [x] Initial instrument domain and API
+- [x] Initial AAS builder
+
+### Digital Twin & Data
+
+- [ ] Extended instrument lifecycle model
+- [ ] Digital passport enrichment
+- [ ] Data ingestion pipeline
+- [ ] Synthetic / experimental datasets
+
+### Analytics
+
+- [ ] Calibration drift modelling
+- [ ] Reliability indicators
+- [ ] Survival analysis
+- [ ] Risk scoring
+
+### Circularity
+
+- [ ] Circularity criteria
+- [ ] Reuse / refurbishment logic
+- [ ] Recommendation engine
+
+### Decision Support
+
+- [ ] BI model
+- [ ] Fleet overview
+- [ ] Instrument-level visualization
+- [ ] Reliability and risk dashboards
+- [ ] Circularity decision-support views
+
+### Validation
+
+- [ ] End-to-end integration
+- [ ] Experimental validation
+- [ ] Final demonstrator
+- [ ] Master's thesis documentation
+
+---
+
+## 👥 Authors
+
+PassportTwin is a **joint Master's Final Project** developed by:
+
+### Alexander Castillo
+
+[GitHub](https://github.com/alexanderj-castillo)
+
+Electromechanical Engineer · Industrial Automation · OT/IT Integration · Industry 4.0
+
+### Pau Modolell
+
+[GitHub](https://github.com/paumr90)
+
+Chemical Engineer · Business & Digital Transformation Consultant · Project Manager · Industry 4.0
+
+The project is collaboratively developed. Individual technical contributions and project evolution are traceable through the repository's Git history.
+
+---
+
+## 🎓 Academic Context
+
+PassportTwin is developed as the **Master's Final Project of the Master's Degree in Industry 4.0 at Universitat Politècnica de Catalunya (UPC)**.
+
+The project explores the practical integration of:
+
+**Digital Twins · Asset Administration Shell · Data Analytics · Artificial Intelligence · Business Intelligence · Circular Economy**
+
+within a real-world Industry 4.0 use case.
+
+---
+
+## 🔐 Data & Privacy
+
+The public repository is intended to contain the software architecture, source code, documentation and examples required to understand and demonstrate the project.
+
+Credentials, local environment configuration, private datasets and confidential information must remain outside version control.
+
+Environment-specific values are managed through `.env` files and other local resources excluded through `.gitignore`.
+
+---
+
+## 📄 License
+
+Copyright © 2026 Alexander Castillo and Pau Modolell Rodríguez.  
+**All rights reserved.**
+
+PassportTwin is currently shared publicly for **academic review, demonstration and portfolio purposes**.
+
+Reuse, modification, redistribution, commercialization or creation of derivative works from the original project materials is not permitted without prior written permission from both authors.
+
+See the [`LICENSE`](LICENSE) file for full terms.
+
+---
+
+**PassportTwin · UPC · 2026**
