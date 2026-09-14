@@ -10,6 +10,13 @@ from app.schemas.instrument import (
     InstrumentUnitResponse)
 from app.services.aas_builder import AASBuilder
 
+##### LIBRERIAS qr code AND Metabase
+import io
+import qrcode
+from fastapi import Response, status
+from fastapi.responses import RedirectResponse
+from uuid import UUID
+
 router = APIRouter(prefix="/instruments", tags=["instruments"])
 
 @router.post("/types", response_model=InstrumentTypeResponse, status_code=status.HTTP_201_CREATED)
@@ -75,3 +82,41 @@ def force_sync_aas(id: int, db: Session = Depends(get_db)):
     db.commit()
     db.refresh(instrument)
     return instrument
+
+######## QR y Metabase endpoints
+@router.get("/{public_id}/qr", summary="Genera la imagen QR física del pasaporte")
+def get_instrument_qr(public_id: UUID, db: Session = Depends(get_db)):
+    instrument = db.query(InstrumentUnit).filter(InstrumentUnit.public_id == public_id).first()
+    if not instrument:
+        raise HTTPException(status_code=404, detail="Instrumento no encontrado.")
+
+    # URL canónica estable según arquitectura ADR-009 y Sección 3.5
+    passport_url = f"http://localhost:8000/passport/{public_id}"
+
+    # Generación matricial del código QR
+    qr = qrcode.QRCode(
+        version=1,
+        error_correction=qrcode.constants.ERROR_CORRECT_M,
+        box_size=10,
+        border=4,
+    )
+    qr.add_data(passport_url)
+    qr.make(fit=True)
+
+    img = qr.make_image(fill_color="black", back_color="white")
+    buf = io.BytesIO()
+    img.save(buf, format="PNG")
+    buf.seek(0)
+
+    return Response(content=buf.getvalue(), media_type="image/png")
+
+@router.get("/passport/{public_id}", tags=["passport"], summary="Punto de resolución canónica del QR")
+def resolve_passport(public_id: UUID, db: Session = Depends(get_db)):
+    """Punto de entrada al escanear el QR: resuelve el activo y redirige a la vista de pasaporte."""
+    instrument = db.query(InstrumentUnit).filter(InstrumentUnit.public_id == public_id).first()
+    if not instrument:
+        raise HTTPException(status_code=404, detail="Pasaporte no encontrado para el identificador escaneado.")
+
+    # Redirige a la tarjeta del pasaporte en Metabase pasando el parámetro public_id
+    metabase_dashboard_url = f"http://localhost:3003/question/1?public_id={public_id}"
+    return RedirectResponse(url=metabase_dashboard_url, status_code=status.HTTP_307_TEMPORARY_REDIRECT)
