@@ -72,6 +72,8 @@ def process_document(document_id: int, db: Session = Depends(get_db)):
         doc.processing_status = "FAILED_EXTRACTION"
         db.commit()
         raise HTTPException(status_code=422, detail="No se pudieron extraer campos estructurados del PDF.")
+    # Línea a añadir para evitar duplicados en Staging:
+    db.query(ExtractedField).filter(ExtractedField.document_id == doc.id).delete()   
 
     # 2. Persistencia en Zona de Staging (extracted_field)
     for field_name, val in extracted.items():

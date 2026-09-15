@@ -91,7 +91,7 @@ def get_instrument_qr(public_id: UUID, db: Session = Depends(get_db)):
         raise HTTPException(status_code=404, detail="Instrumento no encontrado.")
 
     # URL canónica estable según arquitectura ADR-009 y Sección 3.5
-    passport_url = f"http://localhost:8000/passport/{public_id}"
+    passport_url = f"http://localhost:8000/api/v1/instruments/passport/{public_id}"
 
     # Generación matricial del código QR
     qr = qrcode.QRCode(

@@ -5,7 +5,6 @@ This file wires together the FastAPI app. Route logic lives in `api/`,
 configuration in `core/`, DB session handling in `database/`.
 """
 from fastapi import FastAPI
-from app.api import instruments
 from app.database.session import Base, engine
 from app.api import instruments, documents
 
