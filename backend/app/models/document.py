@@ -10,9 +10,9 @@ class Document(Base):
     instrument_unit_id = Column(Integer, ForeignKey("instrument_unit.id"), nullable=True)
     original_filename = Column(String, nullable=False)
     file_path = Column(String, nullable=False)
-    source_type = Column(String, default="MANUAL_UPLOAD")  # PDF_CERTIFICATE | INVENTORY_CSV
+    source_type = Column(String, default="MANUAL_UPLOAD")
     sha256_hash = Column(String(64), unique=True, nullable=False, index=True)
-    processing_status = Column(String, default="RECEIVED")  # RECEIVED | EXTRACTED | VALIDATED | ACCEPTED | REJECTED
+    processing_status = Column(String, default="RECEIVED")
     uploaded_at = Column(DateTime, default=datetime.utcnow)
 
     extracted_fields = relationship("ExtractedField", back_populates="document", cascade="all, delete-orphan")
@@ -22,11 +22,11 @@ class ExtractedField(Base):
 
     id = Column(Integer, primary_key=True, index=True)
     document_id = Column(Integer, ForeignKey("document.id"), nullable=False)
-    field_name = Column(String, nullable=False)        # e.g., 'serial_number', 'calibration_date'
-    raw_value = Column(Text, nullable=True)           # e.g., 'S/N: PT-WIKA-001'
-    normalized_value = Column(Text, nullable=True)    # e.g., 'PT-WIKA-001'
+    field_name = Column(String, nullable=False)
+    raw_value = Column(Text, nullable=True)
+    normalized_value = Column(Text, nullable=True)
     confidence = Column(String, default="1.0")
-    validation_status = Column(String, default="STAGING") # STAGING | ACCEPTED | REVIEW_REQUIRED | REJECTED
+    validation_status = Column(String, default="STAGING")
     created_at = Column(DateTime, default=datetime.utcnow)
 
     document = relationship("Document", back_populates="extracted_fields")
