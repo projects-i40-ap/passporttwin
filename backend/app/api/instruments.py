@@ -21,6 +21,18 @@ from uuid import UUID
 from app.models.calibration import CalibrationEvent
 from app.services.analytics import DriftAnalyticsService
 
+#### Ingestion masiva de sensores
+import io
+import os
+import hashlib
+import pandas as pd
+from datetime import datetime
+from fastapi import UploadFile, File
+from app.models.document import Document
+
+STORAGE_RAW_DIR = os.getenv("STORAGE_RAW_DIR", "/app/storage/raw")
+os.makedirs(STORAGE_RAW_DIR, exist_ok=True)
+
 router = APIRouter(prefix="/instruments", tags=["instruments"])
 
 @router.post("/types", response_model=InstrumentTypeResponse, status_code=status.HTTP_201_CREATED)
@@ -125,6 +137,7 @@ def resolve_passport(public_id: UUID, db: Session = Depends(get_db)):
     metabase_dashboard_url = f"http://localhost:3003/question/1?public_id={public_id}"
     return RedirectResponse(url=metabase_dashboard_url, status_code=status.HTTP_307_TEMPORARY_REDIRECT)
 
+####### Endpoints de Calibración y Predicciones
 @router.get("/{id}/calibrations", summary="Historial de calibraciones del instrumento")
 def get_instrument_calibrations(id: int, db: Session = Depends(get_db)):
     instrument = db.query(InstrumentUnit).filter(InstrumentUnit.id == id).first()
@@ -139,3 +152,134 @@ def get_instrument_predictions(id: int, db: Session = Depends(get_db)):
         raise HTTPException(status_code=404, detail="Instrumento no encontrado.")
     cals = db.query(CalibrationEvent).filter(CalibrationEvent.instrument_unit_id == id).all()
     return DriftAnalyticsService.calculate_drift_and_risk(instrument, cals)
+
+######## Endpoints de Ingesta Masiva de Documentos CSV
+@router.post("/upload-csv", status_code=status.HTTP_201_CREATED, summary="Ingesta masiva de inventario de flota vía CSV")
+async def upload_instruments_csv(
+    file: UploadFile = File(...),
+    db: Session = Depends(get_db)
+):
+    """
+    Pipeline canónico de importación de flota:
+    1. RAW: Persiste el archivo inmutable byte a byte con hash SHA-256.
+    2. NORMALIZE & VALIDATE: Parsea mediante pandas y verifica integridad fila a fila.
+    3. CANONICAL COMMIT: Inserta en instrument_unit con public_id.
+    4. AAS PROJECTION: Proyecta la Shell y Nameplate hacia Eclipse BaSyx.
+    """
+    if not file.filename.lower().endswith(".csv"):
+        raise HTTPException(status_code=400, detail="El formato del archivo debe ser estrictamente .csv")
+
+    contents = await file.read()
+    if not contents:
+        raise HTTPException(status_code=400, detail="El archivo CSV proporcionado está vacío.")
+
+    # 1. Regla de Integridad RAW (R-DUP-01): Cómputo SHA-256
+    file_hash = hashlib.sha256(contents).hexdigest()
+    storage_path = os.path.join(STORAGE_RAW_DIR, f"{file_hash}.csv")
+    with open(storage_path, "wb") as f:
+        f.write(contents)
+
+    # Registrar procedencia RAW inmutable
+    raw_doc = db.query(Document).filter(Document.sha256_hash == file_hash).first()
+    if not raw_doc:
+        raw_doc = Document(
+            original_filename=file.filename,
+            file_path=storage_path,
+            sha256_hash=file_hash,
+            source_type="INVENTORY_CSV",
+            processing_status="ACCEPTED"
+        )
+        db.add(raw_doc)
+        db.commit()
+        db.refresh(raw_doc)
+
+    # 2. Parsing con pandas
+    try:
+        df = pd.read_csv(io.BytesIO(contents))
+    except Exception as e:
+        raise HTTPException(status_code=422, detail=f"Error al estructurar el CSV: {str(e)}")
+
+    required_columns = {"serial_number", "type_name", "manufacturer", "model"}
+    if not required_columns.issubset(df.columns):
+        missing = required_columns - set(df.columns)
+        raise HTTPException(
+            status_code=400, 
+            detail=f"Faltan columnas requeridas en la cabecera del CSV: {list(missing)}"
+        )
+
+    created_instruments = []
+    skipped_records = []
+
+    # Cache de tipos de instrumentos para optimizar consultas en memoria
+    type_cache = {t.name: t for t in db.query(InstrumentType).all()}
+
+    # 3. Procesamiento fila a fila
+    for idx, row in df.iterrows():
+        serial = str(row["serial_number"]).strip()
+        type_str = str(row["type_name"]).strip()
+
+        # Validación: unicidad de serial
+        if db.query(InstrumentUnit).filter(InstrumentUnit.serial_number == serial).first():
+            skipped_records.append({
+                "row": idx + 2,
+                "serial_number": serial,
+                "reason": "Número de serie ya registrado en la base de datos."
+            })
+            continue
+
+        # Validación: existencia del tipo metrológico
+        inst_type = type_cache.get(type_str)
+        if not inst_type:
+            skipped_records.append({
+                "row": idx + 2,
+                "serial_number": serial,
+                "reason": f"El tipo '{type_str}' no existe en el catálogo canónico (instrument_type)."
+            })
+            continue
+
+        # Normalización de fecha de instalación
+        install_date = None
+        if "installed_at" in row and pd.notna(row["installed_at"]):
+            try:
+                install_date = datetime.strptime(str(row["installed_at"]).strip(), "%Y-%m-%d").date()
+            except ValueError:
+                install_date = None
+
+        new_unit = InstrumentUnit(
+            instrument_type_id=inst_type.id,
+            serial_number=serial,
+            manufacturer=str(row["manufacturer"]).strip(),
+            model=str(row["model"]).strip(),
+            location=str(row.get("location", "Main Plant / Unassigned")).strip(),
+            criticality=str(row.get("criticality", "MEDIUM")).strip().upper(),
+            installed_at=install_date,
+            lifecycle_state="operational",
+            aas_sync_status="PENDING"
+        )
+        db.add(new_unit)
+        db.commit()
+        db.refresh(new_unit)
+
+        # 4. Proyección Interoperable hacia Eclipse BaSyx
+        synced = AASBuilder.sync_shell_and_nameplate(new_unit, inst_type)
+        new_unit.aas_sync_status = "SYNCED" if synced else "PENDING"
+        db.commit()
+        db.refresh(new_unit)
+
+        created_instruments.append({
+            "id": new_unit.id,
+            "public_id": str(new_unit.public_id),
+            "serial_number": new_unit.serial_number,
+            "manufacturer": new_unit.manufacturer,
+            "model": new_unit.model,
+            "aas_sync_status": new_unit.aas_sync_status
+        })
+
+    return {
+        "raw_document_id": raw_doc.id,
+        "sha256": raw_doc.sha256_hash,
+        "total_rows_evaluated": len(df),
+        "total_created": len(created_instruments),
+        "created_instruments": created_instruments,
+        "skipped_records": skipped_records
+    }
