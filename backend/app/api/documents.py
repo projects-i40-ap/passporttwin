@@ -8,6 +8,7 @@ from datetime import datetime
 from app.models.document import ExtractedField
 from app.models.instrument import InstrumentUnit
 from app.services.pdf_extractor import PDFCertificateExtractor
+from app.models.calibration import CalibrationEvent, AuditLog
 
 router = APIRouter(prefix="/documents", tags=["documents"])
 
@@ -131,4 +132,90 @@ def process_document(document_id: int, db: Session = Depends(get_db)):
         "matched_instrument_id": doc.instrument_unit_id,
         "extracted_fields": extracted,
         "rules_failed": rules_failed
+    }
+
+from app.models.calibration import CalibrationEvent, AuditLog
+
+@router.post("/{document_id}/accept", summary="Materializa campos aceptados en el Modelo Canónico y AAS")
+def accept_document_to_canonical(document_id: int, db: Session = Depends(get_db)):
+    doc = db.query(Document).filter(Document.id == document_id).first()
+    if not doc:
+        raise HTTPException(status_code=404, detail="Documento no encontrado.")
+    
+    if doc.processing_status != "ACCEPTED":
+        raise HTTPException(
+            status_code=400, 
+            detail=f"El documento está en estado '{doc.processing_status}'. Solo se pueden materializar documentos en estado 'ACCEPTED'."
+        )
+
+    if not doc.instrument_unit_id:
+        raise HTTPException(status_code=400, detail="El documento no tiene un activo canónico asociado.")
+
+    instrument = db.query(InstrumentUnit).filter(InstrumentUnit.id == doc.instrument_unit_id).first()
+    if not instrument:
+        raise HTTPException(status_code=404, detail="Instrumento canónico vinculado no existe.")
+
+    # 1. Recuperar campos de la zona de staging (extracted_field)
+    fields = db.query(ExtractedField).filter(ExtractedField.document_id == doc.id).all()
+    field_dict = {f.field_name: f.normalized_value for f in fields}
+
+    cal_date_str = field_dict.get("calibration_date")
+    due_date_str = field_dict.get("next_due_date")
+    error_val = float(field_dict.get("error_value", 0.0))
+    tolerance_val = float(field_dict.get("tolerance", 0.1))
+
+    if not cal_date_str:
+        raise HTTPException(status_code=422, detail="Falta el campo 'calibration_date' en staging.")
+
+    cal_date = datetime.strptime(cal_date_str, "%Y-%m-%d").date()
+    due_date = datetime.strptime(due_date_str, "%Y-%m-%d").date() if due_date_str else None
+
+    # 2. Regla Metrológica R-TOL-01: Evaluación de tolerancia
+    is_out_of_tol = abs(error_val) > tolerance_val
+    result_status = "out_of_tolerance" if is_out_of_tol else "pass"
+
+    # 3. Transacción Canónica: Crear evento de calibración
+    new_calibration = CalibrationEvent(
+        instrument_unit_id=instrument.id,
+        calibration_date=cal_date,
+        error_value=error_val,
+        tolerance=tolerance_val,
+        result=result_status,
+        next_due_date=due_date
+    )
+    db.add(new_calibration)
+
+    # 4. Actualizar estado operativo del activo en instrument_unit
+    instrument.lifecycle_state = "out_of_tolerance" if is_out_of_tol else "operational"
+
+    # 5. Registrar trazabilidad inmutable en audit_log
+    audit_entry = AuditLog(
+        entity_name="instrument_unit",
+        entity_id=instrument.id,
+        action="CALIBRATION_INGESTED",
+        details={
+            "document_id": doc.id,
+            "certificate_sha256": doc.sha256_hash,
+            "error_value": error_val,
+            "tolerance": tolerance_val,
+            "result": result_status,
+            "previous_state": "operational",
+            "new_state": instrument.lifecycle_state
+        }
+    )
+    db.add(audit_entry)
+
+    # Confirmar transacción en PostgreSQL (Source of Truth)
+    db.commit()
+    db.refresh(new_calibration)
+    db.refresh(instrument)
+
+    return {
+        "status": "CANONICAL_COMMITTED",
+        "calibration_event_id": new_calibration.id,
+        "instrument_id": instrument.id,
+        "serial_number": instrument.serial_number,
+        "lifecycle_state": instrument.lifecycle_state,
+        "result": new_calibration.result,
+        "next_due_date": new_calibration.next_due_date
     }

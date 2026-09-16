@@ -77,8 +77,18 @@ CREATE TABLE IF NOT EXISTS incident (
     created_at         TIMESTAMPTZ DEFAULT now()
 );
 
+CREATE TABLE IF NOT EXISTS audit_log (
+    id          SERIAL PRIMARY KEY,
+    entity_name TEXT NOT NULL,
+    entity_id   INTEGER NOT NULL,
+    action      TEXT NOT NULL,
+    details     JSONB,
+    created_at  TIMESTAMPTZ DEFAULT now()
+);
+
 -- Índices operacionales mínimos
 CREATE INDEX IF NOT EXISTS idx_instrument_unit_serial ON instrument_unit(serial_number);
 CREATE INDEX IF NOT EXISTS idx_instrument_unit_public_id ON instrument_unit(public_id);
 CREATE INDEX IF NOT EXISTS idx_document_sha256 ON document(sha256_hash);
 CREATE INDEX IF NOT EXISTS idx_extracted_field_document ON extracted_field(document_id);
+CREATE INDEX IF NOT EXISTS idx_audit_log_entity ON audit_log(entity_name, entity_id);
