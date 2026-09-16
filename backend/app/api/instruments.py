@@ -17,6 +17,10 @@ from fastapi import Response, status
 from fastapi.responses import RedirectResponse
 from uuid import UUID
 
+##### Librerias calibration and predictions
+from app.models.calibration import CalibrationEvent
+from app.services.analytics import DriftAnalyticsService
+
 router = APIRouter(prefix="/instruments", tags=["instruments"])
 
 @router.post("/types", response_model=InstrumentTypeResponse, status_code=status.HTTP_201_CREATED)
@@ -120,3 +124,18 @@ def resolve_passport(public_id: UUID, db: Session = Depends(get_db)):
     # Redirige a la tarjeta del pasaporte en Metabase pasando el parámetro public_id
     metabase_dashboard_url = f"http://localhost:3003/question/1?public_id={public_id}"
     return RedirectResponse(url=metabase_dashboard_url, status_code=status.HTTP_307_TEMPORARY_REDIRECT)
+
+@router.get("/{id}/calibrations", summary="Historial de calibraciones del instrumento")
+def get_instrument_calibrations(id: int, db: Session = Depends(get_db)):
+    instrument = db.query(InstrumentUnit).filter(InstrumentUnit.id == id).first()
+    if not instrument:
+        raise HTTPException(status_code=404, detail="Instrumento no encontrado.")
+    return db.query(CalibrationEvent).filter(CalibrationEvent.instrument_unit_id == id).order_by(CalibrationEvent.calibration_date.asc()).all()
+
+@router.get("/{id}/predictions", summary="Predicción de deriva, riesgo 30/60/90 y Health Score")
+def get_instrument_predictions(id: int, db: Session = Depends(get_db)):
+    instrument = db.query(InstrumentUnit).filter(InstrumentUnit.id == id).first()
+    if not instrument:
+        raise HTTPException(status_code=404, detail="Instrumento no encontrado.")
+    cals = db.query(CalibrationEvent).filter(CalibrationEvent.instrument_unit_id == id).all()
+    return DriftAnalyticsService.calculate_drift_and_risk(instrument, cals)

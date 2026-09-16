@@ -99,3 +99,68 @@ class AASBuilder:
         except Exception as e:
             logger.error(f"Fallo de comunicación con BaSyx AAS: {str(e)}")
             return False
+    @staticmethod
+    def sync_calibration_submodel(instrument, calibration_event) -> bool:
+        """Proyecta el historial de calibración aceptado al servidor BaSyx."""
+        clean_serial = instrument.serial_number.replace("-", "_")
+        aas_id = f"AAS_{clean_serial}"
+        sm_id = f"Submodel_Calibration_{clean_serial}"
+
+        payload = {
+            "idShort": "CalibrationHistory",
+            "identification": {
+                "id": sm_id,
+                "idType": "Custom"
+            },
+            "semanticId": {
+                "keys": [
+                    {
+                        "type": "GlobalReference",
+                        "local": False,
+                        "value": "urn:passporttwin:submodel:calibration:1:0",
+                        "idType": "IRI"
+                    }
+                ]
+            },
+            "submodelElements": [
+                {
+                    "idShort": "LastCalibrationDate",
+                    "modelType": {"name": "Property"},
+                    "valueType": "string",
+                    "value": str(calibration_event.calibration_date)
+                },
+                {
+                    "idShort": "NextDueDate",
+                    "modelType": {"name": "Property"},
+                    "valueType": "string",
+                    "value": str(calibration_event.next_due_date)
+                },
+                {
+                    "idShort": "ErrorValue",
+                    "modelType": {"name": "Property"},
+                    "valueType": "double",
+                    "value": str(calibration_event.error_value)
+                },
+                {
+                    "idShort": "Tolerance",
+                    "modelType": {"name": "Property"},
+                    "valueType": "double",
+                    "value": str(calibration_event.tolerance)
+                },
+                {
+                    "idShort": "CalibrationResult",
+                    "modelType": {"name": "Property"},
+                    "valueType": "string",
+                    "value": str(calibration_event.result)
+                }
+            ]
+        }
+
+        headers = {"Content-Type": "application/json"}
+        try:
+            url = f"{BASYX_AAS_URL}/shells/{aas_id}/aas/submodels/CalibrationHistory"
+            resp = requests.put(url, json=payload, headers=headers, timeout=4)
+            return resp.status_code in [200, 201]
+        except Exception as e:
+            logger.error(f"Error sincronizando Submodelo Calibration en BaSyx: {str(e)}")
+            return False
