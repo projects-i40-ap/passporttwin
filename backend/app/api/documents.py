@@ -9,6 +9,7 @@ from app.models.document import ExtractedField
 from app.models.instrument import InstrumentUnit
 from app.services.pdf_extractor import PDFCertificateExtractor
 from app.models.calibration import CalibrationEvent, AuditLog
+from app.schemas.document import ExtractedFieldCorrection
 
 router = APIRouter(prefix="/documents", tags=["documents"])
 
@@ -73,6 +74,7 @@ def process_document(document_id: int, db: Session = Depends(get_db)):
         doc.processing_status = "FAILED_EXTRACTION"
         db.commit()
         raise HTTPException(status_code=422, detail="No se pudieron extraer campos estructurados del PDF.")
+
     # Línea a añadir para evitar duplicados en Staging:
     db.query(ExtractedField).filter(ExtractedField.document_id == doc.id).delete()   
 
@@ -218,4 +220,72 @@ def accept_document_to_canonical(document_id: int, db: Session = Depends(get_db)
         "lifecycle_state": instrument.lifecycle_state,
         "result": new_calibration.result,
         "next_due_date": new_calibration.next_due_date
+    }
+
+@router.get("/{document_id}/fields", summary="Consulta los campos extraídos de un documento")
+def get_extracted_fields(
+    document_id: int,
+    db: Session = Depends(get_db)
+):
+    doc = db.query(Document).filter(Document.id == document_id).first()
+    if not doc:
+        raise HTTPException(status_code=404, detail="Documento no encontrado.")
+
+    fields = db.query(ExtractedField).filter(
+        ExtractedField.document_id == document_id
+    ).order_by(ExtractedField.id).all()
+
+    return {
+        "document_id": doc.id,
+        "processing_status": doc.processing_status,
+        "fields": [
+            {
+                "field_id": field.id,
+                "field_name": field.field_name,
+                "raw_value": field.raw_value,
+                "normalized_value": field.normalized_value,
+                "confidence": field.confidence,
+                "validation_status": field.validation_status
+            }
+            for field in fields
+        ]
+    }
+
+@router.patch("/{document_id}/fields/{field_id}", summary="Corrige manualmente un campo extraído")
+def correct_extracted_field(
+    document_id: int,
+    field_id: int,
+    correction: ExtractedFieldCorrection,
+    db: Session = Depends(get_db)
+):
+    doc = db.query(Document).filter(Document.id == document_id).first()
+    if not doc:
+        raise HTTPException(status_code=404, detail="Documento no encontrado.")
+
+    field = db.query(ExtractedField).filter(
+        ExtractedField.id == field_id,
+        ExtractedField.document_id == document_id
+    ).first()
+
+    if not field:
+        raise HTTPException(
+            status_code=404,
+            detail="Campo extraído no encontrado para este documento."
+        )
+
+    # Human-in-the-loop:
+    # raw_value se conserva como evidencia original.
+    # normalized_value contiene la corrección humana.
+    field.normalized_value = correction.normalized_value
+
+    db.commit()
+    db.refresh(field)
+
+    return {
+        "field_id": field.id,
+        "document_id": field.document_id,
+        "field_name": field.field_name,
+        "raw_value": field.raw_value,
+        "normalized_value": field.normalized_value,
+        "validation_status": field.validation_status
     }
