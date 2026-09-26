@@ -10,6 +10,7 @@ from app.models.instrument import InstrumentUnit
 from app.services.pdf_extractor import PDFCertificateExtractor
 from app.models.calibration import CalibrationEvent, AuditLog
 from app.schemas.document import ExtractedFieldCorrection
+from app.services.document_validation import validate_document_fields
 
 router = APIRouter(prefix="/documents", tags=["documents"])
 
@@ -90,36 +91,16 @@ def process_document(document_id: int, db: Session = Depends(get_db)):
         )
         db.add(field_entry)
     
-    # 3. Matching Determinista por Serial Number (Regla primaria)
-    matched_serial = extracted.get("serial_number")
-    target_unit = None
-    if matched_serial:
-        target_unit = db.query(InstrumentUnit).filter(InstrumentUnit.serial_number == matched_serial).first()
+    # 3. Matching Determinista y Motor de Reglas compartido
+    target_unit, rules_failed = validate_document_fields(
+        db=db,
+        fields=extracted
+    )
 
-    # 4. Motor de Reglas y Calidad de Datos (R-ID-01, R-DATE-01, R-DATE-02)
-    rules_failed = []
-    
-    # Regla R-ID-01: Concordancia de activo
-    if not target_unit:
-        rules_failed.append("R-ID-01: Serial no coincide con ningún activo canónico registrado.")
-    else:
+    if target_unit:
         doc.instrument_unit_id = target_unit.id
 
-    # Reglas R-DATE-01 y R-DATE-02: Coherencia temporal
-    cal_date_str = extracted.get("calibration_date")
-    due_date_str = extracted.get("next_due_date")
-
-    if cal_date_str:
-        cal_date = datetime.strptime(cal_date_str, "%Y-%m-%d").date()
-        if cal_date > datetime.utcnow().date():
-            rules_failed.append("R-DATE-01: La fecha de calibración es futura.")
-        
-        if due_date_str:
-            due_date = datetime.strptime(due_date_str, "%Y-%m-%d").date()
-            if due_date <= cal_date:
-                rules_failed.append("R-DATE-02: La fecha de vencimiento es anterior o igual a la de calibración.")
-
-    # 5. Determinación de Estado Canónico
+    # 4. Determinación de Estado Canónico
     if len(rules_failed) == 0:
         doc.processing_status = "ACCEPTED"
     else:
