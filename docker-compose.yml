@@ -16,7 +16,7 @@ services:
     healthcheck:
       test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-passporttwin}"]
       interval: 5s
-      timeout: 5s 
+      timeout: 5s
       retries: 5
     networks:
       - passporttwin-net
@@ -53,6 +53,21 @@ services:
         condition: service_healthy
     volumes:
       - ./backend:/app
+    networks:
+      - passporttwin-net
+
+  frontend:
+    build:
+      context: ./frontend
+    container_name: passporttwin-frontend
+    env_file: .env
+    ports:
+      - "${FRONTEND_PORT:-5173}:5173"
+    depends_on:
+      - backend
+    volumes:
+      - ./frontend:/app
+      - /app/node_modules
     networks:
       - passporttwin-net
 
