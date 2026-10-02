@@ -270,3 +270,50 @@ def correct_extracted_field(
         "normalized_value": field.normalized_value,
         "validation_status": field.validation_status
     }
+
+@router.post("/{document_id}/revalidate", summary="Revalida un documento después de la revisión humana")
+def revalidate_document(
+    document_id: int,
+    db: Session = Depends(get_db)
+):
+    doc = db.query(Document).filter(Document.id == document_id).first()
+    if not doc:
+        raise HTTPException(status_code=404, detail="Documento no encontrado.")
+
+    fields = db.query(ExtractedField).filter(
+        ExtractedField.document_id == document_id
+    ).order_by(ExtractedField.id).all()
+
+    if not fields:
+        raise HTTPException(
+            status_code=422,
+            detail="El documento no tiene campos extraídos para revalidar."
+        )
+
+    normalized_fields = {
+        field.field_name: field.normalized_value
+        for field in fields
+    }
+
+    target_unit, rules_failed = validate_document_fields(
+        db=db,
+        fields=normalized_fields
+    )
+
+    # Evita conservar un matching anterior si deja de ser válido.
+    doc.instrument_unit_id = target_unit.id if target_unit else None
+
+    if len(rules_failed) == 0:
+        doc.processing_status = "ACCEPTED"
+    else:
+        doc.processing_status = "REVIEW_REQUIRED"
+
+    db.commit()
+    db.refresh(doc)
+
+    return {
+        "document_id": doc.id,
+        "processing_status": doc.processing_status,
+        "matched_instrument_id": doc.instrument_unit_id,
+        "rules_failed": rules_failed
+    }
