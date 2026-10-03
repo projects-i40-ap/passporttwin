@@ -29,6 +29,7 @@ ai/datasets/*.parquet
 
 # Data (don't commit generated datasets or real instrument data)
 data/generator/output/
+backend/storage/raw/
 *.db
 
 # IDE
