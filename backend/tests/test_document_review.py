@@ -4,8 +4,10 @@ from fastapi.testclient import TestClient
 
 from app.database.session import get_db
 from app.main import app
+from app.models.calibration import AuditLog, CalibrationEvent
 from app.models.document import Document, ExtractedField
 from app.models.instrument import InstrumentUnit
+from app.services.aas_builder import AASBuilder
 
 
 class FakeQuery:
@@ -47,11 +49,13 @@ class FakeSession:
             id=1,
             processing_status="REVIEW_REQUIRED",
             instrument_unit_id=None,
+            sha256_hash="test-sha256",
         )
 
         self.instrument = SimpleNamespace(
             id=7,
             serial_number="PT-001",
+            lifecycle_state="operational",
         )
 
         self.fields = [
@@ -84,11 +88,22 @@ class FakeSession:
             ),
         ]
 
+        self.calibration_events = []
+        self.audit_logs = []
+
     def query(self, model):
         return FakeQuery(
             model=model,
             session=self,
         )
+
+    def add(self, obj):
+        if isinstance(obj, CalibrationEvent):
+            obj.id = 99
+            self.calibration_events.append(obj)
+
+        if isinstance(obj, AuditLog):
+            self.audit_logs.append(obj)
 
     def commit(self):
         pass
@@ -184,3 +199,52 @@ def test_revalidate_document_after_human_correction():
 
     assert fake_db.document.processing_status == "ACCEPTED"
     assert fake_db.document.instrument_unit_id == 7
+
+
+def test_accept_document_syncs_calibration_submodel(monkeypatch):
+    fake_db.reset()
+
+    fake_db.document.processing_status = "ACCEPTED"
+    fake_db.document.instrument_unit_id = 7
+
+    fake_db.fields[0].normalized_value = "PT-001"
+    fake_db.fields[1].normalized_value = "2026-01-15"
+    fake_db.fields[2].normalized_value = "2027-01-15"
+
+    sync_call = {}
+
+    def fake_sync_calibration_submodel(instrument, calibration_event):
+        sync_call["instrument"] = instrument
+        sync_call["calibration_event"] = calibration_event
+        return True
+
+    monkeypatch.setattr(
+        AASBuilder,
+        "sync_calibration_submodel",
+        fake_sync_calibration_submodel,
+    )
+
+    response = client.post(
+        "/api/v1/documents/1/accept"
+    )
+
+    assert response.status_code == 200
+
+    data = response.json()
+
+    assert data["status"] == "CANONICAL_COMMITTED"
+    assert data["calibration_event_id"] == 99
+    assert data["instrument_id"] == 7
+
+    assert len(fake_db.calibration_events) == 1
+    assert len(fake_db.audit_logs) == 1
+
+    calibration_event = fake_db.calibration_events[0]
+
+    assert calibration_event.instrument_unit_id == 7
+    assert str(calibration_event.calibration_date) == "2026-01-15"
+    assert str(calibration_event.next_due_date) == "2027-01-15"
+    assert calibration_event.result == "pass"
+
+    assert sync_call["instrument"] is fake_db.instrument
+    assert sync_call["calibration_event"] is calibration_event

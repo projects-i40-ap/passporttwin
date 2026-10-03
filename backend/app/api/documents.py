@@ -11,6 +11,7 @@ from app.services.pdf_extractor import PDFCertificateExtractor
 from app.models.calibration import CalibrationEvent, AuditLog
 from app.schemas.document import ExtractedFieldCorrection
 from app.services.document_validation import validate_document_fields
+from app.services.aas_builder import AASBuilder
 
 router = APIRouter(prefix="/documents", tags=["documents"])
 
@@ -188,10 +189,17 @@ def accept_document_to_canonical(document_id: int, db: Session = Depends(get_db)
     )
     db.add(audit_entry)
 
-    # Confirmar transacción en PostgreSQL (Source of Truth)
+    # 6. Confirmar transacción en PostgreSQL (Source of Truth)
     db.commit()
     db.refresh(new_calibration)
     db.refresh(instrument)
+
+    # 7. Proyectar el evento canónico hacia Eclipse BaSyx
+    # La persistencia canónica ya está confirmada aunque la proyección AAS falle.
+    AASBuilder.sync_calibration_submodel(
+        instrument,
+        new_calibration
+    )
 
     return {
         "status": "CANONICAL_COMMITTED",
