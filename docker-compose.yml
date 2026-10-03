@@ -98,7 +98,7 @@ services:
     ports:
       - "4001:4001"
     environment:
-      JAVA_TOOL_OPTIONS: "-Xmx1024m"
+      JAVA_TOOL_OPTIONS: "-Xmx1024m -XX:-UseContainerSupport"
     networks:
       - passporttwin-net
 
