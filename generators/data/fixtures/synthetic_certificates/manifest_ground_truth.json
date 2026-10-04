@@ -1,0 +1,27 @@
+[
+  {
+    "file": "CAL_NOMINAL_001.pdf",
+    "expected_status": "ACCEPTED",
+    "target_rule_fail": null
+  },
+  {
+    "file": "CAL_ERR_FUTURE_002.pdf",
+    "expected_status": "REVIEW_REQUIRED",
+    "target_rule_fail": "R-DATE-01"
+  },
+  {
+    "file": "CAL_ERR_DUEDATE_003.pdf",
+    "expected_status": "REVIEW_REQUIRED",
+    "target_rule_fail": "R-DATE-02"
+  },
+  {
+    "file": "CAL_ERR_SERIAL_004.pdf",
+    "expected_status": "REVIEW_REQUIRED",
+    "target_rule_fail": "R-ID-01"
+  },
+  {
+    "file": "CAL_OUT_OF_TOL_005.pdf",
+    "expected_status": "ACCEPTED",
+    "target_rule_fail": "R-TOL-01_FLAG"
+  }
+]
