@@ -68,7 +68,10 @@ def register_instrument(payload: InstrumentUnitCreate, db: Session = Depends(get
     db.refresh(new_instrument)
 
     # 4. Proyección Interoperable AAS (Southbound sync)
-    synced = AASBuilder.sync_shell_and_nameplate(new_instrument, inst_type)
+    nameplate_synced = AASBuilder.sync_shell_and_nameplate(new_instrument, inst_type)
+    operational_synced = AASBuilder.sync_operational_state(new_instrument)
+    synced = nameplate_synced and operational_synced
+
     new_instrument.aas_sync_status = "SYNCED" if synced else "PENDING"
     db.commit()
     db.refresh(new_instrument)
@@ -93,7 +96,11 @@ def force_sync_aas(id: int, db: Session = Depends(get_db)):
         raise HTTPException(status_code=404, detail="Instrumento no encontrado.")
     
     inst_type = db.query(InstrumentType).filter(InstrumentType.id == instrument.instrument_type_id).first()
-    synced = AASBuilder.sync_shell_and_nameplate(instrument, inst_type)
+
+    nameplate_synced = AASBuilder.sync_shell_and_nameplate(instrument, inst_type)
+    operational_synced = AASBuilder.sync_operational_state(instrument)
+    synced = nameplate_synced and operational_synced
+
     instrument.aas_sync_status = "SYNCED" if synced else "ERROR"
     db.commit()
     db.refresh(instrument)
@@ -164,7 +171,7 @@ async def upload_instruments_csv(
     1. RAW: Persiste el archivo inmutable byte a byte con hash SHA-256.
     2. NORMALIZE & VALIDATE: Parsea mediante pandas y verifica integridad fila a fila.
     3. CANONICAL COMMIT: Inserta en instrument_unit con public_id.
-    4. AAS PROJECTION: Proyecta la Shell y Nameplate hacia Eclipse BaSyx.
+    4. AAS PROJECTION: Proyecta la Shell, Nameplate y OperationalState hacia Eclipse BaSyx.
     """
     if not file.filename.lower().endswith(".csv"):
         raise HTTPException(status_code=400, detail="El formato del archivo debe ser estrictamente .csv")
@@ -261,7 +268,10 @@ async def upload_instruments_csv(
         db.refresh(new_unit)
 
         # 4. Proyección Interoperable hacia Eclipse BaSyx
-        synced = AASBuilder.sync_shell_and_nameplate(new_unit, inst_type)
+        nameplate_synced = AASBuilder.sync_shell_and_nameplate(new_unit, inst_type)
+        operational_synced = AASBuilder.sync_operational_state(new_unit)
+        synced = nameplate_synced and operational_synced
+
         new_unit.aas_sync_status = "SYNCED" if synced else "PENDING"
         db.commit()
         db.refresh(new_unit)
