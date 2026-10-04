@@ -194,11 +194,19 @@ def accept_document_to_canonical(document_id: int, db: Session = Depends(get_db)
     db.refresh(new_calibration)
     db.refresh(instrument)
 
-    # 7. Proyectar el evento canónico hacia Eclipse BaSyx
-    # La persistencia canónica ya está confirmada aunque la proyección AAS falle.
+    # 7. Recuperar el historial canónico completo del instrumento.
+    calibration_history = (
+        db.query(CalibrationEvent)
+        .filter(CalibrationEvent.instrument_unit_id == instrument.id)
+        .order_by(CalibrationEvent.id.asc())
+        .all()
+    )
+
+    # 8. Proyectar el historial canónico completo hacia Eclipse BaSyx.
+    # PostgreSQL sigue siendo Source of Truth aunque la proyección AAS falle.
     AASBuilder.sync_calibration_submodel(
         instrument,
-        new_calibration
+        calibration_history
     )
 
     AASBuilder.sync_operational_state(

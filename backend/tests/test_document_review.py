@@ -37,6 +37,9 @@ class FakeQuery:
         if self.model is ExtractedField:
             return self.session.fields
 
+        if self.model is CalibrationEvent:
+            return self.session.calibration_events
+
         return []
 
 
@@ -201,7 +204,9 @@ def test_revalidate_document_after_human_correction():
     assert fake_db.document.instrument_unit_id == 7
 
 
-def test_accept_document_syncs_calibration_and_operational_state(monkeypatch):
+def test_accept_document_syncs_full_calibration_history_and_operational_state(
+    monkeypatch,
+):
     fake_db.reset()
 
     fake_db.document.processing_status = "ACCEPTED"
@@ -211,11 +216,24 @@ def test_accept_document_syncs_calibration_and_operational_state(monkeypatch):
     fake_db.fields[1].normalized_value = "2026-01-15"
     fake_db.fields[2].normalized_value = "2027-01-15"
 
+    historical_calibration = SimpleNamespace(
+        id=41,
+        instrument_unit_id=7,
+        calibration_date="2025-01-15",
+        error_value="0.03",
+        tolerance="0.1",
+        result="pass",
+        next_due_date="2026-01-15",
+        created_at=None,
+    )
+
+    fake_db.calibration_events.append(historical_calibration)
+
     sync_call = {}
 
-    def fake_sync_calibration_submodel(instrument, calibration_event):
+    def fake_sync_calibration_submodel(instrument, calibration_events):
         sync_call["calibration_instrument"] = instrument
-        sync_call["calibration_event"] = calibration_event
+        sync_call["calibration_events"] = calibration_events
         return True
 
     def fake_sync_operational_state(instrument):
@@ -246,18 +264,22 @@ def test_accept_document_syncs_calibration_and_operational_state(monkeypatch):
     assert data["calibration_event_id"] == 99
     assert data["instrument_id"] == 7
 
-    assert len(fake_db.calibration_events) == 1
+    assert len(fake_db.calibration_events) == 2
     assert len(fake_db.audit_logs) == 1
 
-    calibration_event = fake_db.calibration_events[0]
+    new_calibration = fake_db.calibration_events[-1]
 
-    assert calibration_event.instrument_unit_id == 7
-    assert str(calibration_event.calibration_date) == "2026-01-15"
-    assert str(calibration_event.next_due_date) == "2027-01-15"
-    assert calibration_event.result == "pass"
+    assert new_calibration.instrument_unit_id == 7
+    assert str(new_calibration.calibration_date) == "2026-01-15"
+    assert str(new_calibration.next_due_date) == "2027-01-15"
+    assert new_calibration.result == "pass"
 
     assert sync_call["calibration_instrument"] is fake_db.instrument
-    assert sync_call["calibration_event"] is calibration_event
+    assert sync_call["calibration_events"] == fake_db.calibration_events
+    assert [
+        calibration.id
+        for calibration in sync_call["calibration_events"]
+    ] == [41, 99]
 
     assert sync_call["operational_instrument"] is fake_db.instrument
     assert fake_db.instrument.lifecycle_state == "operational"

@@ -101,11 +101,72 @@ class AASBuilder:
             return False
 
     @staticmethod
-    def sync_calibration_submodel(instrument, calibration_event) -> bool:
-        """Proyecta el historial de calibración aceptado al servidor BaSyx."""
+    def sync_calibration_submodel(instrument, calibration_events) -> bool:
+        """Proyecta el historial canónico completo de calibraciones hacia BaSyx."""
         clean_serial = instrument.serial_number.replace("-", "_")
         aas_id = f"AAS_{clean_serial}"
         sm_id = f"Submodel_Calibration_{clean_serial}"
+
+        ordered_events = sorted(
+            calibration_events,
+            key=lambda event: event.id
+        )
+
+        calibration_collections = []
+
+        for event in ordered_events:
+            calibration_collections.append(
+                {
+                    "idShort": f"CalibrationEvent_{event.id}",
+                    "modelType": {
+                        "name": "SubmodelElementCollection"
+                    },
+                    "value": [
+                        {
+                            "idShort": "CalibrationEventId",
+                            "modelType": {"name": "Property"},
+                            "valueType": "string",
+                            "value": str(event.id)
+                        },
+                        {
+                            "idShort": "CalibrationDate",
+                            "modelType": {"name": "Property"},
+                            "valueType": "string",
+                            "value": str(event.calibration_date)
+                        },
+                        {
+                            "idShort": "NextDueDate",
+                            "modelType": {"name": "Property"},
+                            "valueType": "string",
+                            "value": str(event.next_due_date or "")
+                        },
+                        {
+                            "idShort": "ErrorValue",
+                            "modelType": {"name": "Property"},
+                            "valueType": "double",
+                            "value": str(event.error_value)
+                        },
+                        {
+                            "idShort": "Tolerance",
+                            "modelType": {"name": "Property"},
+                            "valueType": "double",
+                            "value": str(event.tolerance)
+                        },
+                        {
+                            "idShort": "CalibrationResult",
+                            "modelType": {"name": "Property"},
+                            "valueType": "string",
+                            "value": str(event.result)
+                        },
+                        {
+                            "idShort": "CreatedAt",
+                            "modelType": {"name": "Property"},
+                            "valueType": "string",
+                            "value": str(event.created_at or "")
+                        }
+                    ]
+                }
+            )
 
         payload = {
             "idShort": "CalibrationHistory",
@@ -123,38 +184,7 @@ class AASBuilder:
                     }
                 ]
             },
-            "submodelElements": [
-                {
-                    "idShort": "LastCalibrationDate",
-                    "modelType": {"name": "Property"},
-                    "valueType": "string",
-                    "value": str(calibration_event.calibration_date)
-                },
-                {
-                    "idShort": "NextDueDate",
-                    "modelType": {"name": "Property"},
-                    "valueType": "string",
-                    "value": str(calibration_event.next_due_date)
-                },
-                {
-                    "idShort": "ErrorValue",
-                    "modelType": {"name": "Property"},
-                    "valueType": "double",
-                    "value": str(calibration_event.error_value)
-                },
-                {
-                    "idShort": "Tolerance",
-                    "modelType": {"name": "Property"},
-                    "valueType": "double",
-                    "value": str(calibration_event.tolerance)
-                },
-                {
-                    "idShort": "CalibrationResult",
-                    "modelType": {"name": "Property"},
-                    "valueType": "string",
-                    "value": str(calibration_event.result)
-                }
-            ]
+            "submodelElements": calibration_collections
         }
 
         headers = {"Content-Type": "application/json"}
