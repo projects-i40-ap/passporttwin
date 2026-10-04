@@ -57,3 +57,30 @@ class PDFCertificateExtractor:
             parts = date_str.split("/")
             return f"{parts[2]}-{parts[1]}-{parts[0]}"
         return date_str
+
+class PDFDatasheetExtractor:
+    @staticmethod
+    def extract_technical_data(file_path: str) -> dict:
+        """Extrae especificaciones técnicas básicas de un datasheet PDF digital."""
+        raw_text = ""
+        try:
+            with pdfplumber.open(file_path) as pdf:
+                for page in pdf.pages:
+                    text = page.extract_text()
+                    if text:
+                        raw_text += text + "\n"
+        except Exception as e:
+            logger.error(f"Error leyendo Datasheet con pdfplumber: {str(e)}")
+            return {}
+
+        fields = {}
+        # Extracción de Modelo y Rango Operativo
+        model_match = re.search(r"(?:Model|Modelo)[:\s]+([A-Za-z0-9\-_\/]+)", raw_text, re.IGNORECASE)
+        if model_match:
+            fields["model"] = model_match.group(1).strip()
+
+        range_match = re.search(r"(?:Range|Rango)[:\s]+([0-9\.\-]+\s*(?:bar|kPa|°C|pH))", raw_text, re.IGNORECASE)
+        if range_match:
+            fields["operating_range"] = range_match.group(1).strip()
+
+        return fields
