@@ -94,12 +94,55 @@ def force_sync_aas(id: int, db: Session = Depends(get_db)):
     instrument = db.query(InstrumentUnit).filter(InstrumentUnit.id == id).first()
     if not instrument:
         raise HTTPException(status_code=404, detail="Instrumento no encontrado.")
-    
-    inst_type = db.query(InstrumentType).filter(InstrumentType.id == instrument.instrument_type_id).first()
 
-    nameplate_synced = AASBuilder.sync_shell_and_nameplate(instrument, inst_type)
-    operational_synced = AASBuilder.sync_operational_state(instrument)
-    synced = nameplate_synced and operational_synced
+    inst_type = (
+        db.query(InstrumentType)
+        .filter(InstrumentType.id == instrument.instrument_type_id)
+        .first()
+    )
+
+    calibration_history = (
+        db.query(CalibrationEvent)
+        .filter(CalibrationEvent.instrument_unit_id == instrument.id)
+        .order_by(CalibrationEvent.id.asc())
+        .all()
+    )
+
+    document_provenance = (
+        db.query(Document)
+        .filter(
+            Document.instrument_unit_id == instrument.id,
+            Document.processing_status == "ACCEPTED"
+        )
+        .order_by(Document.id.asc())
+        .all()
+    )
+
+    nameplate_synced = AASBuilder.sync_shell_and_nameplate(
+        instrument,
+        inst_type
+    )
+
+    calibration_synced = AASBuilder.sync_calibration_submodel(
+        instrument,
+        calibration_history
+    )
+
+    document_provenance_synced = AASBuilder.sync_document_provenance(
+        instrument,
+        document_provenance
+    )
+
+    operational_synced = AASBuilder.sync_operational_state(
+        instrument
+    )
+
+    synced = (
+        nameplate_synced
+        and calibration_synced
+        and document_provenance_synced
+        and operational_synced
+    )
 
     instrument.aas_sync_status = "SYNCED" if synced else "ERROR"
     db.commit()

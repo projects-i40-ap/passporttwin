@@ -6,6 +6,7 @@ from fastapi.testclient import TestClient
 
 from app.database.session import get_db
 from app.main import app
+from app.models.calibration import CalibrationEvent
 from app.models.document import Document
 from app.models.instrument import InstrumentType, InstrumentUnit
 from app.services.aas_builder import AASBuilder
@@ -17,6 +18,9 @@ class FakeQuery:
         self.session = session
 
     def filter(self, *args, **kwargs):
+        return self
+
+    def order_by(self, *args, **kwargs):
         return self
 
     def first(self):
@@ -37,6 +41,12 @@ class FakeQuery:
         if self.model is InstrumentType:
             return [self.session.instrument_type]
 
+        if self.model is CalibrationEvent:
+            return self.session.calibration_events
+
+        if self.model is Document:
+            return self.session.documents
+
         return []
 
 
@@ -53,6 +63,8 @@ class FakeSession:
 
         self.instrument = None
         self.document = None
+        self.calibration_events = []
+        self.documents = []
 
         if instrument_exists:
             self.instrument = SimpleNamespace(
@@ -83,6 +95,7 @@ class FakeSession:
 
         if isinstance(obj, Document):
             self.document = obj
+            self.documents.append(obj)
 
     def commit(self):
         pass
@@ -178,8 +191,52 @@ def test_register_instrument_syncs_nameplate_and_operational_state(monkeypatch):
     assert sync_call["operational_instrument"] is fake_db.instrument
 
 
-def test_force_sync_syncs_nameplate_and_operational_state(monkeypatch):
+def test_force_sync_rebuilds_all_aas_submodels(monkeypatch):
     fake_db = FakeSession(instrument_exists=True)
+
+    fake_db.calibration_events = [
+        SimpleNamespace(
+            id=1,
+            instrument_unit_id=1,
+            calibration_date="2026-09-15",
+            error_value="0.04",
+            tolerance="0.1",
+            result="pass",
+            next_due_date="2027-09-15",
+            created_at=None,
+        ),
+        SimpleNamespace(
+            id=2,
+            instrument_unit_id=1,
+            calibration_date="2026-10-01",
+            error_value="0.06",
+            tolerance="0.1",
+            result="pass",
+            next_due_date="2027-10-01",
+            created_at=None,
+        ),
+    ]
+
+    fake_db.documents = [
+        SimpleNamespace(
+            id=1,
+            instrument_unit_id=1,
+            original_filename="certificate_1.pdf",
+            source_type="PDF_CERTIFICATE",
+            sha256_hash="hash-1",
+            processing_status="ACCEPTED",
+            uploaded_at=None,
+        ),
+        SimpleNamespace(
+            id=2,
+            instrument_unit_id=1,
+            original_filename="certificate_2.pdf",
+            source_type="PDF_CERTIFICATE",
+            sha256_hash="hash-2",
+            processing_status="ACCEPTED",
+            uploaded_at=None,
+        ),
+    ]
 
     def override_get_db():
         try:
@@ -194,6 +251,16 @@ def test_force_sync_syncs_nameplate_and_operational_state(monkeypatch):
         sync_call["instrument_type"] = instrument_type
         return True
 
+    def fake_sync_calibration_submodel(instrument, calibration_events):
+        sync_call["calibration_instrument"] = instrument
+        sync_call["calibration_events"] = calibration_events
+        return True
+
+    def fake_sync_document_provenance(instrument, documents):
+        sync_call["document_instrument"] = instrument
+        sync_call["documents"] = documents
+        return True
+
     def fake_sync_operational_state(instrument):
         sync_call["operational_instrument"] = instrument
         return True
@@ -202,6 +269,18 @@ def test_force_sync_syncs_nameplate_and_operational_state(monkeypatch):
         AASBuilder,
         "sync_shell_and_nameplate",
         fake_sync_shell_and_nameplate,
+    )
+
+    monkeypatch.setattr(
+        AASBuilder,
+        "sync_calibration_submodel",
+        fake_sync_calibration_submodel,
+    )
+
+    monkeypatch.setattr(
+        AASBuilder,
+        "sync_document_provenance",
+        fake_sync_document_provenance,
     )
 
     monkeypatch.setattr(
@@ -228,6 +307,21 @@ def test_force_sync_syncs_nameplate_and_operational_state(monkeypatch):
 
     assert sync_call["nameplate_instrument"] is fake_db.instrument
     assert sync_call["instrument_type"] is fake_db.instrument_type
+
+    assert sync_call["calibration_instrument"] is fake_db.instrument
+    assert sync_call["calibration_events"] == fake_db.calibration_events
+    assert [
+        calibration.id
+        for calibration in sync_call["calibration_events"]
+    ] == [1, 2]
+
+    assert sync_call["document_instrument"] is fake_db.instrument
+    assert sync_call["documents"] == fake_db.documents
+    assert [
+        document.id
+        for document in sync_call["documents"]
+    ] == [1, 2]
+
     assert sync_call["operational_instrument"] is fake_db.instrument
 
 
