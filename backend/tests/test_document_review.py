@@ -40,6 +40,9 @@ class FakeQuery:
         if self.model is CalibrationEvent:
             return self.session.calibration_events
 
+        if self.model is Document:
+            return self.session.documents
+
         return []
 
 
@@ -52,8 +55,15 @@ class FakeSession:
             id=1,
             processing_status="REVIEW_REQUIRED",
             instrument_unit_id=None,
+            original_filename="current_certificate.pdf",
+            source_type="PDF_CERTIFICATE",
             sha256_hash="test-sha256",
+            uploaded_at=None,
         )
+
+        self.documents = [
+            self.document,
+        ]
 
         self.instrument = SimpleNamespace(
             id=7,
@@ -204,7 +214,7 @@ def test_revalidate_document_after_human_correction():
     assert fake_db.document.instrument_unit_id == 7
 
 
-def test_accept_document_syncs_full_calibration_history_and_operational_state(
+def test_accept_document_syncs_all_aas_dynamic_submodels(
     monkeypatch,
 ):
     fake_db.reset()
@@ -229,11 +239,28 @@ def test_accept_document_syncs_full_calibration_history_and_operational_state(
 
     fake_db.calibration_events.append(historical_calibration)
 
+    linked_document = SimpleNamespace(
+        id=31,
+        processing_status="ACCEPTED",
+        instrument_unit_id=7,
+        original_filename="previous_certificate.pdf",
+        source_type="PDF_CERTIFICATE",
+        sha256_hash="previous-sha256",
+        uploaded_at=None,
+    )
+
+    fake_db.documents.append(linked_document)
+
     sync_call = {}
 
     def fake_sync_calibration_submodel(instrument, calibration_events):
         sync_call["calibration_instrument"] = instrument
         sync_call["calibration_events"] = calibration_events
+        return True
+
+    def fake_sync_document_provenance(instrument, documents):
+        sync_call["document_instrument"] = instrument
+        sync_call["documents"] = documents
         return True
 
     def fake_sync_operational_state(instrument):
@@ -244,6 +271,12 @@ def test_accept_document_syncs_full_calibration_history_and_operational_state(
         AASBuilder,
         "sync_calibration_submodel",
         fake_sync_calibration_submodel,
+    )
+
+    monkeypatch.setattr(
+        AASBuilder,
+        "sync_document_provenance",
+        fake_sync_document_provenance,
     )
 
     monkeypatch.setattr(
@@ -280,6 +313,13 @@ def test_accept_document_syncs_full_calibration_history_and_operational_state(
         calibration.id
         for calibration in sync_call["calibration_events"]
     ] == [41, 99]
+
+    assert sync_call["document_instrument"] is fake_db.instrument
+    assert sync_call["documents"] == fake_db.documents
+    assert [
+        document.id
+        for document in sync_call["documents"]
+    ] == [1, 31]
 
     assert sync_call["operational_instrument"] is fake_db.instrument
     assert fake_db.instrument.lifecycle_state == "operational"

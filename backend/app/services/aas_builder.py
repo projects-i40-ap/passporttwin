@@ -197,6 +197,105 @@ class AASBuilder:
             return False
 
     @staticmethod
+    def sync_document_provenance(instrument, documents) -> bool:
+        """Proyecta la procedencia documental canónica completa hacia BaSyx."""
+        clean_serial = instrument.serial_number.replace("-", "_")
+        aas_id = f"AAS_{clean_serial}"
+        sm_id = f"Submodel_DocumentProvenance_{clean_serial}"
+
+        ordered_documents = sorted(
+            documents,
+            key=lambda document: document.id
+        )
+
+        document_collections = []
+
+        for document in ordered_documents:
+            uploaded_at = (
+                document.uploaded_at.isoformat()
+                if document.uploaded_at
+                else ""
+            )
+
+            document_collections.append(
+                {
+                    "idShort": f"Document_{document.id}",
+                    "modelType": {
+                        "name": "SubmodelElementCollection"
+                    },
+                    "value": [
+                        {
+                            "idShort": "DocumentId",
+                            "modelType": {"name": "Property"},
+                            "valueType": "string",
+                            "value": str(document.id)
+                        },
+                        {
+                            "idShort": "OriginalFilename",
+                            "modelType": {"name": "Property"},
+                            "valueType": "string",
+                            "value": str(document.original_filename)
+                        },
+                        {
+                            "idShort": "SourceType",
+                            "modelType": {"name": "Property"},
+                            "valueType": "string",
+                            "value": str(document.source_type or "")
+                        },
+                        {
+                            "idShort": "Sha256",
+                            "modelType": {"name": "Property"},
+                            "valueType": "string",
+                            "value": str(document.sha256_hash)
+                        },
+                        {
+                            "idShort": "ProcessingStatus",
+                            "modelType": {"name": "Property"},
+                            "valueType": "string",
+                            "value": str(document.processing_status or "")
+                        },
+                        {
+                            "idShort": "UploadedAt",
+                            "modelType": {"name": "Property"},
+                            "valueType": "string",
+                            "value": uploaded_at
+                        }
+                    ]
+                }
+            )
+
+        payload = {
+            "idShort": "DocumentProvenance",
+            "identification": {
+                "id": sm_id,
+                "idType": "Custom"
+            },
+            "semanticId": {
+                "keys": [
+                    {
+                        "type": "GlobalReference",
+                        "local": False,
+                        "value": "urn:passporttwin:submodel:document-provenance:1:0",
+                        "idType": "IRI"
+                    }
+                ]
+            },
+            "submodelElements": document_collections
+        }
+
+        headers = {"Content-Type": "application/json"}
+        try:
+            url = f"{BASYX_AAS_URL}/shells/{aas_id}/aas/submodels/DocumentProvenance"
+            resp = requests.put(url, json=payload, headers=headers, timeout=4)
+            if resp.status_code not in [200, 201]:
+                logger.error(f"Error sincronizando DocumentProvenance ({resp.status_code}): {resp.text}")
+                return False
+            return True
+        except Exception as e:
+            logger.error(f"Error sincronizando DocumentProvenance en BaSyx: {str(e)}")
+            return False
+
+    @staticmethod
     def sync_operational_state(instrument) -> bool:
         """Proyecta el estado operativo canónico actual del instrumento."""
         clean_serial = instrument.serial_number.replace("-", "_")

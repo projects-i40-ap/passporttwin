@@ -202,11 +202,27 @@ def accept_document_to_canonical(document_id: int, db: Session = Depends(get_db)
         .all()
     )
 
-    # 8. Proyectar el historial canónico completo hacia Eclipse BaSyx.
+    # 8. Recuperar la procedencia documental aceptada del instrumento.
+    document_provenance = (
+        db.query(Document)
+        .filter(
+            Document.instrument_unit_id == instrument.id,
+            Document.processing_status == "ACCEPTED"
+        )
+        .order_by(Document.id.asc())
+        .all()
+    )
+
+    # 9. Proyectar los submodelos dinámicos hacia Eclipse BaSyx.
     # PostgreSQL sigue siendo Source of Truth aunque la proyección AAS falle.
     AASBuilder.sync_calibration_submodel(
         instrument,
         calibration_history
+    )
+
+    AASBuilder.sync_document_provenance(
+        instrument,
+        document_provenance
     )
 
     AASBuilder.sync_operational_state(
