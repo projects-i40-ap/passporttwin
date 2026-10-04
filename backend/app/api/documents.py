@@ -9,6 +9,9 @@ from app.models.document import ExtractedField
 from app.models.instrument import InstrumentUnit
 from app.services.pdf_extractor import PDFCertificateExtractor
 from app.models.calibration import CalibrationEvent, AuditLog
+from app.schemas.document import ExtractedFieldCorrection
+from app.services.document_validation import validate_document_fields
+from app.services.aas_builder import AASBuilder
 
 router = APIRouter(prefix="/documents", tags=["documents"])
 
@@ -73,6 +76,7 @@ def process_document(document_id: int, db: Session = Depends(get_db)):
         doc.processing_status = "FAILED_EXTRACTION"
         db.commit()
         raise HTTPException(status_code=422, detail="No se pudieron extraer campos estructurados del PDF.")
+
     # Línea a añadir para evitar duplicados en Staging:
     db.query(ExtractedField).filter(ExtractedField.document_id == doc.id).delete()   
 
@@ -88,36 +92,16 @@ def process_document(document_id: int, db: Session = Depends(get_db)):
         )
         db.add(field_entry)
     
-    # 3. Matching Determinista por Serial Number (Regla primaria)
-    matched_serial = extracted.get("serial_number")
-    target_unit = None
-    if matched_serial:
-        target_unit = db.query(InstrumentUnit).filter(InstrumentUnit.serial_number == matched_serial).first()
+    # 3. Matching Determinista y Motor de Reglas compartido
+    target_unit, rules_failed = validate_document_fields(
+        db=db,
+        fields=extracted
+    )
 
-    # 4. Motor de Reglas y Calidad de Datos (R-ID-01, R-DATE-01, R-DATE-02)
-    rules_failed = []
-    
-    # Regla R-ID-01: Concordancia de activo
-    if not target_unit:
-        rules_failed.append("R-ID-01: Serial no coincide con ningún activo canónico registrado.")
-    else:
+    if target_unit:
         doc.instrument_unit_id = target_unit.id
 
-    # Reglas R-DATE-01 y R-DATE-02: Coherencia temporal
-    cal_date_str = extracted.get("calibration_date")
-    due_date_str = extracted.get("next_due_date")
-
-    if cal_date_str:
-        cal_date = datetime.strptime(cal_date_str, "%Y-%m-%d").date()
-        if cal_date > datetime.utcnow().date():
-            rules_failed.append("R-DATE-01: La fecha de calibración es futura.")
-        
-        if due_date_str:
-            due_date = datetime.strptime(due_date_str, "%Y-%m-%d").date()
-            if due_date <= cal_date:
-                rules_failed.append("R-DATE-02: La fecha de vencimiento es anterior o igual a la de calibración.")
-
-    # 5. Determinación de Estado Canónico
+    # 4. Determinación de Estado Canónico
     if len(rules_failed) == 0:
         doc.processing_status = "ACCEPTED"
     else:
@@ -205,10 +189,45 @@ def accept_document_to_canonical(document_id: int, db: Session = Depends(get_db)
     )
     db.add(audit_entry)
 
-    # Confirmar transacción en PostgreSQL (Source of Truth)
+    # 6. Confirmar transacción en PostgreSQL (Source of Truth)
     db.commit()
     db.refresh(new_calibration)
     db.refresh(instrument)
+
+    # 7. Recuperar el historial canónico completo del instrumento.
+    calibration_history = (
+        db.query(CalibrationEvent)
+        .filter(CalibrationEvent.instrument_unit_id == instrument.id)
+        .order_by(CalibrationEvent.id.asc())
+        .all()
+    )
+
+    # 8. Recuperar la procedencia documental aceptada del instrumento.
+    document_provenance = (
+        db.query(Document)
+        .filter(
+            Document.instrument_unit_id == instrument.id,
+            Document.processing_status == "ACCEPTED"
+        )
+        .order_by(Document.id.asc())
+        .all()
+    )
+
+    # 9. Proyectar los submodelos dinámicos hacia Eclipse BaSyx.
+    # PostgreSQL sigue siendo Source of Truth aunque la proyección AAS falle.
+    AASBuilder.sync_calibration_submodel(
+        instrument,
+        calibration_history
+    )
+
+    AASBuilder.sync_document_provenance(
+        instrument,
+        document_provenance
+    )
+
+    AASBuilder.sync_operational_state(
+        instrument
+    )
 
     return {
         "status": "CANONICAL_COMMITTED",
@@ -218,4 +237,119 @@ def accept_document_to_canonical(document_id: int, db: Session = Depends(get_db)
         "lifecycle_state": instrument.lifecycle_state,
         "result": new_calibration.result,
         "next_due_date": new_calibration.next_due_date
+    }
+
+@router.get("/{document_id}/fields", summary="Consulta los campos extraídos de un documento")
+def get_extracted_fields(
+    document_id: int,
+    db: Session = Depends(get_db)
+):
+    doc = db.query(Document).filter(Document.id == document_id).first()
+    if not doc:
+        raise HTTPException(status_code=404, detail="Documento no encontrado.")
+
+    fields = db.query(ExtractedField).filter(
+        ExtractedField.document_id == document_id
+    ).order_by(ExtractedField.id).all()
+
+    return {
+        "document_id": doc.id,
+        "processing_status": doc.processing_status,
+        "fields": [
+            {
+                "field_id": field.id,
+                "field_name": field.field_name,
+                "raw_value": field.raw_value,
+                "normalized_value": field.normalized_value,
+                "confidence": field.confidence,
+                "validation_status": field.validation_status
+            }
+            for field in fields
+        ]
+    }
+
+@router.patch("/{document_id}/fields/{field_id}", summary="Corrige manualmente un campo extraído")
+def correct_extracted_field(
+    document_id: int,
+    field_id: int,
+    correction: ExtractedFieldCorrection,
+    db: Session = Depends(get_db)
+):
+    doc = db.query(Document).filter(Document.id == document_id).first()
+    if not doc:
+        raise HTTPException(status_code=404, detail="Documento no encontrado.")
+
+    field = db.query(ExtractedField).filter(
+        ExtractedField.id == field_id,
+        ExtractedField.document_id == document_id
+    ).first()
+
+    if not field:
+        raise HTTPException(
+            status_code=404,
+            detail="Campo extraído no encontrado para este documento."
+        )
+
+    # Human-in-the-loop:
+    # raw_value se conserva como evidencia original.
+    # normalized_value contiene la corrección humana.
+    field.normalized_value = correction.normalized_value
+
+    db.commit()
+    db.refresh(field)
+
+    return {
+        "field_id": field.id,
+        "document_id": field.document_id,
+        "field_name": field.field_name,
+        "raw_value": field.raw_value,
+        "normalized_value": field.normalized_value,
+        "validation_status": field.validation_status
+    }
+
+@router.post("/{document_id}/revalidate", summary="Revalida un documento después de la revisión humana")
+def revalidate_document(
+    document_id: int,
+    db: Session = Depends(get_db)
+):
+    doc = db.query(Document).filter(Document.id == document_id).first()
+    if not doc:
+        raise HTTPException(status_code=404, detail="Documento no encontrado.")
+
+    fields = db.query(ExtractedField).filter(
+        ExtractedField.document_id == document_id
+    ).order_by(ExtractedField.id).all()
+
+    if not fields:
+        raise HTTPException(
+            status_code=422,
+            detail="El documento no tiene campos extraídos para revalidar."
+        )
+
+    normalized_fields = {
+        field.field_name: field.normalized_value
+        for field in fields
+    }
+
+    target_unit, rules_failed = validate_document_fields(
+        db=db,
+        fields=normalized_fields
+    )
+
+    # Evita conservar un matching anterior si deja de ser válido.
+    doc.instrument_unit_id = target_unit.id if target_unit else None
+
+    if len(rules_failed) == 0:
+        doc.processing_status = "ACCEPTED"
+    else:
+        doc.processing_status = "REVIEW_REQUIRED"
+
+    db.commit()
+    db.refresh(doc)
+
+    return {
+        "document_id": doc.id,
+        "processing_status": doc.processing_status,
+        "matched_instrument_id": doc.instrument_unit_id,
+        "rules_failed": rules_failed
     }

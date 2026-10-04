@@ -68,7 +68,10 @@ def register_instrument(payload: InstrumentUnitCreate, db: Session = Depends(get
     db.refresh(new_instrument)
 
     # 4. Proyección Interoperable AAS (Southbound sync)
-    synced = AASBuilder.sync_shell_and_nameplate(new_instrument, inst_type)
+    nameplate_synced = AASBuilder.sync_shell_and_nameplate(new_instrument, inst_type)
+    operational_synced = AASBuilder.sync_operational_state(new_instrument)
+    synced = nameplate_synced and operational_synced
+
     new_instrument.aas_sync_status = "SYNCED" if synced else "PENDING"
     db.commit()
     db.refresh(new_instrument)
@@ -91,9 +94,56 @@ def force_sync_aas(id: int, db: Session = Depends(get_db)):
     instrument = db.query(InstrumentUnit).filter(InstrumentUnit.id == id).first()
     if not instrument:
         raise HTTPException(status_code=404, detail="Instrumento no encontrado.")
-    
-    inst_type = db.query(InstrumentType).filter(InstrumentType.id == instrument.instrument_type_id).first()
-    synced = AASBuilder.sync_shell_and_nameplate(instrument, inst_type)
+
+    inst_type = (
+        db.query(InstrumentType)
+        .filter(InstrumentType.id == instrument.instrument_type_id)
+        .first()
+    )
+
+    calibration_history = (
+        db.query(CalibrationEvent)
+        .filter(CalibrationEvent.instrument_unit_id == instrument.id)
+        .order_by(CalibrationEvent.id.asc())
+        .all()
+    )
+
+    document_provenance = (
+        db.query(Document)
+        .filter(
+            Document.instrument_unit_id == instrument.id,
+            Document.processing_status == "ACCEPTED"
+        )
+        .order_by(Document.id.asc())
+        .all()
+    )
+
+    nameplate_synced = AASBuilder.sync_shell_and_nameplate(
+        instrument,
+        inst_type
+    )
+
+    calibration_synced = AASBuilder.sync_calibration_submodel(
+        instrument,
+        calibration_history
+    )
+
+    document_provenance_synced = AASBuilder.sync_document_provenance(
+        instrument,
+        document_provenance
+    )
+
+    operational_synced = AASBuilder.sync_operational_state(
+        instrument
+    )
+
+    synced = (
+        nameplate_synced
+        and calibration_synced
+        and document_provenance_synced
+        and operational_synced
+    )
+
     instrument.aas_sync_status = "SYNCED" if synced else "ERROR"
     db.commit()
     db.refresh(instrument)
@@ -164,7 +214,7 @@ async def upload_instruments_csv(
     1. RAW: Persiste el archivo inmutable byte a byte con hash SHA-256.
     2. NORMALIZE & VALIDATE: Parsea mediante pandas y verifica integridad fila a fila.
     3. CANONICAL COMMIT: Inserta en instrument_unit con public_id.
-    4. AAS PROJECTION: Proyecta la Shell y Nameplate hacia Eclipse BaSyx.
+    4. AAS PROJECTION: Proyecta la Shell, Nameplate y OperationalState hacia Eclipse BaSyx.
     """
     if not file.filename.lower().endswith(".csv"):
         raise HTTPException(status_code=400, detail="El formato del archivo debe ser estrictamente .csv")
@@ -261,7 +311,10 @@ async def upload_instruments_csv(
         db.refresh(new_unit)
 
         # 4. Proyección Interoperable hacia Eclipse BaSyx
-        synced = AASBuilder.sync_shell_and_nameplate(new_unit, inst_type)
+        nameplate_synced = AASBuilder.sync_shell_and_nameplate(new_unit, inst_type)
+        operational_synced = AASBuilder.sync_operational_state(new_unit)
+        synced = nameplate_synced and operational_synced
+
         new_unit.aas_sync_status = "SYNCED" if synced else "PENDING"
         db.commit()
         db.refresh(new_unit)

@@ -99,12 +99,74 @@ class AASBuilder:
         except Exception as e:
             logger.error(f"Fallo de comunicación con BaSyx AAS: {str(e)}")
             return False
+
     @staticmethod
-    def sync_calibration_submodel(instrument, calibration_event) -> bool:
-        """Proyecta el historial de calibración aceptado al servidor BaSyx."""
+    def sync_calibration_submodel(instrument, calibration_events) -> bool:
+        """Proyecta el historial canónico completo de calibraciones hacia BaSyx."""
         clean_serial = instrument.serial_number.replace("-", "_")
         aas_id = f"AAS_{clean_serial}"
         sm_id = f"Submodel_Calibration_{clean_serial}"
+
+        ordered_events = sorted(
+            calibration_events,
+            key=lambda event: event.id
+        )
+
+        calibration_collections = []
+
+        for event in ordered_events:
+            calibration_collections.append(
+                {
+                    "idShort": f"CalibrationEvent_{event.id}",
+                    "modelType": {
+                        "name": "SubmodelElementCollection"
+                    },
+                    "value": [
+                        {
+                            "idShort": "CalibrationEventId",
+                            "modelType": {"name": "Property"},
+                            "valueType": "string",
+                            "value": str(event.id)
+                        },
+                        {
+                            "idShort": "CalibrationDate",
+                            "modelType": {"name": "Property"},
+                            "valueType": "string",
+                            "value": str(event.calibration_date)
+                        },
+                        {
+                            "idShort": "NextDueDate",
+                            "modelType": {"name": "Property"},
+                            "valueType": "string",
+                            "value": str(event.next_due_date or "")
+                        },
+                        {
+                            "idShort": "ErrorValue",
+                            "modelType": {"name": "Property"},
+                            "valueType": "double",
+                            "value": str(event.error_value)
+                        },
+                        {
+                            "idShort": "Tolerance",
+                            "modelType": {"name": "Property"},
+                            "valueType": "double",
+                            "value": str(event.tolerance)
+                        },
+                        {
+                            "idShort": "CalibrationResult",
+                            "modelType": {"name": "Property"},
+                            "valueType": "string",
+                            "value": str(event.result)
+                        },
+                        {
+                            "idShort": "CreatedAt",
+                            "modelType": {"name": "Property"},
+                            "valueType": "string",
+                            "value": str(event.created_at or "")
+                        }
+                    ]
+                }
+            )
 
         payload = {
             "idShort": "CalibrationHistory",
@@ -122,38 +184,7 @@ class AASBuilder:
                     }
                 ]
             },
-            "submodelElements": [
-                {
-                    "idShort": "LastCalibrationDate",
-                    "modelType": {"name": "Property"},
-                    "valueType": "string",
-                    "value": str(calibration_event.calibration_date)
-                },
-                {
-                    "idShort": "NextDueDate",
-                    "modelType": {"name": "Property"},
-                    "valueType": "string",
-                    "value": str(calibration_event.next_due_date)
-                },
-                {
-                    "idShort": "ErrorValue",
-                    "modelType": {"name": "Property"},
-                    "valueType": "double",
-                    "value": str(calibration_event.error_value)
-                },
-                {
-                    "idShort": "Tolerance",
-                    "modelType": {"name": "Property"},
-                    "valueType": "double",
-                    "value": str(calibration_event.tolerance)
-                },
-                {
-                    "idShort": "CalibrationResult",
-                    "modelType": {"name": "Property"},
-                    "valueType": "string",
-                    "value": str(calibration_event.result)
-                }
-            ]
+            "submodelElements": calibration_collections
         }
 
         headers = {"Content-Type": "application/json"}
@@ -163,4 +194,166 @@ class AASBuilder:
             return resp.status_code in [200, 201]
         except Exception as e:
             logger.error(f"Error sincronizando Submodelo Calibration en BaSyx: {str(e)}")
+            return False
+
+    @staticmethod
+    def sync_document_provenance(instrument, documents) -> bool:
+        """Proyecta la procedencia documental canónica completa hacia BaSyx."""
+        clean_serial = instrument.serial_number.replace("-", "_")
+        aas_id = f"AAS_{clean_serial}"
+        sm_id = f"Submodel_DocumentProvenance_{clean_serial}"
+
+        ordered_documents = sorted(
+            documents,
+            key=lambda document: document.id
+        )
+
+        document_collections = []
+
+        for document in ordered_documents:
+            uploaded_at = (
+                document.uploaded_at.isoformat()
+                if document.uploaded_at
+                else ""
+            )
+
+            document_collections.append(
+                {
+                    "idShort": f"Document_{document.id}",
+                    "modelType": {
+                        "name": "SubmodelElementCollection"
+                    },
+                    "value": [
+                        {
+                            "idShort": "DocumentId",
+                            "modelType": {"name": "Property"},
+                            "valueType": "string",
+                            "value": str(document.id)
+                        },
+                        {
+                            "idShort": "OriginalFilename",
+                            "modelType": {"name": "Property"},
+                            "valueType": "string",
+                            "value": str(document.original_filename)
+                        },
+                        {
+                            "idShort": "SourceType",
+                            "modelType": {"name": "Property"},
+                            "valueType": "string",
+                            "value": str(document.source_type or "")
+                        },
+                        {
+                            "idShort": "Sha256",
+                            "modelType": {"name": "Property"},
+                            "valueType": "string",
+                            "value": str(document.sha256_hash)
+                        },
+                        {
+                            "idShort": "ProcessingStatus",
+                            "modelType": {"name": "Property"},
+                            "valueType": "string",
+                            "value": str(document.processing_status or "")
+                        },
+                        {
+                            "idShort": "UploadedAt",
+                            "modelType": {"name": "Property"},
+                            "valueType": "string",
+                            "value": uploaded_at
+                        }
+                    ]
+                }
+            )
+
+        payload = {
+            "idShort": "DocumentProvenance",
+            "identification": {
+                "id": sm_id,
+                "idType": "Custom"
+            },
+            "semanticId": {
+                "keys": [
+                    {
+                        "type": "GlobalReference",
+                        "local": False,
+                        "value": "urn:passporttwin:submodel:document-provenance:1:0",
+                        "idType": "IRI"
+                    }
+                ]
+            },
+            "submodelElements": document_collections
+        }
+
+        headers = {"Content-Type": "application/json"}
+        try:
+            url = f"{BASYX_AAS_URL}/shells/{aas_id}/aas/submodels/DocumentProvenance"
+            resp = requests.put(url, json=payload, headers=headers, timeout=4)
+            if resp.status_code not in [200, 201]:
+                logger.error(f"Error sincronizando DocumentProvenance ({resp.status_code}): {resp.text}")
+                return False
+            return True
+        except Exception as e:
+            logger.error(f"Error sincronizando DocumentProvenance en BaSyx: {str(e)}")
+            return False
+
+    @staticmethod
+    def sync_operational_state(instrument) -> bool:
+        """Proyecta el estado operativo canónico actual del instrumento."""
+        clean_serial = instrument.serial_number.replace("-", "_")
+        aas_id = f"AAS_{clean_serial}"
+        sm_id = f"Submodel_OperationalState_{clean_serial}"
+
+        payload = {
+            "idShort": "OperationalState",
+            "identification": {
+                "id": sm_id,
+                "idType": "Custom"
+            },
+            "semanticId": {
+                "keys": [
+                    {
+                        "type": "GlobalReference",
+                        "local": False,
+                        "value": "urn:passporttwin:submodel:operational-state:1:0",
+                        "idType": "IRI"
+                    }
+                ]
+            },
+            "submodelElements": [
+                {
+                    "idShort": "LifecycleState",
+                    "modelType": {"name": "Property"},
+                    "valueType": "string",
+                    "value": str(instrument.lifecycle_state)
+                },
+                {
+                    "idShort": "Criticality",
+                    "modelType": {"name": "Property"},
+                    "valueType": "string",
+                    "value": str(getattr(instrument, "criticality", None) or "")
+                },
+                {
+                    "idShort": "Location",
+                    "modelType": {"name": "Property"},
+                    "valueType": "string",
+                    "value": str(getattr(instrument, "location", None) or "")
+                },
+                {
+                    "idShort": "InstalledAt",
+                    "modelType": {"name": "Property"},
+                    "valueType": "string",
+                    "value": str(getattr(instrument, "installed_at", None) or "")
+                }
+            ]
+        }
+
+        headers = {"Content-Type": "application/json"}
+        try:
+            url = f"{BASYX_AAS_URL}/shells/{aas_id}/aas/submodels/OperationalState"
+            resp = requests.put(url, json=payload, headers=headers, timeout=4)
+            if resp.status_code not in [200, 201]:
+                logger.error(f"Error sincronizando OperationalState ({resp.status_code}): {resp.text}")
+                return False
+            return True
+        except Exception as e:
+            logger.error(f"Error sincronizando OperationalState en BaSyx: {str(e)}")
             return False
