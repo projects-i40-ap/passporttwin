@@ -99,6 +99,7 @@ class AASBuilder:
         except Exception as e:
             logger.error(f"Fallo de comunicación con BaSyx AAS: {str(e)}")
             return False
+
     @staticmethod
     def sync_calibration_submodel(instrument, calibration_event) -> bool:
         """Proyecta el historial de calibración aceptado al servidor BaSyx."""
@@ -163,4 +164,67 @@ class AASBuilder:
             return resp.status_code in [200, 201]
         except Exception as e:
             logger.error(f"Error sincronizando Submodelo Calibration en BaSyx: {str(e)}")
+            return False
+
+    @staticmethod
+    def sync_operational_state(instrument) -> bool:
+        """Proyecta el estado operativo canónico actual del instrumento."""
+        clean_serial = instrument.serial_number.replace("-", "_")
+        aas_id = f"AAS_{clean_serial}"
+        sm_id = f"Submodel_OperationalState_{clean_serial}"
+
+        payload = {
+            "idShort": "OperationalState",
+            "identification": {
+                "id": sm_id,
+                "idType": "Custom"
+            },
+            "semanticId": {
+                "keys": [
+                    {
+                        "type": "GlobalReference",
+                        "local": False,
+                        "value": "urn:passporttwin:submodel:operational-state:1:0",
+                        "idType": "IRI"
+                    }
+                ]
+            },
+            "submodelElements": [
+                {
+                    "idShort": "LifecycleState",
+                    "modelType": {"name": "Property"},
+                    "valueType": "string",
+                    "value": str(instrument.lifecycle_state)
+                },
+                {
+                    "idShort": "Criticality",
+                    "modelType": {"name": "Property"},
+                    "valueType": "string",
+                    "value": str(getattr(instrument, "criticality", None) or "")
+                },
+                {
+                    "idShort": "Location",
+                    "modelType": {"name": "Property"},
+                    "valueType": "string",
+                    "value": str(getattr(instrument, "location", None) or "")
+                },
+                {
+                    "idShort": "InstalledAt",
+                    "modelType": {"name": "Property"},
+                    "valueType": "string",
+                    "value": str(getattr(instrument, "installed_at", None) or "")
+                }
+            ]
+        }
+
+        headers = {"Content-Type": "application/json"}
+        try:
+            url = f"{BASYX_AAS_URL}/shells/{aas_id}/aas/submodels/OperationalState"
+            resp = requests.put(url, json=payload, headers=headers, timeout=4)
+            if resp.status_code not in [200, 201]:
+                logger.error(f"Error sincronizando OperationalState ({resp.status_code}): {resp.text}")
+                return False
+            return True
+        except Exception as e:
+            logger.error(f"Error sincronizando OperationalState en BaSyx: {str(e)}")
             return False

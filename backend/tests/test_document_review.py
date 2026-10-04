@@ -201,7 +201,7 @@ def test_revalidate_document_after_human_correction():
     assert fake_db.document.instrument_unit_id == 7
 
 
-def test_accept_document_syncs_calibration_submodel(monkeypatch):
+def test_accept_document_syncs_calibration_and_operational_state(monkeypatch):
     fake_db.reset()
 
     fake_db.document.processing_status = "ACCEPTED"
@@ -214,14 +214,24 @@ def test_accept_document_syncs_calibration_submodel(monkeypatch):
     sync_call = {}
 
     def fake_sync_calibration_submodel(instrument, calibration_event):
-        sync_call["instrument"] = instrument
+        sync_call["calibration_instrument"] = instrument
         sync_call["calibration_event"] = calibration_event
+        return True
+
+    def fake_sync_operational_state(instrument):
+        sync_call["operational_instrument"] = instrument
         return True
 
     monkeypatch.setattr(
         AASBuilder,
         "sync_calibration_submodel",
         fake_sync_calibration_submodel,
+    )
+
+    monkeypatch.setattr(
+        AASBuilder,
+        "sync_operational_state",
+        fake_sync_operational_state,
     )
 
     response = client.post(
@@ -246,5 +256,8 @@ def test_accept_document_syncs_calibration_submodel(monkeypatch):
     assert str(calibration_event.next_due_date) == "2027-01-15"
     assert calibration_event.result == "pass"
 
-    assert sync_call["instrument"] is fake_db.instrument
+    assert sync_call["calibration_instrument"] is fake_db.instrument
     assert sync_call["calibration_event"] is calibration_event
+
+    assert sync_call["operational_instrument"] is fake_db.instrument
+    assert fake_db.instrument.lifecycle_state == "operational"

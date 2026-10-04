@@ -201,6 +201,10 @@ def accept_document_to_canonical(document_id: int, db: Session = Depends(get_db)
         new_calibration
     )
 
+    AASBuilder.sync_operational_state(
+        instrument
+    )
+
     return {
         "status": "CANONICAL_COMMITTED",
         "calibration_event_id": new_calibration.id,
