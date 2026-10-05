@@ -18,6 +18,8 @@ router = APIRouter(prefix="/documents", tags=["documents"])
 STORAGE_RAW_DIR = os.getenv("STORAGE_RAW_DIR", "/app/storage/raw")
 os.makedirs(STORAGE_RAW_DIR, exist_ok=True)
 
+from app.services.pdf_extractor import PDFCertificateExtractor, PDFDatasheetExtractor
+
 @router.post("/upload", status_code=status.HTTP_201_CREATED, summary="Ingesta de archivo RAW con hash SHA-256")
 async def upload_raw_document(
     file: UploadFile = File(...),
@@ -28,7 +30,9 @@ async def upload_raw_document(
     if not contents:
         raise HTTPException(status_code=400, detail="El archivo subido está vacío.")
 
+    # 1. Regla de Integridad R-DUP-01: Cálculo estricto de SHA-256
     file_hash = hashlib.sha256(contents).hexdigest()
+    
     existing = db.query(Document).filter(Document.sha256_hash == file_hash).first()
     if existing:
         raise HTTPException(
@@ -36,12 +40,14 @@ async def upload_raw_document(
             detail=f"Documento duplicado (Regla R-DUP-01). ID existente: {existing.id}"
         )
 
+    # 2. Persistencia en Almacenamiento RAW Inmutable
     file_extension = os.path.splitext(file.filename)[1].lower()
     storage_path = os.path.join(STORAGE_RAW_DIR, f"{file_hash}{file_extension}")
+    
     with open(storage_path, "wb") as f:
         f.write(contents)
 
-    # Clasificación documental básica
+    # 3. Clasificación de procedencia documental (Provenance)
     if file_extension == ".csv":
         source_type = "INVENTORY_CSV"
     elif doc_type == "DATASHEET" or "datasheet" in file.filename.lower():
@@ -65,7 +71,8 @@ async def upload_raw_document(
         "filename": new_doc.original_filename,
         "source_type": new_doc.source_type,
         "sha256": new_doc.sha256_hash,
-        "status": new_doc.processing_status
+        "status": new_doc.processing_status,
+        "storage_path": new_doc.file_path
     }
 
 @router.post("/{document_id}/process", summary="Ejecuta Extracción, Matching y Motor de Reglas")
@@ -74,7 +81,7 @@ def process_document(document_id: int, db: Session = Depends(get_db)):
     if not doc:
         raise HTTPException(status_code=404, detail="Documento no encontrado.")
 
-    # 1. Enrutamiento según el tipo de documento
+    # 1. Enrutamiento del extractor según la naturaleza documental
     if doc.source_type == "PDF_DATASHEET":
         extracted = PDFDatasheetExtractor.extract_technical_data(doc.file_path)
     else:
@@ -85,28 +92,33 @@ def process_document(document_id: int, db: Session = Depends(get_db)):
         db.commit()
         raise HTTPException(status_code=422, detail="No se pudieron extraer campos estructurados del PDF.")
 
+    # 2. Persistencia idempotente en Zona de Staging (extracted_field)
     db.query(ExtractedField).filter(ExtractedField.document_id == doc.id).delete()
 
-    # 2. Persistencia en Staging
     for field_name, val in extracted.items():
-        db.add(ExtractedField(
+        field_entry = ExtractedField(
             document_id=doc.id,
             field_name=field_name,
             raw_value=str(val),
             normalized_value=str(val),
             confidence="1.0",
             validation_status="STAGING"
-        ))
+        )
+        db.add(field_entry)
 
-    # 3. Validación y Matching
+    # 3. Reglas y Matching según el tipo de documento
     if doc.source_type == "PDF_DATASHEET":
-        # Para datasheets el matching de serial suele no aplicar; queda en STAGING para inspección
+        # Un datasheet define especificaciones de tipo, no de activo individual
         rules_failed = []
         doc.processing_status = "ACCEPTED"
     else:
-        target_unit, rules_failed = validate_document_fields(db=db, fields=extracted)
+        target_unit, rules_failed = validate_document_fields(
+            db=db,
+            fields=extracted
+        )
         if target_unit:
             doc.instrument_unit_id = target_unit.id
+
         doc.processing_status = "ACCEPTED" if len(rules_failed) == 0 else "REVIEW_REQUIRED"
 
     db.commit()
