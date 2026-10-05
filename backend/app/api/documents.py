@@ -7,7 +7,7 @@ from app.models.document import Document
 from datetime import datetime
 from app.models.document import ExtractedField
 from app.models.instrument import InstrumentUnit
-from app.services.pdf_extractor import PDFCertificateExtractor
+from app.services.pdf_extractor import PDFCertificateExtractor, PDFDatasheetExtractor
 from app.models.calibration import CalibrationEvent, AuditLog
 from app.schemas.document import ExtractedFieldCorrection
 from app.services.document_validation import validate_document_fields
@@ -21,15 +21,14 @@ os.makedirs(STORAGE_RAW_DIR, exist_ok=True)
 @router.post("/upload", status_code=status.HTTP_201_CREATED, summary="Ingesta de archivo RAW con hash SHA-256")
 async def upload_raw_document(
     file: UploadFile = File(...),
+    doc_type: str = "AUTO",  # AUTO | CERTIFICATE | DATASHEET | CSV
     db: Session = Depends(get_db)
 ):
     contents = await file.read()
     if not contents:
         raise HTTPException(status_code=400, detail="El archivo subido está vacío.")
 
-    # 1. Regla de Integridad R-DUP-01: Cálculo estricto de SHA-256
     file_hash = hashlib.sha256(contents).hexdigest()
-    
     existing = db.query(Document).filter(Document.sha256_hash == file_hash).first()
     if existing:
         raise HTTPException(
@@ -37,19 +36,24 @@ async def upload_raw_document(
             detail=f"Documento duplicado (Regla R-DUP-01). ID existente: {existing.id}"
         )
 
-    # 2. Persistencia en Almacenamiento RAW Inmutable
-    file_extension = os.path.splitext(file.filename)[1]
+    file_extension = os.path.splitext(file.filename)[1].lower()
     storage_path = os.path.join(STORAGE_RAW_DIR, f"{file_hash}{file_extension}")
-    
     with open(storage_path, "wb") as f:
         f.write(contents)
 
-    # 3. Registro Canónico de Procedencia (Provenance)
+    # Clasificación documental básica
+    if file_extension == ".csv":
+        source_type = "INVENTORY_CSV"
+    elif doc_type == "DATASHEET" or "datasheet" in file.filename.lower():
+        source_type = "PDF_DATASHEET"
+    else:
+        source_type = "PDF_CERTIFICATE"
+
     new_doc = Document(
         original_filename=file.filename,
         file_path=storage_path,
         sha256_hash=file_hash,
-        source_type="PDF_CERTIFICATE" if file_extension.lower() == ".pdf" else "CSV_DATA",
+        source_type=source_type,
         processing_status="RECEIVED"
     )
     db.add(new_doc)
@@ -59,9 +63,9 @@ async def upload_raw_document(
     return {
         "document_id": new_doc.id,
         "filename": new_doc.original_filename,
+        "source_type": new_doc.source_type,
         "sha256": new_doc.sha256_hash,
-        "status": new_doc.processing_status,
-        "storage_path": new_doc.file_path
+        "status": new_doc.processing_status
     }
 
 @router.post("/{document_id}/process", summary="Ejecuta Extracción, Matching y Motor de Reglas")
@@ -70,48 +74,47 @@ def process_document(document_id: int, db: Session = Depends(get_db)):
     if not doc:
         raise HTTPException(status_code=404, detail="Documento no encontrado.")
 
-    # 1. Extracción de campos crudos
-    extracted = PDFCertificateExtractor.extract_and_parse(doc.file_path)
+    # 1. Enrutamiento según el tipo de documento
+    if doc.source_type == "PDF_DATASHEET":
+        extracted = PDFDatasheetExtractor.extract_technical_data(doc.file_path)
+    else:
+        extracted = PDFCertificateExtractor.extract_and_parse(doc.file_path)
+
     if not extracted:
         doc.processing_status = "FAILED_EXTRACTION"
         db.commit()
         raise HTTPException(status_code=422, detail="No se pudieron extraer campos estructurados del PDF.")
 
-    # Línea a añadir para evitar duplicados en Staging:
-    db.query(ExtractedField).filter(ExtractedField.document_id == doc.id).delete()   
+    db.query(ExtractedField).filter(ExtractedField.document_id == doc.id).delete()
 
-    # 2. Persistencia en Zona de Staging (extracted_field)
+    # 2. Persistencia en Staging
     for field_name, val in extracted.items():
-        field_entry = ExtractedField(
+        db.add(ExtractedField(
             document_id=doc.id,
             field_name=field_name,
             raw_value=str(val),
             normalized_value=str(val),
             confidence="1.0",
             validation_status="STAGING"
-        )
-        db.add(field_entry)
-    
-    # 3. Matching Determinista y Motor de Reglas compartido
-    target_unit, rules_failed = validate_document_fields(
-        db=db,
-        fields=extracted
-    )
+        ))
 
-    if target_unit:
-        doc.instrument_unit_id = target_unit.id
-
-    # 4. Determinación de Estado Canónico
-    if len(rules_failed) == 0:
+    # 3. Validación y Matching
+    if doc.source_type == "PDF_DATASHEET":
+        # Para datasheets el matching de serial suele no aplicar; queda en STAGING para inspección
+        rules_failed = []
         doc.processing_status = "ACCEPTED"
     else:
-        doc.processing_status = "REVIEW_REQUIRED"
+        target_unit, rules_failed = validate_document_fields(db=db, fields=extracted)
+        if target_unit:
+            doc.instrument_unit_id = target_unit.id
+        doc.processing_status = "ACCEPTED" if len(rules_failed) == 0 else "REVIEW_REQUIRED"
 
     db.commit()
     db.refresh(doc)
 
     return {
         "document_id": doc.id,
+        "source_type": doc.source_type,
         "processing_status": doc.processing_status,
         "matched_instrument_id": doc.instrument_unit_id,
         "extracted_fields": extracted,

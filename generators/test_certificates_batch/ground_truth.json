@@ -1,0 +1,298 @@
+[
+  {
+    "certificate_id": 1,
+    "filename": "cert_001.pdf",
+    "error_injection": "NONE",
+    "ground_truth": {
+      "serial_number": "PH-MT-301",
+      "calibration_date": "2026-06-08",
+      "next_due_date": "2027-06-08",
+      "error_value": 0.047,
+      "tolerance": 0.2
+    },
+    "expected_status": "ACCEPTED",
+    "expected_rules_failed": []
+  },
+  {
+    "certificate_id": 2,
+    "filename": "cert_002.pdf",
+    "error_injection": "FUTURE_DATE",
+    "ground_truth": {
+      "serial_number": "PT-WIKA-101",
+      "calibration_date": "2026-10-31",
+      "next_due_date": "2027-10-31",
+      "error_value": 0.016,
+      "tolerance": 0.1
+    },
+    "expected_status": "REVIEW_REQUIRED",
+    "expected_rules_failed": [
+      "R-DATE-01"
+    ]
+  },
+  {
+    "certificate_id": 3,
+    "filename": "cert_003.pdf",
+    "error_injection": "NONE",
+    "ground_truth": {
+      "serial_number": "TT-EH-201",
+      "calibration_date": "2026-07-25",
+      "next_due_date": "2027-07-25",
+      "error_value": 0.095,
+      "tolerance": 0.5
+    },
+    "expected_status": "ACCEPTED",
+    "expected_rules_failed": []
+  },
+  {
+    "certificate_id": 4,
+    "filename": "cert_004.pdf",
+    "error_injection": "SERIAL_MISMATCH",
+    "ground_truth": {
+      "serial_number": "UNKNOWN-ERR-765",
+      "calibration_date": "2026-03-27",
+      "next_due_date": "2027-03-27",
+      "error_value": 0.088,
+      "tolerance": 0.5
+    },
+    "expected_status": "REVIEW_REQUIRED",
+    "expected_rules_failed": [
+      "R-ID-01"
+    ]
+  },
+  {
+    "certificate_id": 5,
+    "filename": "cert_005.pdf",
+    "error_injection": "NONE",
+    "ground_truth": {
+      "serial_number": "PH-MT-301",
+      "calibration_date": "2026-06-22",
+      "next_due_date": "2027-06-22",
+      "error_value": 0.077,
+      "tolerance": 0.2
+    },
+    "expected_status": "ACCEPTED",
+    "expected_rules_failed": []
+  },
+  {
+    "certificate_id": 6,
+    "filename": "cert_006.pdf",
+    "error_injection": "INVALID_DUE_DATE",
+    "ground_truth": {
+      "serial_number": "PT-WIKA-102",
+      "calibration_date": "2026-08-16",
+      "next_due_date": "2026-07-17",
+      "error_value": 0.063,
+      "tolerance": 0.1
+    },
+    "expected_status": "REVIEW_REQUIRED",
+    "expected_rules_failed": [
+      "R-DATE-02"
+    ]
+  },
+  {
+    "certificate_id": 7,
+    "filename": "cert_007.pdf",
+    "error_injection": "SERIAL_MISMATCH",
+    "ground_truth": {
+      "serial_number": "UNKNOWN-ERR-320",
+      "calibration_date": "2026-05-22",
+      "next_due_date": "2027-05-22",
+      "error_value": 0.029,
+      "tolerance": 0.1
+    },
+    "expected_status": "REVIEW_REQUIRED",
+    "expected_rules_failed": [
+      "R-ID-01"
+    ]
+  },
+  {
+    "certificate_id": 8,
+    "filename": "cert_008.pdf",
+    "error_injection": "NONE",
+    "ground_truth": {
+      "serial_number": "PH-MT-302",
+      "calibration_date": "2026-07-25",
+      "next_due_date": "2027-07-25",
+      "error_value": 0.067,
+      "tolerance": 0.2
+    },
+    "expected_status": "ACCEPTED",
+    "expected_rules_failed": []
+  },
+  {
+    "certificate_id": 9,
+    "filename": "cert_009.pdf",
+    "error_injection": "INVALID_DUE_DATE",
+    "ground_truth": {
+      "serial_number": "PT-WIKA-102",
+      "calibration_date": "2026-03-16",
+      "next_due_date": "2026-02-14",
+      "error_value": 0.029,
+      "tolerance": 0.1
+    },
+    "expected_status": "REVIEW_REQUIRED",
+    "expected_rules_failed": [
+      "R-DATE-02"
+    ]
+  },
+  {
+    "certificate_id": 10,
+    "filename": "cert_010.pdf",
+    "error_injection": "FUTURE_DATE",
+    "ground_truth": {
+      "serial_number": "PT-WIKA-001",
+      "calibration_date": "2026-10-31",
+      "next_due_date": "2027-10-31",
+      "error_value": 0.019,
+      "tolerance": 0.1
+    },
+    "expected_status": "REVIEW_REQUIRED",
+    "expected_rules_failed": [
+      "R-DATE-01"
+    ]
+  },
+  {
+    "certificate_id": 11,
+    "filename": "cert_011.pdf",
+    "error_injection": "NONE",
+    "ground_truth": {
+      "serial_number": "TT-EH-201",
+      "calibration_date": "2026-06-03",
+      "next_due_date": "2027-06-03",
+      "error_value": 0.333,
+      "tolerance": 0.5
+    },
+    "expected_status": "ACCEPTED",
+    "expected_rules_failed": []
+  },
+  {
+    "certificate_id": 12,
+    "filename": "cert_012.pdf",
+    "error_injection": "INVALID_DUE_DATE",
+    "ground_truth": {
+      "serial_number": "TT-EH-202",
+      "calibration_date": "2026-05-17",
+      "next_due_date": "2026-04-17",
+      "error_value": 0.235,
+      "tolerance": 0.5
+    },
+    "expected_status": "REVIEW_REQUIRED",
+    "expected_rules_failed": [
+      "R-DATE-02"
+    ]
+  },
+  {
+    "certificate_id": 13,
+    "filename": "cert_013.pdf",
+    "error_injection": "NONE",
+    "ground_truth": {
+      "serial_number": "PH-MT-301",
+      "calibration_date": "2026-03-01",
+      "next_due_date": "2027-03-01",
+      "error_value": 0.044,
+      "tolerance": 0.2
+    },
+    "expected_status": "ACCEPTED",
+    "expected_rules_failed": []
+  },
+  {
+    "certificate_id": 14,
+    "filename": "cert_014.pdf",
+    "error_injection": "OUT_OF_TOLERANCE",
+    "ground_truth": {
+      "serial_number": "PT-WIKA-102",
+      "calibration_date": "2026-06-19",
+      "next_due_date": "2027-06-19",
+      "error_value": 0.15,
+      "tolerance": 0.1
+    },
+    "expected_status": "ACCEPTED",
+    "expected_rules_failed": []
+  },
+  {
+    "certificate_id": 15,
+    "filename": "cert_015.pdf",
+    "error_injection": "NONE",
+    "ground_truth": {
+      "serial_number": "TT-EH-201",
+      "calibration_date": "2026-03-08",
+      "next_due_date": "2027-03-08",
+      "error_value": 0.335,
+      "tolerance": 0.5
+    },
+    "expected_status": "ACCEPTED",
+    "expected_rules_failed": []
+  },
+  {
+    "certificate_id": 16,
+    "filename": "cert_016.pdf",
+    "error_injection": "NONE",
+    "ground_truth": {
+      "serial_number": "PT-WIKA-101",
+      "calibration_date": "2026-06-25",
+      "next_due_date": "2027-06-25",
+      "error_value": 0.057,
+      "tolerance": 0.1
+    },
+    "expected_status": "ACCEPTED",
+    "expected_rules_failed": []
+  },
+  {
+    "certificate_id": 17,
+    "filename": "cert_017.pdf",
+    "error_injection": "OUT_OF_TOLERANCE",
+    "ground_truth": {
+      "serial_number": "PH-MT-301",
+      "calibration_date": "2026-03-05",
+      "next_due_date": "2027-03-05",
+      "error_value": 0.3,
+      "tolerance": 0.2
+    },
+    "expected_status": "ACCEPTED",
+    "expected_rules_failed": []
+  },
+  {
+    "certificate_id": 18,
+    "filename": "cert_018.pdf",
+    "error_injection": "NONE",
+    "ground_truth": {
+      "serial_number": "PH-MT-301",
+      "calibration_date": "2026-06-16",
+      "next_due_date": "2027-06-16",
+      "error_value": 0.035,
+      "tolerance": 0.2
+    },
+    "expected_status": "ACCEPTED",
+    "expected_rules_failed": []
+  },
+  {
+    "certificate_id": 19,
+    "filename": "cert_019.pdf",
+    "error_injection": "NONE",
+    "ground_truth": {
+      "serial_number": "TT-EH-201",
+      "calibration_date": "2026-03-07",
+      "next_due_date": "2027-03-07",
+      "error_value": 0.278,
+      "tolerance": 0.5
+    },
+    "expected_status": "ACCEPTED",
+    "expected_rules_failed": []
+  },
+  {
+    "certificate_id": 20,
+    "filename": "cert_020.pdf",
+    "error_injection": "SERIAL_MISMATCH",
+    "ground_truth": {
+      "serial_number": "UNKNOWN-ERR-132",
+      "calibration_date": "2026-08-03",
+      "next_due_date": "2027-08-03",
+      "error_value": 0.026,
+      "tolerance": 0.1
+    },
+    "expected_status": "REVIEW_REQUIRED",
+    "expected_rules_failed": [
+      "R-ID-01"
+    ]
+  }
+]
