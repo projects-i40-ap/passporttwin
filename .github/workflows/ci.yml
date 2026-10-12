@@ -9,6 +9,8 @@ on:
 jobs:
   backend-tests:
     runs-on: ubuntu-latest
+    env:
+      STORAGE_RAW_DIR: ./storage/raw
     defaults:
       run:
         working-directory: ./backend
