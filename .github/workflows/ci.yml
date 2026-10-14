@@ -9,9 +9,30 @@ on:
 jobs:
   backend-tests:
     runs-on: ubuntu-latest
+
+    services:
+      postgres:
+        image: postgres:17
+        env:
+          POSTGRES_DB: passporttwin
+          POSTGRES_USER: passporttwin
+          POSTGRES_PASSWORD: devpassword
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U passporttwin -d passporttwin"
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 5
+
+    env:
+      DATABASE_URL: postgresql://passporttwin:devpassword@localhost:5432/passporttwin
+      STORAGE_RAW_DIR: ./storage/raw
+
     defaults:
       run:
         working-directory: ./backend
+
     steps:
       - uses: actions/checkout@v4
 
@@ -28,9 +49,11 @@ jobs:
 
   frontend-build:
     runs-on: ubuntu-latest
+
     defaults:
       run:
         working-directory: ./frontend
+
     steps:
       - uses: actions/checkout@v4
 

@@ -4,9 +4,9 @@ from typing import List
 from app.database.session import get_db
 from app.models.instrument import InstrumentType, InstrumentUnit
 from app.schemas.instrument import (
-    InstrumentTypeCreate, 
-    InstrumentTypeResponse, 
-    InstrumentUnitCreate, 
+    InstrumentTypeCreate,
+    InstrumentTypeResponse,
+    InstrumentUnitCreate,
     InstrumentUnitResponse)
 from app.services.aas_builder import AASBuilder
 
@@ -193,15 +193,72 @@ def get_instrument_calibrations(id: int, db: Session = Depends(get_db)):
     instrument = db.query(InstrumentUnit).filter(InstrumentUnit.id == id).first()
     if not instrument:
         raise HTTPException(status_code=404, detail="Instrumento no encontrado.")
-    return db.query(CalibrationEvent).filter(CalibrationEvent.instrument_unit_id == id).order_by(CalibrationEvent.calibration_date.asc()).all()
+
+    return (
+        db.query(CalibrationEvent)
+        .filter(CalibrationEvent.instrument_unit_id == id)
+        .order_by(CalibrationEvent.calibration_date.asc())
+        .all()
+    )
 
 @router.get("/{id}/predictions", summary="Predicción de deriva, riesgo 30/60/90 y Health Score")
 def get_instrument_predictions(id: int, db: Session = Depends(get_db)):
     instrument = db.query(InstrumentUnit).filter(InstrumentUnit.id == id).first()
+
     if not instrument:
-        raise HTTPException(status_code=404, detail="Instrumento no encontrado.")
-    cals = db.query(CalibrationEvent).filter(CalibrationEvent.instrument_unit_id == id).all()
-    return DriftAnalyticsService.calculate_drift_and_risk(instrument, cals)
+        raise HTTPException(
+            status_code=404,
+            detail="Instrumento no encontrado."
+        )
+
+    # Historial del activo objetivo para B0 y M1.
+    calibrations = (
+        db.query(CalibrationEvent)
+        .filter(
+            CalibrationEvent.instrument_unit_id == instrument.id
+        )
+        .order_by(
+            CalibrationEvent.calibration_date.asc()
+        )
+        .all()
+    )
+
+    # Instrumentos pertenecientes a la misma familia/tipo.
+    family_instrument_ids = [
+        instrument_id
+        for (instrument_id,) in (
+            db.query(InstrumentUnit.id)
+            .filter(
+                InstrumentUnit.instrument_type_id
+                == instrument.instrument_type_id
+            )
+            .all()
+        )
+    ]
+
+    # Historial agregado de la familia para calcular B1.
+    family_calibrations = []
+
+    if family_instrument_ids:
+        family_calibrations = (
+            db.query(CalibrationEvent)
+            .filter(
+                CalibrationEvent.instrument_unit_id.in_(
+                    family_instrument_ids
+                )
+            )
+            .order_by(
+                CalibrationEvent.instrument_unit_id.asc(),
+                CalibrationEvent.calibration_date.asc()
+            )
+            .all()
+        )
+
+    return DriftAnalyticsService.calculate_drift_and_risk(
+        instrument=instrument,
+        calibrations=calibrations,
+        family_calibrations=family_calibrations,
+    )
 
 ######## Endpoints de Ingesta Masiva de Documentos CSV
 @router.post("/upload-csv", status_code=status.HTTP_201_CREATED, summary="Ingesta masiva de inventario de flota vía CSV")
@@ -253,7 +310,7 @@ async def upload_instruments_csv(
     if not required_columns.issubset(df.columns):
         missing = required_columns - set(df.columns)
         raise HTTPException(
-            status_code=400, 
+            status_code=400,
             detail=f"Faltan columnas requeridas en la cabecera del CSV: {list(missing)}"
         )
 

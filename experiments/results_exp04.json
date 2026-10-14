@@ -1,0 +1,1727 @@
+{
+  "experiment": "EXP-04",
+  "description": "Evaluación reproducible de estimación de deriva mediante B0 persistencia, B1 baseline de familia y M1 regresión lineal por activo.",
+  "dataset": "ai/datasets/drift_synthetic.csv",
+  "dataset_type": "synthetic",
+  "random_seed": 42,
+  "validation_scope": "Validación experimental sobre datos sintéticos controlados. No constituye validación industrial sobre datos reales.",
+  "split": {
+    "method": "temporal_per_instrument",
+    "train_calibrations_per_instrument": 6,
+    "test_calibrations_per_instrument": 2,
+    "shuffle": false
+  },
+  "dataset_summary": {
+    "total_instruments": 60,
+    "total_records": 480,
+    "train_records": 360,
+    "test_records": 120
+  },
+  "models": {
+    "B0": "Persistencia: último error observado.",
+    "B1": "Baseline de familia: último error observado + pendiente media histórica de la familia.",
+    "M1": "Regresión lineal por activo utilizando todas las calibraciones disponibles en entrenamiento."
+  },
+  "metrics": {
+    "B0_persistence": {
+      "mae": 0.056522,
+      "rmse": 0.077703
+    },
+    "B1_family_baseline": {
+      "mae": 0.037267,
+      "rmse": 0.047945
+    },
+    "M1_linear_regression": {
+      "mae": 0.012487,
+      "rmse": 0.017865
+    }
+  },
+  "best_model_by_rmse": "M1_linear_regression",
+  "family_baselines": {
+    "pressure_transmitter": 0.00011502,
+    "temperature_sensor": 0.00075506,
+    "ph_sensor": 0.00029055
+  },
+  "details": [
+    {
+      "instrument_id": 1,
+      "serial_number": "PT-SYN-001",
+      "instrument_type": "pressure_transmitter",
+      "true_drift_rate_per_day": 0.00022078,
+      "b1_family_drift_rate_per_day": 0.00011502,
+      "m1_estimated_drift_rate_per_day": 0.00021089,
+      "predictions": [
+        {
+          "calibration_date": "2024-08-03 00:00:00",
+          "elapsed_days": 540.0,
+          "horizon_days": 90.0,
+          "true_error": 0.105411,
+          "prediction_b0": 0.082299,
+          "prediction_b1": 0.092651,
+          "prediction_m1": 0.101363
+        },
+        {
+          "calibration_date": "2024-11-01 00:00:00",
+          "elapsed_days": 630.0,
+          "horizon_days": 180.0,
+          "true_error": 0.123894,
+          "prediction_b0": 0.082299,
+          "prediction_b1": 0.103002,
+          "prediction_m1": 0.120343
+        }
+      ]
+    },
+    {
+      "instrument_id": 2,
+      "serial_number": "PT-SYN-002",
+      "instrument_type": "pressure_transmitter",
+      "true_drift_rate_per_day": -0.00013673,
+      "b1_family_drift_rate_per_day": 0.00011502,
+      "m1_estimated_drift_rate_per_day": -0.00015629,
+      "predictions": [
+        {
+          "calibration_date": "2024-07-08 00:00:00",
+          "elapsed_days": 540.0,
+          "horizon_days": 90.0,
+          "true_error": -0.066385,
+          "prediction_b0": -0.065189,
+          "prediction_b1": -0.054837,
+          "prediction_m1": -0.080816
+        },
+        {
+          "calibration_date": "2024-10-06 00:00:00",
+          "elapsed_days": 630.0,
+          "horizon_days": 180.0,
+          "true_error": -0.085631,
+          "prediction_b0": -0.065189,
+          "prediction_b1": -0.044486,
+          "prediction_m1": -0.094882
+        }
+      ]
+    },
+    {
+      "instrument_id": 3,
+      "serial_number": "PT-SYN-003",
+      "instrument_type": "pressure_transmitter",
+      "true_drift_rate_per_day": -1.106e-05,
+      "b1_family_drift_rate_per_day": 0.00011502,
+      "m1_estimated_drift_rate_per_day": -1.766e-05,
+      "predictions": [
+        {
+          "calibration_date": "2024-08-07 00:00:00",
+          "elapsed_days": 540.0,
+          "horizon_days": 90.0,
+          "true_error": -0.009179,
+          "prediction_b0": -0.00523,
+          "prediction_b1": 0.005122,
+          "prediction_m1": -0.008798
+        },
+        {
+          "calibration_date": "2024-11-05 00:00:00",
+          "elapsed_days": 630.0,
+          "horizon_days": 180.0,
+          "true_error": -0.008879,
+          "prediction_b0": -0.00523,
+          "prediction_b1": 0.015473,
+          "prediction_m1": -0.010387
+        }
+      ]
+    },
+    {
+      "instrument_id": 4,
+      "serial_number": "PT-SYN-004",
+      "instrument_type": "pressure_transmitter",
+      "true_drift_rate_per_day": 0.00033656,
+      "b1_family_drift_rate_per_day": 0.00011502,
+      "m1_estimated_drift_rate_per_day": 0.00033351,
+      "predictions": [
+        {
+          "calibration_date": "2024-07-23 00:00:00",
+          "elapsed_days": 540.0,
+          "horizon_days": 90.0,
+          "true_error": 0.182845,
+          "prediction_b0": 0.148891,
+          "prediction_b1": 0.159243,
+          "prediction_m1": 0.18173
+        },
+        {
+          "calibration_date": "2024-10-21 00:00:00",
+          "elapsed_days": 630.0,
+          "horizon_days": 180.0,
+          "true_error": 0.212305,
+          "prediction_b0": 0.148891,
+          "prediction_b1": 0.169594,
+          "prediction_m1": 0.211745
+        }
+      ]
+    },
+    {
+      "instrument_id": 5,
+      "serial_number": "PT-SYN-005",
+      "instrument_type": "pressure_transmitter",
+      "true_drift_rate_per_day": 0.00034261,
+      "b1_family_drift_rate_per_day": 0.00011502,
+      "m1_estimated_drift_rate_per_day": 0.00034066,
+      "predictions": [
+        {
+          "calibration_date": "2024-07-08 00:00:00",
+          "elapsed_days": 540.0,
+          "horizon_days": 90.0,
+          "true_error": 0.192273,
+          "prediction_b0": 0.163039,
+          "prediction_b1": 0.173391,
+          "prediction_m1": 0.194909
+        },
+        {
+          "calibration_date": "2024-10-06 00:00:00",
+          "elapsed_days": 630.0,
+          "horizon_days": 180.0,
+          "true_error": 0.231469,
+          "prediction_b0": 0.163039,
+          "prediction_b1": 0.183742,
+          "prediction_m1": 0.225569
+        }
+      ]
+    },
+    {
+      "instrument_id": 6,
+      "serial_number": "PT-SYN-006",
+      "instrument_type": "pressure_transmitter",
+      "true_drift_rate_per_day": 0.00017402,
+      "b1_family_drift_rate_per_day": 0.00011502,
+      "m1_estimated_drift_rate_per_day": 0.00018267,
+      "predictions": [
+        {
+          "calibration_date": "2024-08-07 00:00:00",
+          "elapsed_days": 540.0,
+          "horizon_days": 90.0,
+          "true_error": 0.108182,
+          "prediction_b0": 0.104072,
+          "prediction_b1": 0.114424,
+          "prediction_m1": 0.113059
+        },
+        {
+          "calibration_date": "2024-11-05 00:00:00",
+          "elapsed_days": 630.0,
+          "horizon_days": 180.0,
+          "true_error": 0.123165,
+          "prediction_b0": 0.104072,
+          "prediction_b1": 0.124775,
+          "prediction_m1": 0.129499
+        }
+      ]
+    },
+    {
+      "instrument_id": 7,
+      "serial_number": "PT-SYN-007",
+      "instrument_type": "pressure_transmitter",
+      "true_drift_rate_per_day": 0.00023416,
+      "b1_family_drift_rate_per_day": 0.00011502,
+      "m1_estimated_drift_rate_per_day": 0.00023238,
+      "predictions": [
+        {
+          "calibration_date": "2024-08-06 00:00:00",
+          "elapsed_days": 540.0,
+          "horizon_days": 90.0,
+          "true_error": 0.113611,
+          "prediction_b0": 0.101914,
+          "prediction_b1": 0.112266,
+          "prediction_m1": 0.121982
+        },
+        {
+          "calibration_date": "2024-11-04 00:00:00",
+          "elapsed_days": 630.0,
+          "horizon_days": 180.0,
+          "true_error": 0.137883,
+          "prediction_b0": 0.101914,
+          "prediction_b1": 0.122617,
+          "prediction_m1": 0.142895
+        }
+      ]
+    },
+    {
+      "instrument_id": 8,
+      "serial_number": "PT-SYN-008",
+      "instrument_type": "pressure_transmitter",
+      "true_drift_rate_per_day": 4.782e-05,
+      "b1_family_drift_rate_per_day": 0.00011502,
+      "m1_estimated_drift_rate_per_day": 4.035e-05,
+      "predictions": [
+        {
+          "calibration_date": "2024-07-07 00:00:00",
+          "elapsed_days": 540.0,
+          "horizon_days": 90.0,
+          "true_error": 0.024673,
+          "prediction_b0": 0.02656,
+          "prediction_b1": 0.036912,
+          "prediction_m1": 0.029717
+        },
+        {
+          "calibration_date": "2024-10-05 00:00:00",
+          "elapsed_days": 630.0,
+          "horizon_days": 180.0,
+          "true_error": 0.032012,
+          "prediction_b0": 0.02656,
+          "prediction_b1": 0.047263,
+          "prediction_m1": 0.033349
+        }
+      ]
+    },
+    {
+      "instrument_id": 9,
+      "serial_number": "PT-SYN-009",
+      "instrument_type": "pressure_transmitter",
+      "true_drift_rate_per_day": 0.00034866,
+      "b1_family_drift_rate_per_day": 0.00011502,
+      "m1_estimated_drift_rate_per_day": 0.00034224,
+      "predictions": [
+        {
+          "calibration_date": "2024-07-19 00:00:00",
+          "elapsed_days": 540.0,
+          "horizon_days": 90.0,
+          "true_error": 0.180478,
+          "prediction_b0": 0.153313,
+          "prediction_b1": 0.163665,
+          "prediction_m1": 0.181102
+        },
+        {
+          "calibration_date": "2024-10-17 00:00:00",
+          "elapsed_days": 630.0,
+          "horizon_days": 180.0,
+          "true_error": 0.209255,
+          "prediction_b0": 0.153313,
+          "prediction_b1": 0.174016,
+          "prediction_m1": 0.211903
+        }
+      ]
+    },
+    {
+      "instrument_id": 10,
+      "serial_number": "PT-SYN-010",
+      "instrument_type": "pressure_transmitter",
+      "true_drift_rate_per_day": 0.00034806,
+      "b1_family_drift_rate_per_day": 0.00011502,
+      "m1_estimated_drift_rate_per_day": 0.00035575,
+      "predictions": [
+        {
+          "calibration_date": "2024-07-18 00:00:00",
+          "elapsed_days": 540.0,
+          "horizon_days": 90.0,
+          "true_error": 0.180151,
+          "prediction_b0": 0.145942,
+          "prediction_b1": 0.156294,
+          "prediction_m1": 0.182384
+        },
+        {
+          "calibration_date": "2024-10-16 00:00:00",
+          "elapsed_days": 630.0,
+          "horizon_days": 180.0,
+          "true_error": 0.213818,
+          "prediction_b0": 0.145942,
+          "prediction_b1": 0.166645,
+          "prediction_m1": 0.214402
+        }
+      ]
+    },
+    {
+      "instrument_id": 11,
+      "serial_number": "PT-SYN-011",
+      "instrument_type": "pressure_transmitter",
+      "true_drift_rate_per_day": -3.25e-06,
+      "b1_family_drift_rate_per_day": 0.00011502,
+      "m1_estimated_drift_rate_per_day": -9.6e-07,
+      "predictions": [
+        {
+          "calibration_date": "2024-08-04 00:00:00",
+          "elapsed_days": 540.0,
+          "horizon_days": 90.0,
+          "true_error": -0.010043,
+          "prediction_b0": -0.009046,
+          "prediction_b1": 0.001306,
+          "prediction_m1": -0.007672
+        },
+        {
+          "calibration_date": "2024-11-02 00:00:00",
+          "elapsed_days": 630.0,
+          "horizon_days": 180.0,
+          "true_error": -0.008532,
+          "prediction_b0": -0.009046,
+          "prediction_b1": 0.011657,
+          "prediction_m1": -0.007759
+        }
+      ]
+    },
+    {
+      "instrument_id": 12,
+      "serial_number": "PT-SYN-012",
+      "instrument_type": "pressure_transmitter",
+      "true_drift_rate_per_day": 0.00016947,
+      "b1_family_drift_rate_per_day": 0.00011502,
+      "m1_estimated_drift_rate_per_day": 0.00016515,
+      "predictions": [
+        {
+          "calibration_date": "2024-08-03 00:00:00",
+          "elapsed_days": 540.0,
+          "horizon_days": 90.0,
+          "true_error": 0.086995,
+          "prediction_b0": 0.063363,
+          "prediction_b1": 0.073715,
+          "prediction_m1": 0.08013
+        },
+        {
+          "calibration_date": "2024-11-01 00:00:00",
+          "elapsed_days": 630.0,
+          "horizon_days": 180.0,
+          "true_error": 0.09872,
+          "prediction_b0": 0.063363,
+          "prediction_b1": 0.084066,
+          "prediction_m1": 0.094994
+        }
+      ]
+    },
+    {
+      "instrument_id": 13,
+      "serial_number": "PT-SYN-013",
+      "instrument_type": "pressure_transmitter",
+      "true_drift_rate_per_day": 3.149e-05,
+      "b1_family_drift_rate_per_day": 0.00011502,
+      "m1_estimated_drift_rate_per_day": 1.908e-05,
+      "predictions": [
+        {
+          "calibration_date": "2024-06-25 00:00:00",
+          "elapsed_days": 540.0,
+          "horizon_days": 90.0,
+          "true_error": 0.000645,
+          "prediction_b0": -0.00202,
+          "prediction_b1": 0.008332,
+          "prediction_m1": -0.001169
+        },
+        {
+          "calibration_date": "2024-09-23 00:00:00",
+          "elapsed_days": 630.0,
+          "horizon_days": 180.0,
+          "true_error": -0.002999,
+          "prediction_b0": -0.00202,
+          "prediction_b1": 0.018683,
+          "prediction_m1": 0.000548
+        }
+      ]
+    },
+    {
+      "instrument_id": 14,
+      "serial_number": "PT-SYN-014",
+      "instrument_type": "pressure_transmitter",
+      "true_drift_rate_per_day": -8.712e-05,
+      "b1_family_drift_rate_per_day": 0.00011502,
+      "m1_estimated_drift_rate_per_day": -8.842e-05,
+      "predictions": [
+        {
+          "calibration_date": "2024-08-11 00:00:00",
+          "elapsed_days": 540.0,
+          "horizon_days": 90.0,
+          "true_error": -0.039683,
+          "prediction_b0": -0.044308,
+          "prediction_b1": -0.033956,
+          "prediction_m1": -0.049674
+        },
+        {
+          "calibration_date": "2024-11-09 00:00:00",
+          "elapsed_days": 630.0,
+          "horizon_days": 180.0,
+          "true_error": -0.056476,
+          "prediction_b0": -0.044308,
+          "prediction_b1": -0.023605,
+          "prediction_m1": -0.057632
+        }
+      ]
+    },
+    {
+      "instrument_id": 15,
+      "serial_number": "PT-SYN-015",
+      "instrument_type": "pressure_transmitter",
+      "true_drift_rate_per_day": 5.86e-06,
+      "b1_family_drift_rate_per_day": 0.00011502,
+      "m1_estimated_drift_rate_per_day": 3.92e-06,
+      "predictions": [
+        {
+          "calibration_date": "2024-08-07 00:00:00",
+          "elapsed_days": 540.0,
+          "horizon_days": 90.0,
+          "true_error": -0.011592,
+          "prediction_b0": -0.007351,
+          "prediction_b1": 0.003001,
+          "prediction_m1": -0.008231
+        },
+        {
+          "calibration_date": "2024-11-05 00:00:00",
+          "elapsed_days": 630.0,
+          "horizon_days": 180.0,
+          "true_error": -0.00373,
+          "prediction_b0": -0.007351,
+          "prediction_b1": 0.013352,
+          "prediction_m1": -0.007878
+        }
+      ]
+    },
+    {
+      "instrument_id": 16,
+      "serial_number": "PT-SYN-016",
+      "instrument_type": "pressure_transmitter",
+      "true_drift_rate_per_day": -0.0001464,
+      "b1_family_drift_rate_per_day": 0.00011502,
+      "m1_estimated_drift_rate_per_day": -0.00014025,
+      "predictions": [
+        {
+          "calibration_date": "2024-07-08 00:00:00",
+          "elapsed_days": 540.0,
+          "horizon_days": 90.0,
+          "true_error": -0.076341,
+          "prediction_b0": -0.058139,
+          "prediction_b1": -0.047787,
+          "prediction_m1": -0.07333
+        },
+        {
+          "calibration_date": "2024-10-06 00:00:00",
+          "elapsed_days": 630.0,
+          "horizon_days": 180.0,
+          "true_error": -0.08416,
+          "prediction_b0": -0.058139,
+          "prediction_b1": -0.037436,
+          "prediction_m1": -0.085952
+        }
+      ]
+    },
+    {
+      "instrument_id": 17,
+      "serial_number": "PT-SYN-017",
+      "instrument_type": "pressure_transmitter",
+      "true_drift_rate_per_day": 0.00031776,
+      "b1_family_drift_rate_per_day": 0.00011502,
+      "m1_estimated_drift_rate_per_day": 0.00032665,
+      "predictions": [
+        {
+          "calibration_date": "2024-07-28 00:00:00",
+          "elapsed_days": 540.0,
+          "horizon_days": 90.0,
+          "true_error": 0.15307,
+          "prediction_b0": 0.129964,
+          "prediction_b1": 0.140316,
+          "prediction_m1": 0.158145
+        },
+        {
+          "calibration_date": "2024-10-26 00:00:00",
+          "elapsed_days": 630.0,
+          "horizon_days": 180.0,
+          "true_error": 0.187242,
+          "prediction_b0": 0.129964,
+          "prediction_b1": 0.150667,
+          "prediction_m1": 0.187543
+        }
+      ]
+    },
+    {
+      "instrument_id": 18,
+      "serial_number": "PT-SYN-018",
+      "instrument_type": "pressure_transmitter",
+      "true_drift_rate_per_day": -0.00012291,
+      "b1_family_drift_rate_per_day": 0.00011502,
+      "m1_estimated_drift_rate_per_day": -0.00011665,
+      "predictions": [
+        {
+          "calibration_date": "2024-07-23 00:00:00",
+          "elapsed_days": 540.0,
+          "horizon_days": 90.0,
+          "true_error": -0.050041,
+          "prediction_b0": -0.042586,
+          "prediction_b1": -0.032234,
+          "prediction_m1": -0.049991
+        },
+        {
+          "calibration_date": "2024-10-21 00:00:00",
+          "elapsed_days": 630.0,
+          "horizon_days": 180.0,
+          "true_error": -0.058254,
+          "prediction_b0": -0.042586,
+          "prediction_b1": -0.021883,
+          "prediction_m1": -0.06049
+        }
+      ]
+    },
+    {
+      "instrument_id": 19,
+      "serial_number": "PT-SYN-019",
+      "instrument_type": "pressure_transmitter",
+      "true_drift_rate_per_day": -1.073e-05,
+      "b1_family_drift_rate_per_day": 0.00011502,
+      "m1_estimated_drift_rate_per_day": -1.793e-05,
+      "predictions": [
+        {
+          "calibration_date": "2024-07-02 00:00:00",
+          "elapsed_days": 540.0,
+          "horizon_days": 90.0,
+          "true_error": -0.001311,
+          "prediction_b0": -0.008353,
+          "prediction_b1": 0.001999,
+          "prediction_m1": -0.010724
+        },
+        {
+          "calibration_date": "2024-09-30 00:00:00",
+          "elapsed_days": 630.0,
+          "horizon_days": 180.0,
+          "true_error": -0.009917,
+          "prediction_b0": -0.008353,
+          "prediction_b1": 0.01235,
+          "prediction_m1": -0.012338
+        }
+      ]
+    },
+    {
+      "instrument_id": 20,
+      "serial_number": "PT-SYN-020",
+      "instrument_type": "pressure_transmitter",
+      "true_drift_rate_per_day": 0.00027435,
+      "b1_family_drift_rate_per_day": 0.00011502,
+      "m1_estimated_drift_rate_per_day": 0.00027354,
+      "predictions": [
+        {
+          "calibration_date": "2024-06-29 00:00:00",
+          "elapsed_days": 540.0,
+          "horizon_days": 90.0,
+          "true_error": 0.168329,
+          "prediction_b0": 0.141917,
+          "prediction_b1": 0.152269,
+          "prediction_m1": 0.167649
+        },
+        {
+          "calibration_date": "2024-09-27 00:00:00",
+          "elapsed_days": 630.0,
+          "horizon_days": 180.0,
+          "true_error": 0.189604,
+          "prediction_b0": 0.141917,
+          "prediction_b1": 0.16262,
+          "prediction_m1": 0.192267
+        }
+      ]
+    },
+    {
+      "instrument_id": 21,
+      "serial_number": "TT-SYN-001",
+      "instrument_type": "temperature_sensor",
+      "true_drift_rate_per_day": 7.05e-05,
+      "b1_family_drift_rate_per_day": 0.00075506,
+      "m1_estimated_drift_rate_per_day": 9.487e-05,
+      "predictions": [
+        {
+          "calibration_date": "2024-08-13 00:00:00",
+          "elapsed_days": 540.0,
+          "horizon_days": 90.0,
+          "true_error": 0.085089,
+          "prediction_b0": 0.078431,
+          "prediction_b1": 0.146387,
+          "prediction_m1": 0.078737
+        },
+        {
+          "calibration_date": "2024-11-11 00:00:00",
+          "elapsed_days": 630.0,
+          "horizon_days": 180.0,
+          "true_error": 0.096836,
+          "prediction_b0": 0.078431,
+          "prediction_b1": 0.214342,
+          "prediction_m1": 0.087275
+        }
+      ]
+    },
+    {
+      "instrument_id": 22,
+      "serial_number": "TT-SYN-002",
+      "instrument_type": "temperature_sensor",
+      "true_drift_rate_per_day": 0.00099595,
+      "b1_family_drift_rate_per_day": 0.00075506,
+      "m1_estimated_drift_rate_per_day": 0.00105405,
+      "predictions": [
+        {
+          "calibration_date": "2024-08-10 00:00:00",
+          "elapsed_days": 540.0,
+          "horizon_days": 90.0,
+          "true_error": 0.555799,
+          "prediction_b0": 0.49746,
+          "prediction_b1": 0.565416,
+          "prediction_m1": 0.573662
+        },
+        {
+          "calibration_date": "2024-11-08 00:00:00",
+          "elapsed_days": 630.0,
+          "horizon_days": 180.0,
+          "true_error": 0.640386,
+          "prediction_b0": 0.49746,
+          "prediction_b1": 0.633371,
+          "prediction_m1": 0.668527
+        }
+      ]
+    },
+    {
+      "instrument_id": 23,
+      "serial_number": "TT-SYN-003",
+      "instrument_type": "temperature_sensor",
+      "true_drift_rate_per_day": 0.00122364,
+      "b1_family_drift_rate_per_day": 0.00075506,
+      "m1_estimated_drift_rate_per_day": 0.00127499,
+      "predictions": [
+        {
+          "calibration_date": "2024-08-01 00:00:00",
+          "elapsed_days": 540.0,
+          "horizon_days": 90.0,
+          "true_error": 0.577449,
+          "prediction_b0": 0.483555,
+          "prediction_b1": 0.551511,
+          "prediction_m1": 0.60164
+        },
+        {
+          "calibration_date": "2024-10-30 00:00:00",
+          "elapsed_days": 630.0,
+          "horizon_days": 180.0,
+          "true_error": 0.680202,
+          "prediction_b0": 0.483555,
+          "prediction_b1": 0.619466,
+          "prediction_m1": 0.716389
+        }
+      ]
+    },
+    {
+      "instrument_id": 24,
+      "serial_number": "TT-SYN-004",
+      "instrument_type": "temperature_sensor",
+      "true_drift_rate_per_day": -9.148e-05,
+      "b1_family_drift_rate_per_day": 0.00075506,
+      "m1_estimated_drift_rate_per_day": -3.831e-05,
+      "predictions": [
+        {
+          "calibration_date": "2024-07-14 00:00:00",
+          "elapsed_days": 540.0,
+          "horizon_days": 90.0,
+          "true_error": 0.020244,
+          "prediction_b0": 0.04497,
+          "prediction_b1": 0.112926,
+          "prediction_m1": 0.034927
+        },
+        {
+          "calibration_date": "2024-10-12 00:00:00",
+          "elapsed_days": 630.0,
+          "horizon_days": 180.0,
+          "true_error": 0.004158,
+          "prediction_b0": 0.04497,
+          "prediction_b1": 0.180881,
+          "prediction_m1": 0.031479
+        }
+      ]
+    },
+    {
+      "instrument_id": 25,
+      "serial_number": "TT-SYN-005",
+      "instrument_type": "temperature_sensor",
+      "true_drift_rate_per_day": 0.00062599,
+      "b1_family_drift_rate_per_day": 0.00075506,
+      "m1_estimated_drift_rate_per_day": 0.00058899,
+      "predictions": [
+        {
+          "calibration_date": "2024-07-23 00:00:00",
+          "elapsed_days": 540.0,
+          "horizon_days": 90.0,
+          "true_error": 0.358007,
+          "prediction_b0": 0.307216,
+          "prediction_b1": 0.375172,
+          "prediction_m1": 0.349994
+        },
+        {
+          "calibration_date": "2024-10-21 00:00:00",
+          "elapsed_days": 630.0,
+          "horizon_days": 180.0,
+          "true_error": 0.430129,
+          "prediction_b0": 0.307216,
+          "prediction_b1": 0.443127,
+          "prediction_m1": 0.403003
+        }
+      ]
+    },
+    {
+      "instrument_id": 26,
+      "serial_number": "TT-SYN-006",
+      "instrument_type": "temperature_sensor",
+      "true_drift_rate_per_day": 0.00090708,
+      "b1_family_drift_rate_per_day": 0.00075506,
+      "m1_estimated_drift_rate_per_day": 0.00099693,
+      "predictions": [
+        {
+          "calibration_date": "2024-07-22 00:00:00",
+          "elapsed_days": 540.0,
+          "horizon_days": 90.0,
+          "true_error": 0.518738,
+          "prediction_b0": 0.446192,
+          "prediction_b1": 0.514148,
+          "prediction_m1": 0.555658
+        },
+        {
+          "calibration_date": "2024-10-20 00:00:00",
+          "elapsed_days": 630.0,
+          "horizon_days": 180.0,
+          "true_error": 0.584399,
+          "prediction_b0": 0.446192,
+          "prediction_b1": 0.582103,
+          "prediction_m1": 0.645382
+        }
+      ]
+    },
+    {
+      "instrument_id": 27,
+      "serial_number": "TT-SYN-007",
+      "instrument_type": "temperature_sensor",
+      "true_drift_rate_per_day": 0.00127943,
+      "b1_family_drift_rate_per_day": 0.00075506,
+      "m1_estimated_drift_rate_per_day": 0.00132091,
+      "predictions": [
+        {
+          "calibration_date": "2024-07-02 00:00:00",
+          "elapsed_days": 540.0,
+          "horizon_days": 90.0,
+          "true_error": 0.667503,
+          "prediction_b0": 0.563512,
+          "prediction_b1": 0.631468,
+          "prediction_m1": 0.667477
+        },
+        {
+          "calibration_date": "2024-09-30 00:00:00",
+          "elapsed_days": 630.0,
+          "horizon_days": 180.0,
+          "true_error": 0.749411,
+          "prediction_b0": 0.563512,
+          "prediction_b1": 0.699423,
+          "prediction_m1": 0.786359
+        }
+      ]
+    },
+    {
+      "instrument_id": 28,
+      "serial_number": "TT-SYN-008",
+      "instrument_type": "temperature_sensor",
+      "true_drift_rate_per_day": 0.00119221,
+      "b1_family_drift_rate_per_day": 0.00075506,
+      "m1_estimated_drift_rate_per_day": 0.00111278,
+      "predictions": [
+        {
+          "calibration_date": "2024-07-10 00:00:00",
+          "elapsed_days": 540.0,
+          "horizon_days": 90.0,
+          "true_error": 0.706178,
+          "prediction_b0": 0.573121,
+          "prediction_b1": 0.641077,
+          "prediction_m1": 0.684624
+        },
+        {
+          "calibration_date": "2024-10-08 00:00:00",
+          "elapsed_days": 630.0,
+          "horizon_days": 180.0,
+          "true_error": 0.848737,
+          "prediction_b0": 0.573121,
+          "prediction_b1": 0.709032,
+          "prediction_m1": 0.784774
+        }
+      ]
+    },
+    {
+      "instrument_id": 29,
+      "serial_number": "TT-SYN-009",
+      "instrument_type": "temperature_sensor",
+      "true_drift_rate_per_day": 0.00062181,
+      "b1_family_drift_rate_per_day": 0.00075506,
+      "m1_estimated_drift_rate_per_day": 0.00055641,
+      "predictions": [
+        {
+          "calibration_date": "2024-07-29 00:00:00",
+          "elapsed_days": 540.0,
+          "horizon_days": 90.0,
+          "true_error": 0.348631,
+          "prediction_b0": 0.317032,
+          "prediction_b1": 0.384988,
+          "prediction_m1": 0.360787
+        },
+        {
+          "calibration_date": "2024-10-27 00:00:00",
+          "elapsed_days": 630.0,
+          "horizon_days": 180.0,
+          "true_error": 0.41778,
+          "prediction_b0": 0.317032,
+          "prediction_b1": 0.452943,
+          "prediction_m1": 0.410864
+        }
+      ]
+    },
+    {
+      "instrument_id": 30,
+      "serial_number": "TT-SYN-010",
+      "instrument_type": "temperature_sensor",
+      "true_drift_rate_per_day": 0.00129796,
+      "b1_family_drift_rate_per_day": 0.00075506,
+      "m1_estimated_drift_rate_per_day": 0.00132491,
+      "predictions": [
+        {
+          "calibration_date": "2024-06-26 00:00:00",
+          "elapsed_days": 540.0,
+          "horizon_days": 90.0,
+          "true_error": 0.678032,
+          "prediction_b0": 0.56272,
+          "prediction_b1": 0.630676,
+          "prediction_m1": 0.6763
+        },
+        {
+          "calibration_date": "2024-09-24 00:00:00",
+          "elapsed_days": 630.0,
+          "horizon_days": 180.0,
+          "true_error": 0.746255,
+          "prediction_b0": 0.56272,
+          "prediction_b1": 0.698631,
+          "prediction_m1": 0.795542
+        }
+      ]
+    },
+    {
+      "instrument_id": 31,
+      "serial_number": "TT-SYN-011",
+      "instrument_type": "temperature_sensor",
+      "true_drift_rate_per_day": 0.00099896,
+      "b1_family_drift_rate_per_day": 0.00075506,
+      "m1_estimated_drift_rate_per_day": 0.00102621,
+      "predictions": [
+        {
+          "calibration_date": "2024-07-20 00:00:00",
+          "elapsed_days": 540.0,
+          "horizon_days": 90.0,
+          "true_error": 0.634771,
+          "prediction_b0": 0.543836,
+          "prediction_b1": 0.611792,
+          "prediction_m1": 0.637747
+        },
+        {
+          "calibration_date": "2024-10-18 00:00:00",
+          "elapsed_days": 630.0,
+          "horizon_days": 180.0,
+          "true_error": 0.746213,
+          "prediction_b0": 0.543836,
+          "prediction_b1": 0.679747,
+          "prediction_m1": 0.730106
+        }
+      ]
+    },
+    {
+      "instrument_id": 32,
+      "serial_number": "TT-SYN-012",
+      "instrument_type": "temperature_sensor",
+      "true_drift_rate_per_day": 0.00110447,
+      "b1_family_drift_rate_per_day": 0.00075506,
+      "m1_estimated_drift_rate_per_day": 0.00117542,
+      "predictions": [
+        {
+          "calibration_date": "2024-08-13 00:00:00",
+          "elapsed_days": 540.0,
+          "horizon_days": 90.0,
+          "true_error": 0.674291,
+          "prediction_b0": 0.591424,
+          "prediction_b1": 0.65938,
+          "prediction_m1": 0.701826
+        },
+        {
+          "calibration_date": "2024-11-11 00:00:00",
+          "elapsed_days": 630.0,
+          "horizon_days": 180.0,
+          "true_error": 0.753736,
+          "prediction_b0": 0.591424,
+          "prediction_b1": 0.727335,
+          "prediction_m1": 0.807614
+        }
+      ]
+    },
+    {
+      "instrument_id": 33,
+      "serial_number": "TT-SYN-013",
+      "instrument_type": "temperature_sensor",
+      "true_drift_rate_per_day": 0.00019932,
+      "b1_family_drift_rate_per_day": 0.00075506,
+      "m1_estimated_drift_rate_per_day": 0.00021712,
+      "predictions": [
+        {
+          "calibration_date": "2024-08-15 00:00:00",
+          "elapsed_days": 540.0,
+          "horizon_days": 90.0,
+          "true_error": 0.205816,
+          "prediction_b0": 0.166271,
+          "prediction_b1": 0.234227,
+          "prediction_m1": 0.182084
+        },
+        {
+          "calibration_date": "2024-11-13 00:00:00",
+          "elapsed_days": 630.0,
+          "horizon_days": 180.0,
+          "true_error": 0.20708,
+          "prediction_b0": 0.166271,
+          "prediction_b1": 0.302182,
+          "prediction_m1": 0.201625
+        }
+      ]
+    },
+    {
+      "instrument_id": 34,
+      "serial_number": "TT-SYN-014",
+      "instrument_type": "temperature_sensor",
+      "true_drift_rate_per_day": 0.00029936,
+      "b1_family_drift_rate_per_day": 0.00075506,
+      "m1_estimated_drift_rate_per_day": 0.00026704,
+      "predictions": [
+        {
+          "calibration_date": "2024-07-16 00:00:00",
+          "elapsed_days": 540.0,
+          "horizon_days": 90.0,
+          "true_error": 0.199567,
+          "prediction_b0": 0.155028,
+          "prediction_b1": 0.222984,
+          "prediction_m1": 0.18031
+        },
+        {
+          "calibration_date": "2024-10-14 00:00:00",
+          "elapsed_days": 630.0,
+          "horizon_days": 180.0,
+          "true_error": 0.207568,
+          "prediction_b0": 0.155028,
+          "prediction_b1": 0.290939,
+          "prediction_m1": 0.204343
+        }
+      ]
+    },
+    {
+      "instrument_id": 35,
+      "serial_number": "TT-SYN-015",
+      "instrument_type": "temperature_sensor",
+      "true_drift_rate_per_day": 0.00019137,
+      "b1_family_drift_rate_per_day": 0.00075506,
+      "m1_estimated_drift_rate_per_day": 0.0001979,
+      "predictions": [
+        {
+          "calibration_date": "2024-06-30 00:00:00",
+          "elapsed_days": 540.0,
+          "horizon_days": 90.0,
+          "true_error": 0.139373,
+          "prediction_b0": 0.093904,
+          "prediction_b1": 0.16186,
+          "prediction_m1": 0.120133
+        },
+        {
+          "calibration_date": "2024-09-28 00:00:00",
+          "elapsed_days": 630.0,
+          "horizon_days": 180.0,
+          "true_error": 0.14191,
+          "prediction_b0": 0.093904,
+          "prediction_b1": 0.229815,
+          "prediction_m1": 0.137944
+        }
+      ]
+    },
+    {
+      "instrument_id": 36,
+      "serial_number": "TT-SYN-016",
+      "instrument_type": "temperature_sensor",
+      "true_drift_rate_per_day": 0.0005769,
+      "b1_family_drift_rate_per_day": 0.00075506,
+      "m1_estimated_drift_rate_per_day": 0.00066066,
+      "predictions": [
+        {
+          "calibration_date": "2024-07-27 00:00:00",
+          "elapsed_days": 540.0,
+          "horizon_days": 90.0,
+          "true_error": 0.371237,
+          "prediction_b0": 0.340275,
+          "prediction_b1": 0.408231,
+          "prediction_m1": 0.401821
+        },
+        {
+          "calibration_date": "2024-10-25 00:00:00",
+          "elapsed_days": 630.0,
+          "horizon_days": 180.0,
+          "true_error": 0.446745,
+          "prediction_b0": 0.340275,
+          "prediction_b1": 0.476186,
+          "prediction_m1": 0.46128
+        }
+      ]
+    },
+    {
+      "instrument_id": 37,
+      "serial_number": "TT-SYN-017",
+      "instrument_type": "temperature_sensor",
+      "true_drift_rate_per_day": 0.00130009,
+      "b1_family_drift_rate_per_day": 0.00075506,
+      "m1_estimated_drift_rate_per_day": 0.00134295,
+      "predictions": [
+        {
+          "calibration_date": "2024-08-17 00:00:00",
+          "elapsed_days": 540.0,
+          "horizon_days": 90.0,
+          "true_error": 0.632043,
+          "prediction_b0": 0.520606,
+          "prediction_b1": 0.588562,
+          "prediction_m1": 0.649754
+        },
+        {
+          "calibration_date": "2024-11-15 00:00:00",
+          "elapsed_days": 630.0,
+          "horizon_days": 180.0,
+          "true_error": 0.742195,
+          "prediction_b0": 0.520606,
+          "prediction_b1": 0.656517,
+          "prediction_m1": 0.77062
+        }
+      ]
+    },
+    {
+      "instrument_id": 38,
+      "serial_number": "TT-SYN-018",
+      "instrument_type": "temperature_sensor",
+      "true_drift_rate_per_day": 0.00073103,
+      "b1_family_drift_rate_per_day": 0.00075506,
+      "m1_estimated_drift_rate_per_day": 0.00071077,
+      "predictions": [
+        {
+          "calibration_date": "2024-08-10 00:00:00",
+          "elapsed_days": 540.0,
+          "horizon_days": 90.0,
+          "true_error": 0.446598,
+          "prediction_b0": 0.404646,
+          "prediction_b1": 0.472602,
+          "prediction_m1": 0.456136
+        },
+        {
+          "calibration_date": "2024-11-08 00:00:00",
+          "elapsed_days": 630.0,
+          "horizon_days": 180.0,
+          "true_error": 0.50652,
+          "prediction_b0": 0.404646,
+          "prediction_b1": 0.540557,
+          "prediction_m1": 0.520105
+        }
+      ]
+    },
+    {
+      "instrument_id": 39,
+      "serial_number": "TT-SYN-019",
+      "instrument_type": "temperature_sensor",
+      "true_drift_rate_per_day": 0.00052235,
+      "b1_family_drift_rate_per_day": 0.00075506,
+      "m1_estimated_drift_rate_per_day": 0.00057843,
+      "predictions": [
+        {
+          "calibration_date": "2024-07-22 00:00:00",
+          "elapsed_days": 540.0,
+          "horizon_days": 90.0,
+          "true_error": 0.303684,
+          "prediction_b0": 0.292026,
+          "prediction_b1": 0.359982,
+          "prediction_m1": 0.320468
+        },
+        {
+          "calibration_date": "2024-10-20 00:00:00",
+          "elapsed_days": 630.0,
+          "horizon_days": 180.0,
+          "true_error": 0.351147,
+          "prediction_b0": 0.292026,
+          "prediction_b1": 0.427937,
+          "prediction_m1": 0.372527
+        }
+      ]
+    },
+    {
+      "instrument_id": 40,
+      "serial_number": "TT-SYN-020",
+      "instrument_type": "temperature_sensor",
+      "true_drift_rate_per_day": 0.00084559,
+      "b1_family_drift_rate_per_day": 0.00075506,
+      "m1_estimated_drift_rate_per_day": 0.00079871,
+      "predictions": [
+        {
+          "calibration_date": "2024-08-23 00:00:00",
+          "elapsed_days": 540.0,
+          "horizon_days": 90.0,
+          "true_error": 0.515364,
+          "prediction_b0": 0.426757,
+          "prediction_b1": 0.494713,
+          "prediction_m1": 0.482029
+        },
+        {
+          "calibration_date": "2024-11-21 00:00:00",
+          "elapsed_days": 630.0,
+          "horizon_days": 180.0,
+          "true_error": 0.582046,
+          "prediction_b0": 0.426757,
+          "prediction_b1": 0.562668,
+          "prediction_m1": 0.553913
+        }
+      ]
+    },
+    {
+      "instrument_id": 41,
+      "serial_number": "PH-SYN-001",
+      "instrument_type": "ph_sensor",
+      "true_drift_rate_per_day": 0.00049018,
+      "b1_family_drift_rate_per_day": 0.00029055,
+      "m1_estimated_drift_rate_per_day": 0.00049179,
+      "predictions": [
+        {
+          "calibration_date": "2024-08-03 00:00:00",
+          "elapsed_days": 540.0,
+          "horizon_days": 90.0,
+          "true_error": 0.283807,
+          "prediction_b0": 0.214242,
+          "prediction_b1": 0.240392,
+          "prediction_m1": 0.275202
+        },
+        {
+          "calibration_date": "2024-11-01 00:00:00",
+          "elapsed_days": 630.0,
+          "horizon_days": 180.0,
+          "true_error": 0.303425,
+          "prediction_b0": 0.214242,
+          "prediction_b1": 0.266541,
+          "prediction_m1": 0.319463
+        }
+      ]
+    },
+    {
+      "instrument_id": 42,
+      "serial_number": "PH-SYN-002",
+      "instrument_type": "ph_sensor",
+      "true_drift_rate_per_day": 0.00075376,
+      "b1_family_drift_rate_per_day": 0.00029055,
+      "m1_estimated_drift_rate_per_day": 0.00075653,
+      "predictions": [
+        {
+          "calibration_date": "2024-07-08 00:00:00",
+          "elapsed_days": 540.0,
+          "horizon_days": 90.0,
+          "true_error": 0.366394,
+          "prediction_b0": 0.318122,
+          "prediction_b1": 0.344272,
+          "prediction_m1": 0.382559
+        },
+        {
+          "calibration_date": "2024-10-06 00:00:00",
+          "elapsed_days": 630.0,
+          "horizon_days": 180.0,
+          "true_error": 0.423126,
+          "prediction_b0": 0.318122,
+          "prediction_b1": 0.370421,
+          "prediction_m1": 0.450647
+        }
+      ]
+    },
+    {
+      "instrument_id": 43,
+      "serial_number": "PH-SYN-003",
+      "instrument_type": "ph_sensor",
+      "true_drift_rate_per_day": 0.00053078,
+      "b1_family_drift_rate_per_day": 0.00029055,
+      "m1_estimated_drift_rate_per_day": 0.00054627,
+      "predictions": [
+        {
+          "calibration_date": "2024-08-01 00:00:00",
+          "elapsed_days": 540.0,
+          "horizon_days": 90.0,
+          "true_error": 0.282745,
+          "prediction_b0": 0.21823,
+          "prediction_b1": 0.24438,
+          "prediction_m1": 0.275874
+        },
+        {
+          "calibration_date": "2024-10-30 00:00:00",
+          "elapsed_days": 630.0,
+          "horizon_days": 180.0,
+          "true_error": 0.336504,
+          "prediction_b0": 0.21823,
+          "prediction_b1": 0.270529,
+          "prediction_m1": 0.325039
+        }
+      ]
+    },
+    {
+      "instrument_id": 44,
+      "serial_number": "PH-SYN-004",
+      "instrument_type": "ph_sensor",
+      "true_drift_rate_per_day": -2.804e-05,
+      "b1_family_drift_rate_per_day": 0.00029055,
+      "m1_estimated_drift_rate_per_day": 1.139e-05,
+      "predictions": [
+        {
+          "calibration_date": "2024-07-22 00:00:00",
+          "elapsed_days": 540.0,
+          "horizon_days": 90.0,
+          "true_error": -0.036177,
+          "prediction_b0": -0.027913,
+          "prediction_b1": -0.001763,
+          "prediction_m1": -0.028061
+        },
+        {
+          "calibration_date": "2024-10-20 00:00:00",
+          "elapsed_days": 630.0,
+          "horizon_days": 180.0,
+          "true_error": -0.029164,
+          "prediction_b0": -0.027913,
+          "prediction_b1": 0.024386,
+          "prediction_m1": -0.027036
+        }
+      ]
+    },
+    {
+      "instrument_id": 45,
+      "serial_number": "PH-SYN-005",
+      "instrument_type": "ph_sensor",
+      "true_drift_rate_per_day": -0.00021136,
+      "b1_family_drift_rate_per_day": 0.00029055,
+      "m1_estimated_drift_rate_per_day": -0.00022762,
+      "predictions": [
+        {
+          "calibration_date": "2024-07-14 00:00:00",
+          "elapsed_days": 540.0,
+          "horizon_days": 90.0,
+          "true_error": -0.086199,
+          "prediction_b0": -0.059102,
+          "prediction_b1": -0.032952,
+          "prediction_m1": -0.084442
+        },
+        {
+          "calibration_date": "2024-10-12 00:00:00",
+          "elapsed_days": 630.0,
+          "horizon_days": 180.0,
+          "true_error": -0.100956,
+          "prediction_b0": -0.059102,
+          "prediction_b1": -0.006803,
+          "prediction_m1": -0.104927
+        }
+      ]
+    },
+    {
+      "instrument_id": 46,
+      "serial_number": "PH-SYN-006",
+      "instrument_type": "ph_sensor",
+      "true_drift_rate_per_day": 0.00069532,
+      "b1_family_drift_rate_per_day": 0.00029055,
+      "m1_estimated_drift_rate_per_day": 0.00071669,
+      "predictions": [
+        {
+          "calibration_date": "2024-08-16 00:00:00",
+          "elapsed_days": 540.0,
+          "horizon_days": 90.0,
+          "true_error": 0.3591,
+          "prediction_b0": 0.307249,
+          "prediction_b1": 0.333399,
+          "prediction_m1": 0.371833
+        },
+        {
+          "calibration_date": "2024-11-14 00:00:00",
+          "elapsed_days": 630.0,
+          "horizon_days": 180.0,
+          "true_error": 0.445094,
+          "prediction_b0": 0.307249,
+          "prediction_b1": 0.359548,
+          "prediction_m1": 0.436336
+        }
+      ]
+    },
+    {
+      "instrument_id": 47,
+      "serial_number": "PH-SYN-007",
+      "instrument_type": "ph_sensor",
+      "true_drift_rate_per_day": 0.0006193,
+      "b1_family_drift_rate_per_day": 0.00029055,
+      "m1_estimated_drift_rate_per_day": 0.00063292,
+      "predictions": [
+        {
+          "calibration_date": "2024-08-17 00:00:00",
+          "elapsed_days": 540.0,
+          "horizon_days": 90.0,
+          "true_error": 0.355871,
+          "prediction_b0": 0.310607,
+          "prediction_b1": 0.336757,
+          "prediction_m1": 0.363242
+        },
+        {
+          "calibration_date": "2024-11-15 00:00:00",
+          "elapsed_days": 630.0,
+          "horizon_days": 180.0,
+          "true_error": 0.422385,
+          "prediction_b0": 0.310607,
+          "prediction_b1": 0.362906,
+          "prediction_m1": 0.420205
+        }
+      ]
+    },
+    {
+      "instrument_id": 48,
+      "serial_number": "PH-SYN-008",
+      "instrument_type": "ph_sensor",
+      "true_drift_rate_per_day": 0.00014475,
+      "b1_family_drift_rate_per_day": 0.00029055,
+      "m1_estimated_drift_rate_per_day": 0.00013866,
+      "predictions": [
+        {
+          "calibration_date": "2024-08-05 00:00:00",
+          "elapsed_days": 540.0,
+          "horizon_days": 90.0,
+          "true_error": 0.090341,
+          "prediction_b0": 0.081156,
+          "prediction_b1": 0.107306,
+          "prediction_m1": 0.098354
+        },
+        {
+          "calibration_date": "2024-11-03 00:00:00",
+          "elapsed_days": 630.0,
+          "horizon_days": 180.0,
+          "true_error": 0.1046,
+          "prediction_b0": 0.081156,
+          "prediction_b1": 0.133455,
+          "prediction_m1": 0.110834
+        }
+      ]
+    },
+    {
+      "instrument_id": 49,
+      "serial_number": "PH-SYN-009",
+      "instrument_type": "ph_sensor",
+      "true_drift_rate_per_day": 0.00065354,
+      "b1_family_drift_rate_per_day": 0.00029055,
+      "m1_estimated_drift_rate_per_day": 0.00066402,
+      "predictions": [
+        {
+          "calibration_date": "2024-08-04 00:00:00",
+          "elapsed_days": 540.0,
+          "horizon_days": 90.0,
+          "true_error": 0.342858,
+          "prediction_b0": 0.305926,
+          "prediction_b1": 0.332076,
+          "prediction_m1": 0.354114
+        },
+        {
+          "calibration_date": "2024-11-02 00:00:00",
+          "elapsed_days": 630.0,
+          "horizon_days": 180.0,
+          "true_error": 0.430208,
+          "prediction_b0": 0.305926,
+          "prediction_b1": 0.358225,
+          "prediction_m1": 0.413876
+        }
+      ]
+    },
+    {
+      "instrument_id": 50,
+      "serial_number": "PH-SYN-010",
+      "instrument_type": "ph_sensor",
+      "true_drift_rate_per_day": -0.0002099,
+      "b1_family_drift_rate_per_day": 0.00029055,
+      "m1_estimated_drift_rate_per_day": -0.00026606,
+      "predictions": [
+        {
+          "calibration_date": "2024-07-20 00:00:00",
+          "elapsed_days": 540.0,
+          "horizon_days": 90.0,
+          "true_error": -0.142863,
+          "prediction_b0": -0.128388,
+          "prediction_b1": -0.102238,
+          "prediction_m1": -0.151056
+        },
+        {
+          "calibration_date": "2024-10-18 00:00:00",
+          "elapsed_days": 630.0,
+          "horizon_days": 180.0,
+          "true_error": -0.165719,
+          "prediction_b0": -0.128388,
+          "prediction_b1": -0.076089,
+          "prediction_m1": -0.175001
+        }
+      ]
+    },
+    {
+      "instrument_id": 51,
+      "serial_number": "PH-SYN-011",
+      "instrument_type": "ph_sensor",
+      "true_drift_rate_per_day": 0.00062315,
+      "b1_family_drift_rate_per_day": 0.00029055,
+      "m1_estimated_drift_rate_per_day": 0.00064264,
+      "predictions": [
+        {
+          "calibration_date": "2024-08-23 00:00:00",
+          "elapsed_days": 540.0,
+          "horizon_days": 90.0,
+          "true_error": 0.315908,
+          "prediction_b0": 0.256595,
+          "prediction_b1": 0.282745,
+          "prediction_m1": 0.321175
+        },
+        {
+          "calibration_date": "2024-11-21 00:00:00",
+          "elapsed_days": 630.0,
+          "horizon_days": 180.0,
+          "true_error": 0.381955,
+          "prediction_b0": 0.256595,
+          "prediction_b1": 0.308894,
+          "prediction_m1": 0.379013
+        }
+      ]
+    },
+    {
+      "instrument_id": 52,
+      "serial_number": "PH-SYN-012",
+      "instrument_type": "ph_sensor",
+      "true_drift_rate_per_day": 0.00052272,
+      "b1_family_drift_rate_per_day": 0.00029055,
+      "m1_estimated_drift_rate_per_day": 0.00049754,
+      "predictions": [
+        {
+          "calibration_date": "2024-08-01 00:00:00",
+          "elapsed_days": 540.0,
+          "horizon_days": 90.0,
+          "true_error": 0.279741,
+          "prediction_b0": 0.245192,
+          "prediction_b1": 0.271342,
+          "prediction_m1": 0.289525
+        },
+        {
+          "calibration_date": "2024-10-30 00:00:00",
+          "elapsed_days": 630.0,
+          "horizon_days": 180.0,
+          "true_error": 0.315276,
+          "prediction_b0": 0.245192,
+          "prediction_b1": 0.297491,
+          "prediction_m1": 0.334304
+        }
+      ]
+    },
+    {
+      "instrument_id": 53,
+      "serial_number": "PH-SYN-013",
+      "instrument_type": "ph_sensor",
+      "true_drift_rate_per_day": -8.184e-05,
+      "b1_family_drift_rate_per_day": 0.00029055,
+      "m1_estimated_drift_rate_per_day": -2.406e-05,
+      "predictions": [
+        {
+          "calibration_date": "2024-07-19 00:00:00",
+          "elapsed_days": 540.0,
+          "horizon_days": 90.0,
+          "true_error": -0.002777,
+          "prediction_b0": 0.012885,
+          "prediction_b1": 0.039035,
+          "prediction_m1": 0.009262
+        },
+        {
+          "calibration_date": "2024-10-17 00:00:00",
+          "elapsed_days": 630.0,
+          "horizon_days": 180.0,
+          "true_error": -0.033002,
+          "prediction_b0": 0.012885,
+          "prediction_b1": 0.065184,
+          "prediction_m1": 0.007097
+        }
+      ]
+    },
+    {
+      "instrument_id": 54,
+      "serial_number": "PH-SYN-014",
+      "instrument_type": "ph_sensor",
+      "true_drift_rate_per_day": 8.192e-05,
+      "b1_family_drift_rate_per_day": 0.00029055,
+      "m1_estimated_drift_rate_per_day": 8.093e-05,
+      "predictions": [
+        {
+          "calibration_date": "2024-07-30 00:00:00",
+          "elapsed_days": 540.0,
+          "horizon_days": 90.0,
+          "true_error": 0.086907,
+          "prediction_b0": 0.044408,
+          "prediction_b1": 0.070558,
+          "prediction_m1": 0.063514
+        },
+        {
+          "calibration_date": "2024-10-28 00:00:00",
+          "elapsed_days": 630.0,
+          "horizon_days": 180.0,
+          "true_error": 0.08989,
+          "prediction_b0": 0.044408,
+          "prediction_b1": 0.096707,
+          "prediction_m1": 0.070798
+        }
+      ]
+    },
+    {
+      "instrument_id": 55,
+      "serial_number": "PH-SYN-015",
+      "instrument_type": "ph_sensor",
+      "true_drift_rate_per_day": 0.00020571,
+      "b1_family_drift_rate_per_day": 0.00029055,
+      "m1_estimated_drift_rate_per_day": 0.00015945,
+      "predictions": [
+        {
+          "calibration_date": "2024-08-03 00:00:00",
+          "elapsed_days": 540.0,
+          "horizon_days": 90.0,
+          "true_error": 0.144136,
+          "prediction_b0": 0.108951,
+          "prediction_b1": 0.135101,
+          "prediction_m1": 0.121274
+        },
+        {
+          "calibration_date": "2024-11-01 00:00:00",
+          "elapsed_days": 630.0,
+          "horizon_days": 180.0,
+          "true_error": 0.149877,
+          "prediction_b0": 0.108951,
+          "prediction_b1": 0.16125,
+          "prediction_m1": 0.135624
+        }
+      ]
+    },
+    {
+      "instrument_id": 56,
+      "serial_number": "PH-SYN-016",
+      "instrument_type": "ph_sensor",
+      "true_drift_rate_per_day": -4.76e-06,
+      "b1_family_drift_rate_per_day": 0.00029055,
+      "m1_estimated_drift_rate_per_day": 7.73e-06,
+      "predictions": [
+        {
+          "calibration_date": "2024-08-15 00:00:00",
+          "elapsed_days": 540.0,
+          "horizon_days": 90.0,
+          "true_error": 0.008401,
+          "prediction_b0": 0.027509,
+          "prediction_b1": 0.053659,
+          "prediction_m1": 0.025859
+        },
+        {
+          "calibration_date": "2024-11-13 00:00:00",
+          "elapsed_days": 630.0,
+          "horizon_days": 180.0,
+          "true_error": 0.009243,
+          "prediction_b0": 0.027509,
+          "prediction_b1": 0.079808,
+          "prediction_m1": 0.026555
+        }
+      ]
+    },
+    {
+      "instrument_id": 57,
+      "serial_number": "PH-SYN-017",
+      "instrument_type": "ph_sensor",
+      "true_drift_rate_per_day": 5.752e-05,
+      "b1_family_drift_rate_per_day": 0.00029055,
+      "m1_estimated_drift_rate_per_day": 3.962e-05,
+      "predictions": [
+        {
+          "calibration_date": "2024-06-25 00:00:00",
+          "elapsed_days": 540.0,
+          "horizon_days": 90.0,
+          "true_error": 0.019278,
+          "prediction_b0": 0.013726,
+          "prediction_b1": 0.039876,
+          "prediction_m1": 0.020034
+        },
+        {
+          "calibration_date": "2024-09-23 00:00:00",
+          "elapsed_days": 630.0,
+          "horizon_days": 180.0,
+          "true_error": 0.031639,
+          "prediction_b0": 0.013726,
+          "prediction_b1": 0.066025,
+          "prediction_m1": 0.0236
+        }
+      ]
+    },
+    {
+      "instrument_id": 58,
+      "serial_number": "PH-SYN-018",
+      "instrument_type": "ph_sensor",
+      "true_drift_rate_per_day": 0.00049208,
+      "b1_family_drift_rate_per_day": 0.00029055,
+      "m1_estimated_drift_rate_per_day": 0.00049977,
+      "predictions": [
+        {
+          "calibration_date": "2024-07-06 00:00:00",
+          "elapsed_days": 540.0,
+          "horizon_days": 90.0,
+          "true_error": 0.238476,
+          "prediction_b0": 0.189309,
+          "prediction_b1": 0.215459,
+          "prediction_m1": 0.2265
+        },
+        {
+          "calibration_date": "2024-10-04 00:00:00",
+          "elapsed_days": 630.0,
+          "horizon_days": 180.0,
+          "true_error": 0.280767,
+          "prediction_b0": 0.189309,
+          "prediction_b1": 0.241608,
+          "prediction_m1": 0.271479
+        }
+      ]
+    },
+    {
+      "instrument_id": 59,
+      "serial_number": "PH-SYN-019",
+      "instrument_type": "ph_sensor",
+      "true_drift_rate_per_day": 0.00043036,
+      "b1_family_drift_rate_per_day": 0.00029055,
+      "m1_estimated_drift_rate_per_day": 0.00043702,
+      "predictions": [
+        {
+          "calibration_date": "2024-08-07 00:00:00",
+          "elapsed_days": 540.0,
+          "horizon_days": 90.0,
+          "true_error": 0.203658,
+          "prediction_b0": 0.170225,
+          "prediction_b1": 0.196375,
+          "prediction_m1": 0.213663
+        },
+        {
+          "calibration_date": "2024-11-05 00:00:00",
+          "elapsed_days": 630.0,
+          "horizon_days": 180.0,
+          "true_error": 0.253041,
+          "prediction_b0": 0.170225,
+          "prediction_b1": 0.222524,
+          "prediction_m1": 0.252995
+        }
+      ]
+    },
+    {
+      "instrument_id": 60,
+      "serial_number": "PH-SYN-020",
+      "instrument_type": "ph_sensor",
+      "true_drift_rate_per_day": -8.816e-05,
+      "b1_family_drift_rate_per_day": 0.00029055,
+      "m1_estimated_drift_rate_per_day": -9.261e-05,
+      "predictions": [
+        {
+          "calibration_date": "2024-07-08 00:00:00",
+          "elapsed_days": 540.0,
+          "horizon_days": 90.0,
+          "true_error": -0.08231,
+          "prediction_b0": -0.058767,
+          "prediction_b1": -0.032617,
+          "prediction_m1": -0.075141
+        },
+        {
+          "calibration_date": "2024-10-06 00:00:00",
+          "elapsed_days": 630.0,
+          "horizon_days": 180.0,
+          "true_error": -0.112943,
+          "prediction_b0": -0.058767,
+          "prediction_b1": -0.006468,
+          "prediction_m1": -0.083476
+        }
+      ]
+    }
+  ]
+}
