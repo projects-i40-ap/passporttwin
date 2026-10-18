@@ -7,10 +7,18 @@ from app.models.document import Document
 from datetime import datetime
 from app.models.document import ExtractedField
 from app.models.instrument import InstrumentUnit
-from app.services.pdf_extractor import PDFCertificateExtractor, PDFDatasheetExtractor
+from app.services.pdf_extractor import (
+    PDFDatasheetExtractor,
+    HybridDocumentExtractor,
+)
 from app.models.calibration import CalibrationEvent, AuditLog
-from app.schemas.document import ExtractedFieldCorrection
+from app.schemas.document import (
+    ExtractedFieldCorrection,
+    DocumentQueryRequest,
+    DocumentQueryResponse,
+)
 from app.services.document_validation import validate_document_fields
+from app.services.rag_service import DocumentRAGService
 from app.services.aas_builder import AASBuilder
 
 router = APIRouter(prefix="/documents", tags=["documents"])
@@ -18,7 +26,9 @@ router = APIRouter(prefix="/documents", tags=["documents"])
 STORAGE_RAW_DIR = os.getenv("STORAGE_RAW_DIR", "/app/storage/raw")
 os.makedirs(STORAGE_RAW_DIR, exist_ok=True)
 
-from app.services.pdf_extractor import PDFCertificateExtractor, PDFDatasheetExtractor
+# Campo interno de staging que almacena el texto limpio para el bloque RAG
+# (RF-RAG-01). Nunca se expone en las respuestas de edición humana.
+FULL_TEXT_FIELD = "__full_text__"
 
 @router.post("/upload", status_code=status.HTTP_201_CREATED, summary="Ingesta de archivo RAW con hash SHA-256")
 async def upload_raw_document(
@@ -75,17 +85,59 @@ async def upload_raw_document(
         "storage_path": new_doc.file_path
     }
 
+@router.post(
+    "/query",
+    response_model=DocumentQueryResponse,
+    summary="Consulta RAG documental sobre PostgreSQL (RF-RAG-02 / RF-RAG-03)",
+)
+def query_documents(
+    payload: DocumentQueryRequest,
+    db: Session = Depends(get_db),
+):
+    # Bloque LEGO 2: retrieval 100% SQL + generación opcional vía `llama.cpp`.
+    # Si el servidor de inferencia está apagado, degrada a OFFLINE_RETRIEVAL_ONLY
+    # sin lanzar excepción (RF-RAG-03).
+    service = DocumentRAGService()
+
+    return service.query_documents(
+        db=db,
+        question=payload.question,
+        serial_number=payload.serial_number,
+        document_id=payload.document_id,
+        top_k=payload.top_k,
+        use_llm=payload.use_llm,
+    )
+
+
 @router.post("/{document_id}/process", summary="Ejecuta Extracción, Matching y Motor de Reglas")
-def process_document(document_id: int, db: Session = Depends(get_db)):
+def process_document(
+    document_id: int,
+    extractor: str = "auto",
+    db: Session = Depends(get_db),
+):
     doc = db.query(Document).filter(Document.id == document_id).first()
     if not doc:
         raise HTTPException(status_code=404, detail="Documento no encontrado.")
 
-    # 1. Enrutamiento del extractor según la naturaleza documental
+    # 1. Enrutamiento del extractor según la naturaleza documental.
+    #    El extractor híbrido (bloque LEGO 1) degrada al determinista ante
+    #    cualquier fallo de `llama.cpp` (RF-LEGO-02).
+    full_text = ""
+
     if doc.source_type == "PDF_DATASHEET":
+        # Un datasheet define especificaciones de tipo, no de activo individual.
         extracted = PDFDatasheetExtractor.extract_technical_data(doc.file_path)
+        extractor_used = "datasheet_deterministic"
     else:
-        extracted = PDFCertificateExtractor.extract_and_parse(doc.file_path)
+        hybrid_extractor = HybridDocumentExtractor()
+        parsed = hybrid_extractor.extract_and_parse(
+            doc.file_path,
+            extractor_mode=extractor,
+            include_full_text=True,
+        )
+        extractor_used = parsed.pop("extractor_used", "deterministic")
+        full_text = parsed.pop(FULL_TEXT_FIELD, "")
+        extracted = parsed
 
     if not extracted:
         doc.processing_status = "FAILED_EXTRACTION"
@@ -105,6 +157,20 @@ def process_document(document_id: int, db: Session = Depends(get_db)):
             validation_status="STAGING"
         )
         db.add(field_entry)
+
+    # Texto limpio indexado para el bloque RAG (RF-RAG-01). Se conserva en
+    # staging pero queda excluido de la vista de edición humana.
+    if full_text:
+        db.add(
+            ExtractedField(
+                document_id=doc.id,
+                field_name=FULL_TEXT_FIELD,
+                raw_value=full_text,
+                normalized_value=full_text,
+                confidence="1.0",
+                validation_status="STAGING",
+            )
+        )
 
     # 3. Reglas y Matching según el tipo de documento
     if doc.source_type == "PDF_DATASHEET":
@@ -130,17 +196,33 @@ def process_document(document_id: int, db: Session = Depends(get_db)):
         "processing_status": doc.processing_status,
         "matched_instrument_id": doc.instrument_unit_id,
         "extracted_fields": extracted,
-        "rules_failed": rules_failed
+        "rules_failed": rules_failed,
+        "extractor_used": extractor_used
     }
-
-from app.models.calibration import CalibrationEvent, AuditLog
 
 @router.post("/{document_id}/accept", summary="Materializa campos aceptados en el Modelo Canónico y AAS")
 def accept_document_to_canonical(document_id: int, db: Session = Depends(get_db)):
     doc = db.query(Document).filter(Document.id == document_id).first()
     if not doc:
         raise HTTPException(status_code=404, detail="Documento no encontrado.")
-    
+
+    # R-DUP-ACCEPT (RF-RULE-04): idempotencia de la materialización.
+    # Se recorre la auditoría de la sesión (compatible con SQLAlchemy y con los
+    # `FakeSession` de los tests) para detectar una ingesta previa del documento.
+    for audit_entry in db.query(AuditLog).filter(
+        AuditLog.action == "CALIBRATION_INGESTED"
+    ).all():
+        details = getattr(audit_entry, "details", None) or {}
+
+        if (
+            getattr(audit_entry, "action", None) == "CALIBRATION_INGESTED"
+            and details.get("document_id") == doc.id
+        ):
+            raise HTTPException(
+                status_code=409,
+                detail="R-DUP-ACCEPT: El documento ya fue materializado previamente en el modelo canónico."
+            )
+
     if doc.processing_status != "ACCEPTED":
         raise HTTPException(
             status_code=400, 
@@ -267,6 +349,9 @@ def get_extracted_fields(
         ExtractedField.document_id == document_id
     ).order_by(ExtractedField.id).all()
 
+    # El texto limpio para RAG (`__full_text__`) nunca se expone en la edición.
+    visible_fields = [field for field in fields if field.field_name != FULL_TEXT_FIELD]
+
     return {
         "document_id": doc.id,
         "processing_status": doc.processing_status,
@@ -279,7 +364,7 @@ def get_extracted_fields(
                 "confidence": field.confidence,
                 "validation_status": field.validation_status
             }
-            for field in fields
+            for field in visible_fields
         ]
     }
 
@@ -334,6 +419,9 @@ def revalidate_document(
     fields = db.query(ExtractedField).filter(
         ExtractedField.document_id == document_id
     ).order_by(ExtractedField.id).all()
+
+    # El texto limpio para RAG no participa en la validación metrológica.
+    fields = [field for field in fields if field.field_name != FULL_TEXT_FIELD]
 
     if not fields:
         raise HTTPException(
