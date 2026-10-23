@@ -1,0 +1,274 @@
+{
+  "experiment": "EXP-03",
+  "description": "Evaluación cuantitativa del motor de reglas documentales frente a ground truth",
+  "validation_scope": "Validación experimental sobre certificados sintéticos controlados. R-TOL-01 queda fuera de la clasificación documental porque se evalúa posteriormente durante /accept.",
+  "dataset_evaluated": "generators/test_certificates_batch/ground_truth.json",
+  "ground_truth_definition": "Un documento se considera anomalía documental cuando expected_status == REVIEW_REQUIRED.",
+  "confusion_matrix": {
+    "true_positives": 8,
+    "true_negatives": 12,
+    "false_positives": 0,
+    "false_negatives": 0
+  },
+  "metrics": {
+    "accuracy": 1.0,
+    "precision": 1.0,
+    "recall": 1.0,
+    "f1_score": 1.0,
+    "rule_exact_match_accuracy": 1.0
+  },
+  "details": [
+    {
+      "certificate_id": 1,
+      "filename": "cert_001.pdf",
+      "error_injection": "NONE",
+      "ground_truth_status": "ACCEPTED",
+      "actual_status": "ACCEPTED",
+      "classification": "TN (Documento documentalmente conforme)",
+      "expected_rules": [],
+      "triggered_rules": [],
+      "rules_exact_match": true
+    },
+    {
+      "certificate_id": 2,
+      "filename": "cert_002.pdf",
+      "error_injection": "FUTURE_DATE",
+      "ground_truth_status": "REVIEW_REQUIRED",
+      "actual_status": "REVIEW_REQUIRED",
+      "classification": "TP (Anomalía documental detectada correctamente)",
+      "expected_rules": [
+        "R-DATE-01"
+      ],
+      "triggered_rules": [
+        "R-DATE-01"
+      ],
+      "rules_exact_match": true
+    },
+    {
+      "certificate_id": 3,
+      "filename": "cert_003.pdf",
+      "error_injection": "NONE",
+      "ground_truth_status": "ACCEPTED",
+      "actual_status": "ACCEPTED",
+      "classification": "TN (Documento documentalmente conforme)",
+      "expected_rules": [],
+      "triggered_rules": [],
+      "rules_exact_match": true
+    },
+    {
+      "certificate_id": 4,
+      "filename": "cert_004.pdf",
+      "error_injection": "SERIAL_MISMATCH",
+      "ground_truth_status": "REVIEW_REQUIRED",
+      "actual_status": "REVIEW_REQUIRED",
+      "classification": "TP (Anomalía documental detectada correctamente)",
+      "expected_rules": [
+        "R-ID-01"
+      ],
+      "triggered_rules": [
+        "R-ID-01"
+      ],
+      "rules_exact_match": true
+    },
+    {
+      "certificate_id": 5,
+      "filename": "cert_005.pdf",
+      "error_injection": "NONE",
+      "ground_truth_status": "ACCEPTED",
+      "actual_status": "ACCEPTED",
+      "classification": "TN (Documento documentalmente conforme)",
+      "expected_rules": [],
+      "triggered_rules": [],
+      "rules_exact_match": true
+    },
+    {
+      "certificate_id": 6,
+      "filename": "cert_006.pdf",
+      "error_injection": "INVALID_DUE_DATE",
+      "ground_truth_status": "REVIEW_REQUIRED",
+      "actual_status": "REVIEW_REQUIRED",
+      "classification": "TP (Anomalía documental detectada correctamente)",
+      "expected_rules": [
+        "R-DATE-02"
+      ],
+      "triggered_rules": [
+        "R-DATE-02"
+      ],
+      "rules_exact_match": true
+    },
+    {
+      "certificate_id": 7,
+      "filename": "cert_007.pdf",
+      "error_injection": "SERIAL_MISMATCH",
+      "ground_truth_status": "REVIEW_REQUIRED",
+      "actual_status": "REVIEW_REQUIRED",
+      "classification": "TP (Anomalía documental detectada correctamente)",
+      "expected_rules": [
+        "R-ID-01"
+      ],
+      "triggered_rules": [
+        "R-ID-01"
+      ],
+      "rules_exact_match": true
+    },
+    {
+      "certificate_id": 8,
+      "filename": "cert_008.pdf",
+      "error_injection": "NONE",
+      "ground_truth_status": "ACCEPTED",
+      "actual_status": "ACCEPTED",
+      "classification": "TN (Documento documentalmente conforme)",
+      "expected_rules": [],
+      "triggered_rules": [],
+      "rules_exact_match": true
+    },
+    {
+      "certificate_id": 9,
+      "filename": "cert_009.pdf",
+      "error_injection": "INVALID_DUE_DATE",
+      "ground_truth_status": "REVIEW_REQUIRED",
+      "actual_status": "REVIEW_REQUIRED",
+      "classification": "TP (Anomalía documental detectada correctamente)",
+      "expected_rules": [
+        "R-DATE-02"
+      ],
+      "triggered_rules": [
+        "R-DATE-02"
+      ],
+      "rules_exact_match": true
+    },
+    {
+      "certificate_id": 10,
+      "filename": "cert_010.pdf",
+      "error_injection": "FUTURE_DATE",
+      "ground_truth_status": "REVIEW_REQUIRED",
+      "actual_status": "REVIEW_REQUIRED",
+      "classification": "TP (Anomalía documental detectada correctamente)",
+      "expected_rules": [
+        "R-DATE-01"
+      ],
+      "triggered_rules": [
+        "R-DATE-01"
+      ],
+      "rules_exact_match": true
+    },
+    {
+      "certificate_id": 11,
+      "filename": "cert_011.pdf",
+      "error_injection": "NONE",
+      "ground_truth_status": "ACCEPTED",
+      "actual_status": "ACCEPTED",
+      "classification": "TN (Documento documentalmente conforme)",
+      "expected_rules": [],
+      "triggered_rules": [],
+      "rules_exact_match": true
+    },
+    {
+      "certificate_id": 12,
+      "filename": "cert_012.pdf",
+      "error_injection": "INVALID_DUE_DATE",
+      "ground_truth_status": "REVIEW_REQUIRED",
+      "actual_status": "REVIEW_REQUIRED",
+      "classification": "TP (Anomalía documental detectada correctamente)",
+      "expected_rules": [
+        "R-DATE-02"
+      ],
+      "triggered_rules": [
+        "R-DATE-02"
+      ],
+      "rules_exact_match": true
+    },
+    {
+      "certificate_id": 13,
+      "filename": "cert_013.pdf",
+      "error_injection": "NONE",
+      "ground_truth_status": "ACCEPTED",
+      "actual_status": "ACCEPTED",
+      "classification": "TN (Documento documentalmente conforme)",
+      "expected_rules": [],
+      "triggered_rules": [],
+      "rules_exact_match": true
+    },
+    {
+      "certificate_id": 14,
+      "filename": "cert_014.pdf",
+      "error_injection": "OUT_OF_TOLERANCE",
+      "ground_truth_status": "ACCEPTED",
+      "actual_status": "ACCEPTED",
+      "classification": "TN (Documento documentalmente conforme)",
+      "expected_rules": [],
+      "triggered_rules": [],
+      "rules_exact_match": true
+    },
+    {
+      "certificate_id": 15,
+      "filename": "cert_015.pdf",
+      "error_injection": "NONE",
+      "ground_truth_status": "ACCEPTED",
+      "actual_status": "ACCEPTED",
+      "classification": "TN (Documento documentalmente conforme)",
+      "expected_rules": [],
+      "triggered_rules": [],
+      "rules_exact_match": true
+    },
+    {
+      "certificate_id": 16,
+      "filename": "cert_016.pdf",
+      "error_injection": "NONE",
+      "ground_truth_status": "ACCEPTED",
+      "actual_status": "ACCEPTED",
+      "classification": "TN (Documento documentalmente conforme)",
+      "expected_rules": [],
+      "triggered_rules": [],
+      "rules_exact_match": true
+    },
+    {
+      "certificate_id": 17,
+      "filename": "cert_017.pdf",
+      "error_injection": "OUT_OF_TOLERANCE",
+      "ground_truth_status": "ACCEPTED",
+      "actual_status": "ACCEPTED",
+      "classification": "TN (Documento documentalmente conforme)",
+      "expected_rules": [],
+      "triggered_rules": [],
+      "rules_exact_match": true
+    },
+    {
+      "certificate_id": 18,
+      "filename": "cert_018.pdf",
+      "error_injection": "NONE",
+      "ground_truth_status": "ACCEPTED",
+      "actual_status": "ACCEPTED",
+      "classification": "TN (Documento documentalmente conforme)",
+      "expected_rules": [],
+      "triggered_rules": [],
+      "rules_exact_match": true
+    },
+    {
+      "certificate_id": 19,
+      "filename": "cert_019.pdf",
+      "error_injection": "NONE",
+      "ground_truth_status": "ACCEPTED",
+      "actual_status": "ACCEPTED",
+      "classification": "TN (Documento documentalmente conforme)",
+      "expected_rules": [],
+      "triggered_rules": [],
+      "rules_exact_match": true
+    },
+    {
+      "certificate_id": 20,
+      "filename": "cert_020.pdf",
+      "error_injection": "SERIAL_MISMATCH",
+      "ground_truth_status": "REVIEW_REQUIRED",
+      "actual_status": "REVIEW_REQUIRED",
+      "classification": "TP (Anomalía documental detectada correctamente)",
+      "expected_rules": [
+        "R-ID-01"
+      ],
+      "triggered_rules": [
+        "R-ID-01"
+      ],
+      "rules_exact_match": true
+    }
+  ]
+}
