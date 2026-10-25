@@ -8,7 +8,12 @@ from app.schemas.instrument import (
     InstrumentTypeResponse,
     InstrumentUnitCreate,
     InstrumentUnitResponse)
+from app.schemas.audit import (
+    AuditLogEntryResponse,
+    InstrumentTraceabilityResponse,
+)
 from app.services.aas_builder import AASBuilder
+from app.services.audit_service import AuditService
 
 ##### LIBRERIAS qr code AND Metabase
 import io
@@ -18,7 +23,7 @@ from fastapi.responses import RedirectResponse
 from uuid import UUID
 
 ##### Librerias calibration and predictions
-from app.models.calibration import CalibrationEvent
+from app.models.calibration import AuditLog, CalibrationEvent
 from app.services.analytics import DriftAnalyticsService
 
 #### Ingestion masiva de sensores
@@ -27,8 +32,22 @@ import os
 import hashlib
 import pandas as pd
 from datetime import datetime
+from decimal import Decimal, InvalidOperation
 from fastapi import UploadFile, File
 from app.models.document import Document
+from app.models.maintenance import Incident, MaintenanceEvent
+from app.schemas.maintenance import (
+    ERPSyncRecordResult,
+    ERPSyncRequest,
+    ERPSyncResponse,
+    IncidentCreate,
+    IncidentResponse,
+    MaintenanceEventResponse,
+)
+
+import logging
+
+logger = logging.getLogger("passporttwin.instruments")
 
 STORAGE_RAW_DIR = os.getenv("STORAGE_RAW_DIR", "/app/storage/raw")
 os.makedirs(STORAGE_RAW_DIR, exist_ok=True)
@@ -73,6 +92,22 @@ def register_instrument(payload: InstrumentUnitCreate, db: Session = Depends(get
     synced = nameplate_synced and operational_synced
 
     new_instrument.aas_sync_status = "SYNCED" if synced else "PENDING"
+
+    # 5. Trazabilidad del alta del activo (RF-AUDIT-04).
+    AuditService.log_event(
+        db=db,
+        entity_name="instrument_unit",
+        entity_id=new_instrument.id,
+        action="INSTRUMENT_CREATED",
+        source="api.instruments.create",
+        after={
+            "serial_number": new_instrument.serial_number,
+            "lifecycle_state": new_instrument.lifecycle_state,
+            "aas_sync_status": new_instrument.aas_sync_status,
+        },
+        details={"instrument_unit_id": new_instrument.id},
+    )
+
     db.commit()
     db.refresh(new_instrument)
 
@@ -88,6 +123,118 @@ def get_instrument_by_id(id: int, db: Session = Depends(get_db)):
     if not instrument:
         raise HTTPException(status_code=404, detail="Instrumento no encontrado.")
     return instrument
+
+def _normalize_audit_timestamp(value):
+    """Normaliza `created_at` para ordenar de forma segura (naive/aware)."""
+    if value is None:
+        return datetime.min
+    if getattr(value, "tzinfo", None) is not None:
+        return value.replace(tzinfo=None)
+    return value
+
+def _sort_audit_entries_desc(entries):
+    """Ordena los eventos de auditoría del más reciente al más antiguo."""
+    return sorted(
+        entries,
+        key=lambda entry: (
+            _normalize_audit_timestamp(getattr(entry, "created_at", None)),
+            getattr(entry, "id", 0) or 0,
+        ),
+        reverse=True,
+    )
+
+def _serialize_audit_entry(entry):
+    """Adapta una fila de `audit_log` (ORM o fake) al schema de respuesta."""
+    details = getattr(entry, "details", None)
+
+    return AuditLogEntryResponse(
+        id=getattr(entry, "id", 0),
+        entity_name=getattr(entry, "entity_name", ""),
+        entity_id=getattr(entry, "entity_id", 0),
+        action=getattr(entry, "action", ""),
+        details=dict(details) if isinstance(details, dict) else {},
+        created_at=getattr(entry, "created_at", None),
+    )
+
+@router.get(
+    "/{id}/audit",
+    response_model=InstrumentTraceabilityResponse,
+    summary="Trazabilidad de auditoría del instrumento y sus documentos",
+)
+def get_instrument_audit(id: int, db: Session = Depends(get_db)):
+    """Árbol de trazabilidad del activo (RF-AUDIT-06).
+
+    Agrega los eventos del propio instrumento, de sus documentos vinculados y
+    de sus calibraciones canónicas, ordenados descendentemente por `created_at`.
+    """
+    instrument = db.query(InstrumentUnit).filter(InstrumentUnit.id == id).first()
+    if not instrument:
+        raise HTTPException(status_code=404, detail="Instrumento no encontrado.")
+
+    # Documentos y calibraciones directamente asociados al activo. El filtro
+    # en Python mantiene el comportamiento con los `FakeSession` de los tests.
+    documents = [
+        document
+        for document in db.query(Document).filter(
+            Document.instrument_unit_id == id
+        ).all()
+        if getattr(document, "instrument_unit_id", None) == id
+    ]
+    document_ids = {document.id for document in documents}
+
+    calibrations = [
+        calibration
+        for calibration in db.query(CalibrationEvent).filter(
+            CalibrationEvent.instrument_unit_id == id
+        ).all()
+        if getattr(calibration, "instrument_unit_id", None) == id
+    ]
+    calibration_ids = {calibration.id for calibration in calibrations}
+
+    audit_entries = (
+        db.query(AuditLog)
+        .filter(
+            AuditLog.entity_name.in_(
+                ("instrument_unit", "document", "calibration_event")
+            )
+        )
+        .order_by(AuditLog.created_at.desc(), AuditLog.id.desc())
+        .all()
+    )
+
+    events = []
+
+    for entry in _sort_audit_entries_desc(audit_entries):
+        entity_name = getattr(entry, "entity_name", None)
+        entity_id = getattr(entry, "entity_id", None)
+        details = getattr(entry, "details", None)
+        details = details if isinstance(details, dict) else {}
+
+        belongs_to_instrument = (
+            (entity_name == "instrument_unit" and entity_id == id)
+            or (
+                entity_name == "document"
+                and (
+                    entity_id in document_ids
+                    or details.get("document_id") in document_ids
+                )
+            )
+            or (
+                entity_name == "calibration_event"
+                and entity_id in calibration_ids
+            )
+            or details.get("instrument_unit_id") == id
+        )
+
+        if belongs_to_instrument:
+            events.append(_serialize_audit_entry(entry))
+
+    return InstrumentTraceabilityResponse(
+        instrument_id=instrument.id,
+        serial_number=getattr(instrument, "serial_number", None),
+        total_events=len(events),
+        events=events,
+    )
 
 @router.post("/{id}/sync", response_model=InstrumentUnitResponse)
 def force_sync_aas(id: int, db: Session = Depends(get_db)):
@@ -144,7 +291,21 @@ def force_sync_aas(id: int, db: Session = Depends(get_db)):
         and operational_synced
     )
 
+    previous_sync_status = instrument.aas_sync_status
     instrument.aas_sync_status = "SYNCED" if synced else "ERROR"
+
+    # Trazabilidad de la sincronización AAS (RF-AUDIT-05).
+    AuditService.log_event(
+        db=db,
+        entity_name="instrument_unit",
+        entity_id=instrument.id,
+        action="AAS_SYNCED",
+        source="api.instruments.sync",
+        before={"aas_sync_status": previous_sync_status},
+        after={"aas_sync_status": instrument.aas_sync_status},
+        details={"instrument_unit_id": instrument.id},
+    )
+
     db.commit()
     db.refresh(instrument)
     return instrument
@@ -393,3 +554,459 @@ async def upload_instruments_csv(
         "created_instruments": created_instruments,
         "skipped_records": skipped_records
     }
+
+######## Endpoints de Ingesta de Mantenimiento (CSV) y consulta de historial
+MAINTENANCE_REQUIRED_COLUMNS = {"serial_number", "event_date", "description"}
+
+
+def _parse_maintenance_date(value):
+    """Normaliza `event_date` del CSV (`YYYY-MM-DD` o ISO 8601) a `date`.
+
+    Devuelve `None` cuando la celda está vacía o no representa una fecha válida,
+    de modo que la fila se reporte en `skipped_records` sin romper el lote.
+    """
+    if value is None:
+        return None
+
+    if not isinstance(value, str) and pd.isna(value):
+        return None
+
+    try:
+        parsed = pd.to_datetime(str(value).strip(), errors="coerce")
+    except (TypeError, ValueError):
+        return None
+
+    if parsed is None or pd.isna(parsed):
+        return None
+
+    return parsed.date()
+
+
+def _parse_maintenance_cost(value):
+    """Convierte `cost_estimate` a `Decimal`, devolviendo `None` si no es válido."""
+    if value is None:
+        return None
+
+    if not isinstance(value, str) and pd.isna(value):
+        return None
+
+    text = str(value).strip().replace(",", ".")
+    if not text:
+        return None
+
+    try:
+        return Decimal(text)
+    except (InvalidOperation, ValueError):
+        return None
+
+
+@router.post(
+    "/maintenance/upload-csv",
+    status_code=status.HTTP_201_CREATED,
+    summary="Ingesta de órdenes de mantenimiento vía CSV (R-DUP-01)",
+)
+async def upload_maintenance_csv(
+    file: UploadFile = File(...),
+    db: Session = Depends(get_db)
+):
+    """Ingesta de órdenes de trabajo de mantenimiento (RF-MAINT-02).
+
+    Pipeline:
+    1. RAW: calcula el SHA-256 de los bytes crudos y rechaza duplicados
+       (HTTP 409, R-DUP-01) antes de persistir cualquier efecto.
+    2. RAW STORAGE: guarda el fichero inmutable en
+       `/app/storage/raw/{sha256}.csv` y crea el `Document` con
+       `source_type="MAINTENANCE_CSV"`.
+    3. NORMALIZE & MATCH: parsea con pandas y empareja cada fila con
+       `instrument_unit` por `serial_number` exacto. Las filas sin serial
+       canónico se reportan en `skipped_records`.
+    4. CANONICAL COMMIT: inserta en `maintenance_event` y registra
+       `MAINTENANCE_LOGGED` en `audit_log` por cada evento persistido.
+    """
+    if not file.filename or not file.filename.lower().endswith(".csv"):
+        raise HTTPException(
+            status_code=400,
+            detail="El formato del archivo debe ser estrictamente .csv"
+        )
+
+    contents = await file.read()
+    if not contents:
+        raise HTTPException(
+            status_code=400,
+            detail="El archivo CSV proporcionado está vacío."
+        )
+
+    # 1. Regla de Integridad RAW (R-DUP-01): unicidad del SHA-256.
+    file_hash = hashlib.sha256(contents).hexdigest()
+    existing_document = (
+        db.query(Document)
+        .filter(Document.sha256_hash == file_hash)
+        .first()
+    )
+    if existing_document:
+        raise HTTPException(
+            status_code=409,
+            detail=(
+                "El fichero ya fue ingerido (R-DUP-01): ya existe el "
+                f"documento {existing_document.id} con SHA-256 {file_hash}."
+            )
+        )
+
+    # 2. Persistencia RAW inmutable + registro de procedencia.
+    storage_path = os.path.join(STORAGE_RAW_DIR, f"{file_hash}.csv")
+    with open(storage_path, "wb") as f:
+        f.write(contents)
+
+    raw_doc = Document(
+        original_filename=file.filename,
+        file_path=storage_path,
+        sha256_hash=file_hash,
+        source_type="MAINTENANCE_CSV",
+        processing_status="ACCEPTED"
+    )
+    db.add(raw_doc)
+    db.commit()
+    db.refresh(raw_doc)
+
+    # 3. Parsing con pandas.
+    try:
+        df = pd.read_csv(io.BytesIO(contents))
+    except Exception as e:
+        raise HTTPException(
+            status_code=422,
+            detail=f"Error al estructurar el CSV de mantenimiento: {str(e)}"
+        )
+
+    if not MAINTENANCE_REQUIRED_COLUMNS.issubset(df.columns):
+        missing = MAINTENANCE_REQUIRED_COLUMNS - set(df.columns)
+        raise HTTPException(
+            status_code=400,
+            detail=(
+                "Faltan columnas requeridas en la cabecera del CSV: "
+                f"{sorted(missing)}"
+            )
+        )
+
+    logged_events = []
+    skipped_records = []
+
+    # 4. Procesamiento fila a fila con matching exacto por serial.
+    for idx, row in df.iterrows():
+        row_number = idx + 2  # +2: cabecera y base 0 de pandas.
+
+        serial = row["serial_number"]
+        serial = "" if serial is None or pd.isna(serial) else str(serial).strip()
+
+        if not serial:
+            skipped_records.append({
+                "row": row_number,
+                "serial_number": None,
+                "reason": "La fila no informa de serial_number."
+            })
+            continue
+
+        instrument = (
+            db.query(InstrumentUnit)
+            .filter(InstrumentUnit.serial_number == serial)
+            .first()
+        )
+        if not instrument:
+            skipped_records.append({
+                "row": row_number,
+                "serial_number": serial,
+                "reason": "El serial_number no existe en instrument_unit."
+            })
+            continue
+
+        description = row["description"]
+        description = (
+            "" if description is None or pd.isna(description)
+            else str(description).strip()
+        )
+        if not description:
+            skipped_records.append({
+                "row": row_number,
+                "serial_number": serial,
+                "reason": "La fila no informa de description."
+            })
+            continue
+
+        event_date = _parse_maintenance_date(row["event_date"])
+        if event_date is None:
+            skipped_records.append({
+                "row": row_number,
+                "serial_number": serial,
+                "reason": "event_date vacía o con formato inválido."
+            })
+            continue
+
+        cost_estimate = None
+        if "cost_estimate" in df.columns:
+            cost_estimate = _parse_maintenance_cost(row["cost_estimate"])
+
+        event = MaintenanceEvent(
+            instrument_unit_id=instrument.id,
+            event_date=event_date,
+            description=description,
+            cost_estimate=cost_estimate,
+        )
+        db.add(event)
+        db.commit()
+        db.refresh(event)
+
+        # 5. Trazabilidad inmutable de la intervención.
+        AuditService.log_event(
+            db=db,
+            entity_name="maintenance_event",
+            entity_id=event.id,
+            action="MAINTENANCE_LOGGED",
+            source="api.instruments.maintenance.upload_csv",
+            after={
+                "instrument_unit_id": instrument.id,
+                "event_date": event_date.isoformat(),
+                "description": description,
+                "cost_estimate": (
+                    str(cost_estimate) if cost_estimate is not None else None
+                ),
+            },
+            details={
+                "instrument_unit_id": instrument.id,
+                "document_id": raw_doc.id,
+                "sha256": file_hash,
+                "row": row_number,
+            },
+        )
+        db.commit()
+
+        logged_events.append({
+            "id": event.id,
+            "instrument_unit_id": instrument.id,
+            "serial_number": serial,
+            "event_date": event_date.isoformat(),
+            "description": description,
+            "cost_estimate": (
+                str(cost_estimate) if cost_estimate is not None else None
+            ),
+        })
+
+    return {
+        "raw_document_id": raw_doc.id,
+        "sha256": file_hash,
+        "total_rows_evaluated": len(df),
+        "total_logged": len(logged_events),
+        "logged_events": logged_events,
+        "skipped_records": skipped_records,
+    }
+
+
+@router.get(
+    "/{id}/maintenance",
+    response_model=List[MaintenanceEventResponse],
+    summary="Historial cronológico descendente de mantenimiento",
+)
+def get_instrument_maintenance(id: int, db: Session = Depends(get_db)):
+    """Listado de eventos de mantenimiento del instrumento (RF-MAINT-04).
+
+    Devuelve las intervenciones ordenadas de la más reciente a la más antigua
+    (`event_date` descendente, desempate por `id` descendente).
+    """
+    instrument = db.query(InstrumentUnit).filter(InstrumentUnit.id == id).first()
+    if not instrument:
+        raise HTTPException(status_code=404, detail="Instrumento no encontrado.")
+
+    return (
+        db.query(MaintenanceEvent)
+        .filter(MaintenanceEvent.instrument_unit_id == id)
+        .order_by(MaintenanceEvent.event_date.desc(), MaintenanceEvent.id.desc())
+        .all()
+    )
+
+
+######## Adaptador HTTP del ERP simulado e incidencias operativas (RF-MAINT-03/04/05)
+ERP_SYNC_FIELDS = ("location", "criticality", "lifecycle_state")
+
+
+@router.post(
+    "/erp-sync",
+    response_model=ERPSyncResponse,
+    summary="Sincronización del estado operacional desde el ERP simulado",
+)
+def sync_instruments_from_erp(
+    payload: ERPSyncRequest,
+    db: Session = Depends(get_db),
+):
+    """Sincroniza lotes de activos provenientes del ERP simulado (RF-MAINT-03).
+
+    Para cada registro:
+    1. Localiza el activo por `serial_number` exacto.
+    2. Captura el estado previo (`before`) y aplica los nuevos valores (`after`).
+    3. Confirma la transacción canónica en PostgreSQL.
+    4. Registra `ERP_SYNCED` en `audit_log` con la evidencia del cambio.
+    5. Proyecta de forma resiliente el nuevo estado hacia `OperationalState`
+       en Eclipse BaSyx (RF-MAINT-05): si la proyección falla, el activo queda
+       con `aas_sync_status="PENDING"` y la respuesta sigue siendo HTTP 200.
+    """
+    results: List[ERPSyncRecordResult] = []
+    updated = 0
+    skipped = 0
+
+    for record in payload.records:
+        serial = (record.serial_number or "").strip()
+        instrument = (
+            db.query(InstrumentUnit)
+            .filter(InstrumentUnit.serial_number == serial)
+            .first()
+        )
+
+        if not instrument:
+            skipped += 1
+            results.append(
+                ERPSyncRecordResult(
+                    serial_number=serial,
+                    status="NOT_FOUND",
+                )
+            )
+            continue
+
+        # 1. Estado previo y aplicación de los valores informados por el ERP.
+        before = {
+            field: getattr(instrument, field, None)
+            for field in ERP_SYNC_FIELDS
+        }
+        for field in ERP_SYNC_FIELDS:
+            new_value = getattr(record, field, None)
+            if new_value is not None:
+                setattr(instrument, field, new_value)
+
+        after = {
+            field: getattr(instrument, field, None)
+            for field in ERP_SYNC_FIELDS
+        }
+        previous_sync_status = getattr(instrument, "aas_sync_status", None)
+
+        # 2. Frontera transaccional: PostgreSQL es la fuente de verdad y se
+        #    confirma antes de intentar la proyección interoperable.
+        db.commit()
+
+        # 3. Proyección resiliente hacia Eclipse BaSyx (patrón LEGO).
+        try:
+            projected = AASBuilder.sync_operational_state(instrument)
+            sync_status = "SYNCED" if projected else "PENDING"
+        except Exception:
+            logger.exception(
+                "Fallo inesperado proyectando OperationalState del activo %s",
+                serial,
+            )
+            sync_status = "ERROR"
+
+        instrument.aas_sync_status = sync_status
+
+        # 4. Trazabilidad inmutable de la actualización externa (ERP_SYNCED).
+        AuditService.log_event(
+            db=db,
+            entity_name="instrument_unit",
+            entity_id=instrument.id,
+            action="ERP_SYNCED",
+            source="api.instruments.erp_sync",
+            before={**before, "aas_sync_status": previous_sync_status},
+            after={**after, "aas_sync_status": sync_status},
+            details={
+                "instrument_unit_id": instrument.id,
+                "serial_number": serial,
+            },
+        )
+        db.commit()
+        db.refresh(instrument)
+
+        updated += 1
+        results.append(
+            ERPSyncRecordResult(
+                serial_number=serial,
+                status="UPDATED",
+                before=before,
+                after=after,
+                aas_sync_status=sync_status,
+            )
+        )
+
+    return ERPSyncResponse(
+        processed=len(payload.records),
+        updated=updated,
+        skipped=skipped,
+        results=results,
+    )
+
+
+@router.post(
+    "/{id}/incidents",
+    response_model=IncidentResponse,
+    status_code=status.HTTP_201_CREATED,
+    summary="Alta directa de una incidencia operativa",
+)
+def create_instrument_incident(
+    id: int,
+    payload: IncidentCreate,
+    db: Session = Depends(get_db),
+):
+    """Registra una incidencia operativa con auditoría inmutable (RF-MAINT-04)."""
+    instrument = db.query(InstrumentUnit).filter(InstrumentUnit.id == id).first()
+    if not instrument:
+        raise HTTPException(status_code=404, detail="Instrumento no encontrado.")
+
+    incident = Incident(
+        instrument_unit_id=instrument.id,
+        incident_date=payload.incident_date,
+        description=payload.description,
+        severity=str(payload.severity or "LOW").strip().upper(),
+        resolved_at=payload.resolved_at,
+    )
+    db.add(incident)
+    db.commit()
+    db.refresh(incident)
+
+    AuditService.log_event(
+        db=db,
+        entity_name="incident",
+        entity_id=incident.id,
+        action="INCIDENT_LOGGED",
+        source="api.instruments.incidents.create",
+        after={
+            "instrument_unit_id": instrument.id,
+            "incident_date": payload.incident_date.isoformat(),
+            "description": payload.description,
+            "severity": incident.severity,
+            "resolved_at": (
+                payload.resolved_at.isoformat()
+                if payload.resolved_at is not None
+                else None
+            ),
+        },
+        details={"instrument_unit_id": instrument.id},
+    )
+    db.commit()
+    db.refresh(incident)
+
+    return incident
+
+
+@router.get(
+    "/{id}/incidents",
+    response_model=List[IncidentResponse],
+    summary="Historial cronológico descendente de incidencias",
+)
+def get_instrument_incidents(id: int, db: Session = Depends(get_db)):
+    """Listado de incidencias del instrumento (RF-MAINT-04).
+
+    Devuelve las incidencias de la más reciente a la más antigua
+    (`incident_date` descendente, desempate por `id` descendente).
+    """
+    instrument = db.query(InstrumentUnit).filter(InstrumentUnit.id == id).first()
+    if not instrument:
+        raise HTTPException(status_code=404, detail="Instrumento no encontrado.")
+
+    return (
+        db.query(Incident)
+        .filter(Incident.instrument_unit_id == id)
+        .order_by(Incident.incident_date.desc(), Incident.id.desc())
+        .all()
+    )

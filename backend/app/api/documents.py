@@ -12,6 +12,10 @@ from app.services.pdf_extractor import (
     HybridDocumentExtractor,
 )
 from app.models.calibration import CalibrationEvent, AuditLog
+from app.schemas.audit import (
+    AuditLogEntryResponse,
+    DocumentTraceabilityResponse,
+)
 from app.schemas.document import (
     ExtractedFieldCorrection,
     DocumentQueryRequest,
@@ -20,6 +24,7 @@ from app.schemas.document import (
 from app.services.document_validation import validate_document_fields
 from app.services.rag_service import DocumentRAGService
 from app.services.aas_builder import AASBuilder
+from app.services.audit_service import AuditService
 
 router = APIRouter(prefix="/documents", tags=["documents"])
 
@@ -29,6 +34,38 @@ os.makedirs(STORAGE_RAW_DIR, exist_ok=True)
 # Campo interno de staging que almacena el texto limpio para el bloque RAG
 # (RF-RAG-01). Nunca se expone en las respuestas de edición humana.
 FULL_TEXT_FIELD = "__full_text__"
+
+def _normalize_audit_timestamp(value):
+    """Normaliza `created_at` para ordenar de forma segura (naive/aware)."""
+    if value is None:
+        return datetime.min
+    if getattr(value, "tzinfo", None) is not None:
+        return value.replace(tzinfo=None)
+    return value
+
+def _sort_audit_entries_desc(entries):
+    """Ordena los eventos de auditoría del más reciente al más antiguo."""
+    return sorted(
+        entries,
+        key=lambda entry: (
+            _normalize_audit_timestamp(getattr(entry, "created_at", None)),
+            getattr(entry, "id", 0) or 0,
+        ),
+        reverse=True,
+    )
+
+def _serialize_audit_entry(entry):
+    """Adapta una fila de `audit_log` (ORM o fake) al schema de respuesta."""
+    details = getattr(entry, "details", None)
+
+    return AuditLogEntryResponse(
+        id=getattr(entry, "id", 0),
+        entity_name=getattr(entry, "entity_name", ""),
+        entity_id=getattr(entry, "entity_id", 0),
+        action=getattr(entry, "action", ""),
+        details=dict(details) if isinstance(details, dict) else {},
+        created_at=getattr(entry, "created_at", None),
+    )
 
 @router.post("/upload", status_code=status.HTTP_201_CREATED, summary="Ingesta de archivo RAW con hash SHA-256")
 async def upload_raw_document(
@@ -75,6 +112,24 @@ async def upload_raw_document(
     db.add(new_doc)
     db.commit()
     db.refresh(new_doc)
+
+    # 4. Trazabilidad de la ingesta RAW (RF-AUDIT-04): el hash SHA-256 queda
+    #    como evidencia inmutable del byte a byte almacenado.
+    AuditService.log_event(
+        db=db,
+        entity_name="document",
+        entity_id=new_doc.id,
+        action="DOCUMENT_UPLOADED",
+        source="api.documents.upload",
+        details={
+            "document_id": new_doc.id,
+            "original_filename": new_doc.original_filename,
+            "source_type": new_doc.source_type,
+            "processing_status": new_doc.processing_status,
+        },
+        metadata={"sha256": new_doc.sha256_hash},
+    )
+    db.commit()
 
     return {
         "document_id": new_doc.id,
@@ -267,24 +322,27 @@ def accept_document_to_canonical(document_id: int, db: Session = Depends(get_db)
     db.add(new_calibration)
 
     # 4. Actualizar estado operativo del activo en instrument_unit
+    previous_lifecycle_state = instrument.lifecycle_state
     instrument.lifecycle_state = "out_of_tolerance" if is_out_of_tol else "operational"
 
-    # 5. Registrar trazabilidad inmutable en audit_log
-    audit_entry = AuditLog(
+    # 5. Registrar trazabilidad inmutable en audit_log (RF-AUDIT-07). El
+    #    `details.document_id` es la clave que consume R-DUP-ACCEPT.
+    AuditService.log_event(
+        db=db,
         entity_name="instrument_unit",
         entity_id=instrument.id,
         action="CALIBRATION_INGESTED",
+        source="api.documents.accept",
+        before={"lifecycle_state": previous_lifecycle_state},
+        after={"lifecycle_state": instrument.lifecycle_state},
         details={
             "document_id": doc.id,
             "certificate_sha256": doc.sha256_hash,
             "error_value": error_val,
             "tolerance": tolerance_val,
             "result": result_status,
-            "previous_state": "operational",
-            "new_state": instrument.lifecycle_state
-        }
+        },
     )
-    db.add(audit_entry)
 
     # 6. Confirmar transacción en PostgreSQL (Source of Truth)
     db.commit()
@@ -368,6 +426,68 @@ def get_extracted_fields(
         ]
     }
 
+@router.get(
+    "/{document_id}/audit",
+    response_model=DocumentTraceabilityResponse,
+    summary="Trazabilidad de auditoría del documento y sus campos extraídos",
+)
+def get_document_audit(document_id: int, db: Session = Depends(get_db)):
+    """Árbol de trazabilidad documental (RF-AUDIT-06).
+
+    Recupera los eventos del documento y de sus campos extraídos, incluyendo
+    las mutaciones canónicas que referencian el documento vía
+    `details->>'document_id'`, ordenados descendentemente por `created_at`.
+    """
+    doc = db.query(Document).filter(Document.id == document_id).first()
+    if not doc:
+        raise HTTPException(status_code=404, detail="Documento no encontrado.")
+
+    fields = [
+        field
+        for field in db.query(ExtractedField).filter(
+            ExtractedField.document_id == document_id
+        ).all()
+        if getattr(field, "document_id", None) == document_id
+    ]
+    field_ids = {field.id for field in fields}
+
+    audit_entries = (
+        db.query(AuditLog)
+        .filter(
+            AuditLog.entity_name.in_(
+                ("document", "extracted_field", "instrument_unit")
+            )
+        )
+        .order_by(AuditLog.created_at.desc(), AuditLog.id.desc())
+        .all()
+    )
+
+    events = []
+
+    for entry in _sort_audit_entries_desc(audit_entries):
+        entity_name = getattr(entry, "entity_name", None)
+        entity_id = getattr(entry, "entity_id", None)
+        details = getattr(entry, "details", None)
+        details = details if isinstance(details, dict) else {}
+
+        belongs_to_document = (
+            (entity_name == "document" and entity_id == document_id)
+            or (entity_name == "extracted_field" and entity_id in field_ids)
+            or details.get("document_id") == document_id
+        )
+
+        if belongs_to_document:
+            events.append(_serialize_audit_entry(entry))
+
+    return DocumentTraceabilityResponse(
+        document_id=doc.id,
+        original_filename=getattr(doc, "original_filename", None),
+        sha256_hash=getattr(doc, "sha256_hash", None),
+        processing_status=getattr(doc, "processing_status", None),
+        total_events=len(events),
+        events=events,
+    )
+
 @router.patch("/{document_id}/fields/{field_id}", summary="Corrige manualmente un campo extraído")
 def correct_extracted_field(
     document_id: int,
@@ -393,7 +513,24 @@ def correct_extracted_field(
     # Human-in-the-loop:
     # raw_value se conserva como evidencia original.
     # normalized_value contiene la corrección humana.
+    old_normalized_value = field.normalized_value
     field.normalized_value = correction.normalized_value
+
+    # Trazabilidad del diferencial de la corrección (RF-AUDIT-02).
+    AuditService.log_event(
+        db=db,
+        entity_name="document",
+        entity_id=doc.id,
+        action="FIELD_CORRECTED",
+        source="api.documents.correct_field",
+        before={"normalized_value": old_normalized_value},
+        after={"normalized_value": field.normalized_value},
+        details={
+            "document_id": doc.id,
+            "field_id": field.id,
+            "field_name": field.field_name,
+        },
+    )
 
     db.commit()
     db.refresh(field)
@@ -439,6 +576,13 @@ def revalidate_document(
         fields=normalized_fields
     )
 
+    # Estado previo a la revalidación (RF-AUDIT-03).
+    before_state = {
+        "processing_status": doc.processing_status,
+        "matched_instrument_id": doc.instrument_unit_id,
+        "rules_failed": getattr(doc, "rules_failed", None),
+    }
+
     # Evita conservar un matching anterior si deja de ser válido.
     doc.instrument_unit_id = target_unit.id if target_unit else None
 
@@ -446,6 +590,21 @@ def revalidate_document(
         doc.processing_status = "ACCEPTED"
     else:
         doc.processing_status = "REVIEW_REQUIRED"
+
+    AuditService.log_event(
+        db=db,
+        entity_name="document",
+        entity_id=doc.id,
+        action="DOCUMENT_REVALIDATED",
+        source="api.documents.revalidate",
+        before=before_state,
+        after={
+            "processing_status": doc.processing_status,
+            "matched_instrument_id": doc.instrument_unit_id,
+            "rules_failed": rules_failed,
+        },
+        details={"document_id": doc.id},
+    )
 
     db.commit()
     db.refresh(doc)
