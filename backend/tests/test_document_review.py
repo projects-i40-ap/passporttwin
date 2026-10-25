@@ -189,6 +189,19 @@ def test_correct_extracted_field_preserves_raw_value():
     assert fake_db.fields[0].raw_value == "WRONG-SERIAL"
     assert fake_db.fields[0].normalized_value == "PT-001"
 
+    # Trazabilidad del cambio humano (RF-AUDIT-02).
+    assert len(fake_db.audit_logs) == 1
+
+    audit_entry = fake_db.audit_logs[0]
+
+    assert audit_entry.entity_name == "document"
+    assert audit_entry.entity_id == 1
+    assert audit_entry.action == "FIELD_CORRECTED"
+    assert audit_entry.details["document_id"] == 1
+    assert audit_entry.details["field_id"] == 10
+    assert audit_entry.details["before"] == {"normalized_value": "WRONG-SERIAL"}
+    assert audit_entry.details["after"] == {"normalized_value": "PT-001"}
+
 
 def test_revalidate_document_after_human_correction():
     fake_db.reset()
@@ -212,6 +225,22 @@ def test_revalidate_document_after_human_correction():
 
     assert fake_db.document.processing_status == "ACCEPTED"
     assert fake_db.document.instrument_unit_id == 7
+
+    # Trazabilidad del cambio de estado (RF-AUDIT-03).
+    assert len(fake_db.audit_logs) == 1
+
+    audit_entry = fake_db.audit_logs[0]
+
+    assert audit_entry.entity_name == "document"
+    assert audit_entry.entity_id == 1
+    assert audit_entry.action == "DOCUMENT_REVALIDATED"
+    assert audit_entry.details["document_id"] == 1
+
+    assert audit_entry.details["before"]["processing_status"] == "REVIEW_REQUIRED"
+    assert audit_entry.details["before"]["matched_instrument_id"] is None
+    assert audit_entry.details["after"]["processing_status"] == "ACCEPTED"
+    assert audit_entry.details["after"]["matched_instrument_id"] == 7
+    assert audit_entry.details["after"]["rules_failed"] == []
 
 
 def test_accept_document_syncs_all_aas_dynamic_submodels(

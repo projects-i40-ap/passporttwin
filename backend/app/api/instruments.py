@@ -8,7 +8,12 @@ from app.schemas.instrument import (
     InstrumentTypeResponse,
     InstrumentUnitCreate,
     InstrumentUnitResponse)
+from app.schemas.audit import (
+    AuditLogEntryResponse,
+    InstrumentTraceabilityResponse,
+)
 from app.services.aas_builder import AASBuilder
+from app.services.audit_service import AuditService
 
 ##### LIBRERIAS qr code AND Metabase
 import io
@@ -18,7 +23,7 @@ from fastapi.responses import RedirectResponse
 from uuid import UUID
 
 ##### Librerias calibration and predictions
-from app.models.calibration import CalibrationEvent
+from app.models.calibration import AuditLog, CalibrationEvent
 from app.services.analytics import DriftAnalyticsService
 
 #### Ingestion masiva de sensores
@@ -73,6 +78,22 @@ def register_instrument(payload: InstrumentUnitCreate, db: Session = Depends(get
     synced = nameplate_synced and operational_synced
 
     new_instrument.aas_sync_status = "SYNCED" if synced else "PENDING"
+
+    # 5. Trazabilidad del alta del activo (RF-AUDIT-04).
+    AuditService.log_event(
+        db=db,
+        entity_name="instrument_unit",
+        entity_id=new_instrument.id,
+        action="INSTRUMENT_CREATED",
+        source="api.instruments.create",
+        after={
+            "serial_number": new_instrument.serial_number,
+            "lifecycle_state": new_instrument.lifecycle_state,
+            "aas_sync_status": new_instrument.aas_sync_status,
+        },
+        details={"instrument_unit_id": new_instrument.id},
+    )
+
     db.commit()
     db.refresh(new_instrument)
 
@@ -88,6 +109,118 @@ def get_instrument_by_id(id: int, db: Session = Depends(get_db)):
     if not instrument:
         raise HTTPException(status_code=404, detail="Instrumento no encontrado.")
     return instrument
+
+def _normalize_audit_timestamp(value):
+    """Normaliza `created_at` para ordenar de forma segura (naive/aware)."""
+    if value is None:
+        return datetime.min
+    if getattr(value, "tzinfo", None) is not None:
+        return value.replace(tzinfo=None)
+    return value
+
+def _sort_audit_entries_desc(entries):
+    """Ordena los eventos de auditoría del más reciente al más antiguo."""
+    return sorted(
+        entries,
+        key=lambda entry: (
+            _normalize_audit_timestamp(getattr(entry, "created_at", None)),
+            getattr(entry, "id", 0) or 0,
+        ),
+        reverse=True,
+    )
+
+def _serialize_audit_entry(entry):
+    """Adapta una fila de `audit_log` (ORM o fake) al schema de respuesta."""
+    details = getattr(entry, "details", None)
+
+    return AuditLogEntryResponse(
+        id=getattr(entry, "id", 0),
+        entity_name=getattr(entry, "entity_name", ""),
+        entity_id=getattr(entry, "entity_id", 0),
+        action=getattr(entry, "action", ""),
+        details=dict(details) if isinstance(details, dict) else {},
+        created_at=getattr(entry, "created_at", None),
+    )
+
+@router.get(
+    "/{id}/audit",
+    response_model=InstrumentTraceabilityResponse,
+    summary="Trazabilidad de auditoría del instrumento y sus documentos",
+)
+def get_instrument_audit(id: int, db: Session = Depends(get_db)):
+    """Árbol de trazabilidad del activo (RF-AUDIT-06).
+
+    Agrega los eventos del propio instrumento, de sus documentos vinculados y
+    de sus calibraciones canónicas, ordenados descendentemente por `created_at`.
+    """
+    instrument = db.query(InstrumentUnit).filter(InstrumentUnit.id == id).first()
+    if not instrument:
+        raise HTTPException(status_code=404, detail="Instrumento no encontrado.")
+
+    # Documentos y calibraciones directamente asociados al activo. El filtro
+    # en Python mantiene el comportamiento con los `FakeSession` de los tests.
+    documents = [
+        document
+        for document in db.query(Document).filter(
+            Document.instrument_unit_id == id
+        ).all()
+        if getattr(document, "instrument_unit_id", None) == id
+    ]
+    document_ids = {document.id for document in documents}
+
+    calibrations = [
+        calibration
+        for calibration in db.query(CalibrationEvent).filter(
+            CalibrationEvent.instrument_unit_id == id
+        ).all()
+        if getattr(calibration, "instrument_unit_id", None) == id
+    ]
+    calibration_ids = {calibration.id for calibration in calibrations}
+
+    audit_entries = (
+        db.query(AuditLog)
+        .filter(
+            AuditLog.entity_name.in_(
+                ("instrument_unit", "document", "calibration_event")
+            )
+        )
+        .order_by(AuditLog.created_at.desc(), AuditLog.id.desc())
+        .all()
+    )
+
+    events = []
+
+    for entry in _sort_audit_entries_desc(audit_entries):
+        entity_name = getattr(entry, "entity_name", None)
+        entity_id = getattr(entry, "entity_id", None)
+        details = getattr(entry, "details", None)
+        details = details if isinstance(details, dict) else {}
+
+        belongs_to_instrument = (
+            (entity_name == "instrument_unit" and entity_id == id)
+            or (
+                entity_name == "document"
+                and (
+                    entity_id in document_ids
+                    or details.get("document_id") in document_ids
+                )
+            )
+            or (
+                entity_name == "calibration_event"
+                and entity_id in calibration_ids
+            )
+            or details.get("instrument_unit_id") == id
+        )
+
+        if belongs_to_instrument:
+            events.append(_serialize_audit_entry(entry))
+
+    return InstrumentTraceabilityResponse(
+        instrument_id=instrument.id,
+        serial_number=getattr(instrument, "serial_number", None),
+        total_events=len(events),
+        events=events,
+    )
 
 @router.post("/{id}/sync", response_model=InstrumentUnitResponse)
 def force_sync_aas(id: int, db: Session = Depends(get_db)):
@@ -144,7 +277,21 @@ def force_sync_aas(id: int, db: Session = Depends(get_db)):
         and operational_synced
     )
 
+    previous_sync_status = instrument.aas_sync_status
     instrument.aas_sync_status = "SYNCED" if synced else "ERROR"
+
+    # Trazabilidad de la sincronización AAS (RF-AUDIT-05).
+    AuditService.log_event(
+        db=db,
+        entity_name="instrument_unit",
+        entity_id=instrument.id,
+        action="AAS_SYNCED",
+        source="api.instruments.sync",
+        before={"aas_sync_status": previous_sync_status},
+        after={"aas_sync_status": instrument.aas_sync_status},
+        details={"instrument_unit_id": instrument.id},
+    )
+
     db.commit()
     db.refresh(instrument)
     return instrument
