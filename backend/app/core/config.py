@@ -8,7 +8,7 @@ mediante `AI_LEGO_ENABLED=true`.
 """
 
 from pydantic_settings import BaseSettings, SettingsConfigDict
-from pydantic import Field
+from pydantic import AnyHttpUrl, Field, field_validator
 
 from app.schemas.health_score import HealthScoreWeights
 
@@ -36,6 +36,16 @@ class Settings(BaseSettings):
 
     # JSON environment variable HEALTH_SCORE_WEIGHTS; invalid values fail startup.
     health_score_weights: HealthScoreWeights = Field(default_factory=HealthScoreWeights)
+
+    public_api_base_url: AnyHttpUrl = "http://localhost:8000"
+    passport_frontend_base_url: AnyHttpUrl = "http://localhost:5173"
+
+    @field_validator("public_api_base_url", "passport_frontend_base_url")
+    @classmethod
+    def validate_base_url(cls, value):
+        if value.query or value.fragment or value.username or value.password:
+            raise ValueError("Base URLs cannot contain credentials, query or fragment")
+        return value
 
 
 settings = Settings()

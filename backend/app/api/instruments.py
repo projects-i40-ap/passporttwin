@@ -25,6 +25,7 @@ from uuid import UUID
 ##### Librerias calibration and predictions
 from app.models.calibration import AuditLog, CalibrationEvent
 from app.services.analytics import DriftAnalyticsService
+from app.core.config import settings
 
 #### Ingestion masiva de sensores
 import io
@@ -318,7 +319,7 @@ def get_instrument_qr(public_id: UUID, db: Session = Depends(get_db)):
         raise HTTPException(status_code=404, detail="Instrumento no encontrado.")
 
     # URL canónica estable según arquitectura ADR-009 y Sección 3.5
-    passport_url = f"http://localhost:8000/api/v1/instruments/passport/{public_id}"
+    passport_url = f"{str(settings.public_api_base_url).rstrip('/')}/api/v1/instruments/passport/{public_id}"
 
     # Generación matricial del código QR
     qr = qrcode.QRCode(
@@ -344,9 +345,16 @@ def resolve_passport(public_id: UUID, db: Session = Depends(get_db)):
     if not instrument:
         raise HTTPException(status_code=404, detail="Pasaporte no encontrado para el identificador escaneado.")
 
-    # Redirige a la tarjeta del pasaporte en Metabase pasando el parámetro public_id
-    metabase_dashboard_url = f"http://localhost:3003/question/1?public_id={public_id}"
-    return RedirectResponse(url=metabase_dashboard_url, status_code=status.HTTP_307_TEMPORARY_REDIRECT)
+    passport_view_url = f"{str(settings.passport_frontend_base_url).rstrip('/')}/passport/{public_id}"
+    return RedirectResponse(url=passport_view_url, status_code=status.HTTP_307_TEMPORARY_REDIRECT)
+
+
+@router.get("/by-public-id/{public_id}", response_model=InstrumentUnitResponse, tags=["passport"])
+def get_instrument_by_public_id(public_id: UUID, db: Session = Depends(get_db)):
+    instrument = db.query(InstrumentUnit).filter(InstrumentUnit.public_id == public_id).first()
+    if instrument is None:
+        raise HTTPException(status_code=404, detail="Pasaporte no encontrado.")
+    return instrument
 
 ####### Endpoints de Calibración y Predicciones
 @router.get("/{id}/calibrations", summary="Historial de calibraciones del instrumento")
