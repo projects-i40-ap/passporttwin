@@ -2,6 +2,8 @@ from typing import Any, Dict, List, Optional
 
 from app.models.calibration import CalibrationEvent
 from app.models.instrument import InstrumentUnit
+from app.core.config import settings
+from app.schemas.health_score import HealthScoreWeights
 
 
 class DriftAnalyticsService:
@@ -143,6 +145,7 @@ class DriftAnalyticsService:
         family_calibrations: Optional[
             List[CalibrationEvent]
         ] = None,
+        health_score_weights: Optional[HealthScoreWeights] = None,
     ) -> Dict[str, Any]:
         """
         Calcula B0, B1, M1 y conserva las salidas existentes
@@ -162,7 +165,15 @@ class DriftAnalyticsService:
             El riesgo y Health Score existentes se mantienen por
             compatibilidad y todavía utilizan la tendencia histórica
             de dos puntos que empleaba el servicio original.
+            health_score_details explica las penalizaciones y los pesos
+            configurados; el indicador no es una probabilidad validada.
         """
+
+        weights = (
+            health_score_weights
+            if health_score_weights is not None
+            else settings.health_score_weights
+        ).model_dump()
 
         if not calibrations:
             return {
@@ -170,6 +181,16 @@ class DriftAnalyticsService:
                 "serial_number": instrument.serial_number,
                 "status": "NO_CALIBRATION_DATA",
                 "health_score": 50.0,
+                "health_score_details": {
+                    "status": "NOT_CALCULATED",
+                    "reason": "NO_CALIBRATION_DATA",
+                    "method_version": "weighted_penalties_v1",
+                    "weights": weights,
+                    "components": {},
+                    "total_penalty_points": None,
+                    "score": 50.0,
+                    "fallback": True,
+                },
             }
 
         sorted_cals = sorted(
@@ -334,11 +355,20 @@ class DriftAnalyticsService:
             "90_days"
         ]
 
-        health_deduction = (
-            0.40 * max_horizon_risk
-            + 0.35 * current_error_ratio
-            + 0.25 * out_of_tol_penalty
-        )
+        values = {
+            "risk_90_days": max_horizon_risk,
+            "current_error": current_error_ratio,
+            "out_of_tolerance": out_of_tol_penalty,
+        }
+        components = {
+            name: {
+                "value": value,
+                "weight": weights[name],
+                "penalty_points": 100 * weights[name] * value,
+            }
+            for name, value in values.items()
+        }
+        health_deduction = sum(weights[name] * value for name, value in values.items())
 
         health_score = max(
             0.0,
@@ -405,6 +435,17 @@ class DriftAnalyticsService:
             ),
             "risk_out_of_tolerance": risk_b1,
             "health_score": health_score,
+            "health_score_details": {
+                "status": "CALCULATED",
+                "method_version": "weighted_penalties_v1",
+                "weights": weights,
+                "components": components,
+                "total_penalty_points": sum(
+                    component["penalty_points"] for component in components.values()
+                ),
+                "score": health_score,
+                "fallback": False,
+            },
             "lifecycle_state": (
                 instrument.lifecycle_state
             ),

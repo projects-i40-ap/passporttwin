@@ -1,5 +1,5 @@
 """
-Configuración centralizada de los bloques LEGO de IA (Spec 001).
+Configuración centralizada de IA (Spec 001) y Health Score.
 
 Centraliza las variables de entorno de los módulos de IA local (LLM/OCR/RAG
 servidos por `llama.cpp`). Los valores por defecto son seguros para el servidor
@@ -8,6 +8,9 @@ mediante `AI_LEGO_ENABLED=true`.
 """
 
 from pydantic_settings import BaseSettings, SettingsConfigDict
+from pydantic import Field
+
+from app.schemas.health_score import HealthScoreWeights
 
 
 class Settings(BaseSettings):
@@ -30,6 +33,9 @@ class Settings(BaseSettings):
 
     # Tiempo máximo de espera antes de degradar al motor determinista.
     ai_timeout_seconds: float = 12.0
+
+    # JSON environment variable HEALTH_SCORE_WEIGHTS; invalid values fail startup.
+    health_score_weights: HealthScoreWeights = Field(default_factory=HealthScoreWeights)
 
 
 settings = Settings()
