@@ -6,12 +6,14 @@ configuration in `core/`, DB session handling in `database/`.
 """
 
 import os
+from urllib.parse import urlsplit
 
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
 from app.database.session import Base, engine
 from app.api import instruments, documents, tolerance_risk
+from app.core.config import settings
 
 
 # 1. Crea el esquema canónico en PostgreSQL si las tablas no existen
@@ -27,12 +29,14 @@ app = FastAPI(
 
 # 2. Permite al frontend React/Vite acceder a la API durante desarrollo local
 frontend_port = os.getenv("FRONTEND_PORT", "5173")
+passport_origin = urlsplit(str(settings.passport_frontend_base_url))
 
 app.add_middleware(
     CORSMiddleware,
     allow_origins=[
         f"http://localhost:{frontend_port}",
         f"http://127.0.0.1:{frontend_port}",
+        f"{passport_origin.scheme}://{passport_origin.netloc}",
     ],
     allow_credentials=True,
     allow_methods=["*"],

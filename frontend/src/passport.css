@@ -1,0 +1,17 @@
+.passport { max-width: 1080px; margin: 0 auto; padding: 28px 20px; font-family: system-ui, sans-serif; color: #18334c; line-height: 1.5; }
+.passport header { border-bottom: 2px solid #dce6f0; padding-bottom: 24px; overflow-wrap: anywhere; }
+.passport h1 { font-size: 2.3rem; margin: 8px 0; }
+.passport h2 { font-size: 1.3rem; }
+.passport a { color: #1755a5; }
+.passport section { padding: 18px 0; border-bottom: 1px solid #e2e8f0; }
+.passport-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 16px; }
+.passport dt, .passport small { color: #526579; }
+.passport dd { margin: 4px 0; font-weight: 600; }
+.passport-score { font-size: 2rem; font-weight: 700; margin: 8px 0; }
+.passport-score small { font-size: 1rem; }
+.passport-horizon { background: #f4f8fc; border: 1px solid #dce6f0; border-radius: 8px; padding: 16px; }
+.passport-horizon h3 { margin-top: 0; }
+.passport-horizon strong { font-size: 1.5rem; }
+.passport-table { overflow-x: auto; }
+.passport table { width: 100%; border-collapse: collapse; text-align: left; }
+.passport th, .passport td { padding: 12px 10px; border-bottom: 1px solid #dce6f0; white-space: nowrap; }
