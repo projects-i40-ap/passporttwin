@@ -1,0 +1,30 @@
+from datetime import date
+
+from fastapi import APIRouter, Depends, HTTPException
+from sqlalchemy.orm import Session
+
+from app.database.session import get_db
+from app.models.calibration import CalibrationEvent
+from app.models.instrument import InstrumentUnit
+from app.services.tolerance_risk import estimate_tolerance_risk
+
+router = APIRouter(prefix="/instruments", tags=["risk"])
+
+
+@router.get("/{instrument_id}/tolerance-risk", summary="Riesgo experimental a 30/60/90 días")
+def get_tolerance_risk(
+    instrument_id: int, as_of: date | None = None, db: Session = Depends(get_db),
+):
+    instrument = db.query(InstrumentUnit).filter(InstrumentUnit.id == instrument_id).first()
+    if instrument is None:
+        raise HTTPException(status_code=404, detail="Instrumento no encontrado.")
+    reference_date = as_of if as_of is not None else date.today()
+    history = db.query(CalibrationEvent).filter(
+        CalibrationEvent.instrument_unit_id == instrument_id,
+        CalibrationEvent.calibration_date <= reference_date,
+    ).all()
+    return {
+        "instrument_id": instrument.id,
+        "serial_number": instrument.serial_number,
+        **estimate_tolerance_risk(history, reference_date),
+    }

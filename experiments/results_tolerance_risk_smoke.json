@@ -1,0 +1,28 @@
+{
+  "method_version": "ols_gaussian_predictive_v1",
+  "seed": 42,
+  "dataset_sha256": "7b078b4f8726118db6b73bb35d49c5d504a6ca5e46a6c355391e1e5d477ac28e",
+  "instruments": 60,
+  "training_points_per_instrument": 16,
+  "validation_status": "SYNTHETIC_SMOKE_ONLY",
+  "metrics": {
+    "30": {
+      "n": 60,
+      "positives": 22,
+      "brier": 0.02799847736175186,
+      "b0_brier": 0.13333333333333333
+    },
+    "60": {
+      "n": 60,
+      "positives": 26,
+      "brier": 0.010205329143629429,
+      "b0_brier": 0.16666666666666666
+    },
+    "90": {
+      "n": 60,
+      "positives": 27,
+      "brier": 0.003810488197819519,
+      "b0_brier": 0.18333333333333332
+    }
+  }
+}
