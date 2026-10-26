@@ -49,3 +49,21 @@ La política de acceso existente de la API sigue aplicando; un UUID no es un per
 Primera ficha de lectura: identidad/estado, calibraciones, Health Score y riesgo.
 No muestra aún documentos completos, mantenimiento ni historial de auditoría.
 Metabase conserva el dashboard de flota. No se altera ningún cálculo analítico.
+
+Por ahora servir el frontend desde la raíz del origen; no se configura un basename
+para alojarlo bajo un subdirectorio. La base pública de API puede incluir el prefijo
+del proxy siempre que se publique también la ruta `/api/v1` bajo ese prefijo.
+
+## Evidencia técnica 2026-10-26
+
+- 120 pruebas backend correctas en la rama, Docker/Python 3.11 y PostgreSQL 17 aislado.
+- Merge temporal con PR #11 (`e06e82d`): sin conflictos, 137 pruebas backend+BI correctas.
+- Build de producción Vite correcto con la versión final del frontend.
+- Chromium real contra API/React/PostgreSQL desechables: redirección desde el
+  resolvedor, ficha por UUID, cuatro calibraciones, score y riesgo, recarga directa,
+  ancho móvil 390px sin desbordamiento de página, instrumento inexistente,
+  historial vacío y fallo parcial del endpoint de score. Sin errores JavaScript.
+- Las pruebas backend verifican URL codificada en QR, redirección configurable,
+  404/422 y rechazo de URLs inválidas. No se escaneó físicamente una etiqueta.
+- No se hizo despliegue en una URL compartida ni se verificó exposición desde
+  un teléfono real. Pendiente de revisión e integración por el equipo.
