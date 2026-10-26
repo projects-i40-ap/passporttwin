@@ -73,3 +73,19 @@ desde la raíz con dependencias del backend. No utilizar una base operativa para
 
 La tarjeta permanece en curso hasta revisar la priorización, validar el dashboard
 en el entorno compartido e incorporar la visualización predictiva acordada.
+
+## Evidencia del checkpoint 2026-10-26
+
+- 17 pruebas BI correctas con PostgreSQL 17 desechable (SQL y aprovisionamiento).
+- Creación real del dashboard y sus siete preguntas en Metabase v0.64.3.4,
+  imagen `metabase/metabase:latest` con digest
+  `sha256:7804ce4edfa217dd08a896821f57b12a9a392d944bd3797a55520d51c76232e3`.
+- Todas las preguntas ejecutadas sin filtros y con filtro de ubicación. KPI de
+  prueba: cuatro activos totales, dos al seleccionar Lab A. La configuración de
+  ambos filtros se comprueba además en las pruebas de aprovisionamiento.
+- Merge temporal con PR #8 (`bc90870`) y PR #9 (`1980253`): sin conflictos,
+  129 pruebas backend + BI correctas en Docker/Python 3.11. Ninguna PR fusionada.
+- El Metabase y los datos usados son desechables, no vuestro entorno compartido.
+  El procedimiento debe repetirse contra la versión de Metabase del despliegue.
+- La CI nueva `BI checks` comprueba SQL/aprovisionamiento con PostgreSQL; no levanta
+  Metabase. Los avisos de dependencias Starlette/Requests no provocaron fallos.
