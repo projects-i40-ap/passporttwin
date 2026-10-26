@@ -69,3 +69,14 @@ mantenimiento. No se añadió M2 porque no se ha justificado complejidad adicion
 Pendientes: protocolo final congelado, calibración y sensibilidad por familia,
 datos con intervenciones, revisión del equipo, UI y decisión sobre integración
 con Health Score. No marcar la tarjeta como validada solo por estas pruebas.
+
+## Checkpoint técnico 2026-10-26
+
+- Rama `feature/tolerance-risk` sobre `main` (`29def6e`): 96 pruebas backend
+  correctas en Docker/Python 3.11 con PostgreSQL 17 desechable.
+- Combinación temporal con la PR #8 (`bc90870`): merge automático sin conflictos,
+  112 pruebas correctas en el mismo entorno aislado. No se fusionó ninguna PR.
+- El ensayo conserva ambos endpoints y las pruebas de Health Score. Esta evidencia
+  corresponde a esos commits; cambios posteriores requerirán nueva comprobación.
+- Benchmark sintético reproducido; configuración de pesos y código de la PR #8
+  no se modificaron. La tarjeta continúa en curso, pendiente de revisión y validación.
