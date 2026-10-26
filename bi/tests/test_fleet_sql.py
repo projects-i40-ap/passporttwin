@@ -11,8 +11,13 @@ ROOT = Path(__file__).resolve().parents[2]
 def db():
     connection = psycopg2.connect(os.environ['DATABASE_URL'])
     with connection.cursor() as cursor:
+        # Backend imports may already have created stricter ORM tables in public.
+        # Exercise the SQL schema independently of pytest collection order.
+        cursor.execute("CREATE SCHEMA fleet_sql_test")
+        cursor.execute("SET LOCAL search_path TO fleet_sql_test")
         cursor.execute((ROOT / 'infra/postgres/schema.sql').read_text())
-        cursor.execute((ROOT / 'bi/sql/fleet_overview.sql').read_text())
+        cursor.execute((ROOT / 'bi/sql/fleet_overview.sql').read_text().replace(
+            'passporttwin_bi', 'fleet_sql_test_bi'))
         cursor.execute("INSERT INTO instrument_type(name,magnitude,unit) VALUES ('test-fleet','Pressure','bar') RETURNING id")
         type_id = cursor.fetchone()[0]
         cursor.execute("INSERT INTO instrument_unit(instrument_type_id,serial_number,manufacturer,model) VALUES (%s,'TEST-FLEET','TEST','TEST') RETURNING id", (type_id,))
@@ -32,7 +37,7 @@ def calibrate(cursor, instrument_id, due_days=100, error=0.1, tolerance=1):
 
 
 def row(cursor, instrument_id):
-    cursor.execute("SELECT traffic_light,primary_reason,documents_to_review FROM passporttwin_bi.fleet_overview WHERE instrument_id=%s", (instrument_id,))
+    cursor.execute("SELECT traffic_light,primary_reason,documents_to_review FROM fleet_sql_test_bi.fleet_overview WHERE instrument_id=%s", (instrument_id,))
     return cursor.fetchone()
 
 
@@ -71,7 +76,7 @@ def test_review_count_is_per_instrument_without_multiplying_rows(db):
     for index in range(2):
         cursor.execute("INSERT INTO document(instrument_unit_id,original_filename,file_path,sha256_hash,processing_status) VALUES (%s,'test','test',%s,'REVIEW_REQUIRED')",(instrument_id,f'fleet-hash-{index}'))
     assert row(cursor,instrument_id) == ('yellow','DOCUMENT_REVIEW',2)
-    cursor.execute("SELECT COUNT(*) FROM passporttwin_bi.fleet_overview WHERE instrument_id=%s",(instrument_id,))
+    cursor.execute("SELECT COUNT(*) FROM fleet_sql_test_bi.fleet_overview WHERE instrument_id=%s",(instrument_id,))
     assert cursor.fetchone()[0] == 1
 
 

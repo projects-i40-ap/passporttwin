@@ -25,10 +25,13 @@ jobs:
           --health-retries 5
     env:
       DATABASE_URL: postgresql://passporttwin:test-only@localhost:5432/passporttwin_bi_test
+      PYTHONPATH: backend
+      STORAGE_RAW_DIR: /tmp/passporttwin-bi-test-raw
+      AI_LEGO_ENABLED: "false"
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-python@v5
         with:
           python-version: "3.11"
       - run: pip install -r backend/requirements.txt
-      - run: python -m pytest bi/tests -v
+      - run: python -m pytest backend/tests bi/tests -v
