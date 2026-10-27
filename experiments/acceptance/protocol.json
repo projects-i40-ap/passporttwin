@@ -1,0 +1,20 @@
+{
+  "protocol_version": "synthetic_acceptance_v1",
+  "seed": 20261027,
+  "families": {"pressure": 0.1, "temperature": 0.5, "ph": 0.2},
+  "training_lengths": [8, 16],
+  "instruments_per_cell": 30,
+  "horizons_days": [30, 60, 90],
+  "scenarios": ["stable", "linear", "curvature", "step_change", "heavy_tail", "maintenance_reset"],
+  "generation": "offset uniform(-1.1,1.1), drift per 30 days uniform(-0.09,0.09), noise sd 0.12 tolerance units; stable drift=0; curvature +0.008*step^2; step_change adds 0.65 only after cutoff; heavy_tail noise sd=0.6 with probability 0.1; maintenance_reset sets post-cutoff mean to 0",
+  "split": "first 8 or 16 calibrations train, next three at 30-day spacing test; no test observation enters the service",
+  "metrics": ["Brier", "ECE_10_equal_width_bins", "MAE", "Gaussian_95_prediction_interval_coverage", "positives", "abstentions"],
+  "baselines": ["last_observed_out_of_tolerance_state", "Gaussian_persistence_with_same_predictive_std"],
+  "checks": {
+    "probabilities_finite_in_unit_interval": true,
+    "linear_normal_pooled_brier_better_than_state_persistence": true,
+    "linear_normal_pooled_ece_max": 0.1,
+    "linear_normal_pooled_95_coverage_min": 0.88
+  },
+  "scope": "Independent synthetic evaluation of the implemented method, not proof of real-world validity. Stress scenarios need not outperform baselines. Freeze protocol and script before running; never tune on this run. Results do not constitute all seven final TFM experiments."
+}

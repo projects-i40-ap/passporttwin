@@ -1,0 +1,1084 @@
+{
+  "protocol": {
+    "protocol_version": "synthetic_acceptance_v1",
+    "seed": 20261027,
+    "families": {
+      "pressure": 0.1,
+      "temperature": 0.5,
+      "ph": 0.2
+    },
+    "training_lengths": [
+      8,
+      16
+    ],
+    "instruments_per_cell": 30,
+    "horizons_days": [
+      30,
+      60,
+      90
+    ],
+    "scenarios": [
+      "stable",
+      "linear",
+      "curvature",
+      "step_change",
+      "heavy_tail",
+      "maintenance_reset"
+    ],
+    "generation": "offset uniform(-1.1,1.1), drift per 30 days uniform(-0.09,0.09), noise sd 0.12 tolerance units; stable drift=0; curvature +0.008*step^2; step_change adds 0.65 only after cutoff; heavy_tail noise sd=0.6 with probability 0.1; maintenance_reset sets post-cutoff mean to 0",
+    "split": "first 8 or 16 calibrations train, next three at 30-day spacing test; no test observation enters the service",
+    "metrics": [
+      "Brier",
+      "ECE_10_equal_width_bins",
+      "MAE",
+      "Gaussian_95_prediction_interval_coverage",
+      "positives",
+      "abstentions"
+    ],
+    "baselines": [
+      "last_observed_out_of_tolerance_state",
+      "Gaussian_persistence_with_same_predictive_std"
+    ],
+    "checks": {
+      "probabilities_finite_in_unit_interval": true,
+      "linear_normal_pooled_brier_better_than_state_persistence": true,
+      "linear_normal_pooled_ece_max": 0.1,
+      "linear_normal_pooled_95_coverage_min": 0.88
+    },
+    "scope": "Independent synthetic evaluation of the implemented method, not proof of real-world validity. Stress scenarios need not outperform baselines. Freeze protocol and script before running; never tune on this run. Results do not constitute all seven final TFM experiments."
+  },
+  "dataset_sha256": "d7112c2dadc9fd9b3264e942f08e05b1524306930d96a03364b851d4061f0f5e",
+  "trajectories": 1080,
+  "forecasts": 3240,
+  "abstentions": 0,
+  "checks": {
+    "probabilities_finite_in_unit_interval": true,
+    "linear_normal_pooled_brier_better_than_state_persistence": true,
+    "linear_normal_pooled_ece": true,
+    "linear_normal_pooled_95_coverage": true
+  },
+  "overall": {
+    "n": 3240,
+    "positives": 935,
+    "brier": 0.141796708244576,
+    "state_persistence_brier": 0.16728395061728396,
+    "gaussian_persistence_brier": 0.13559914079743624,
+    "ece": 0.10565431651207735,
+    "mae_in_tolerance_units": 0.3841039927864233,
+    "coverage_95": 0.5873456790123457,
+    "reliability_bins": [
+      {
+        "n": 1746,
+        "mean_probability": 0.00930823767551359,
+        "observed_rate": 0.05899198167239404
+      },
+      {
+        "n": 158,
+        "mean_probability": 0.1522125487403005,
+        "observed_rate": 0.189873417721519
+      },
+      {
+        "n": 118,
+        "mean_probability": 0.24935131154541312,
+        "observed_rate": 0.2457627118644068
+      },
+      {
+        "n": 84,
+        "mean_probability": 0.345580289490237,
+        "observed_rate": 0.2857142857142857
+      },
+      {
+        "n": 72,
+        "mean_probability": 0.4483047720853649,
+        "observed_rate": 0.4166666666666667
+      },
+      {
+        "n": 67,
+        "mean_probability": 0.5490427542057228,
+        "observed_rate": 0.5522388059701493
+      },
+      {
+        "n": 83,
+        "mean_probability": 0.6513340597684903,
+        "observed_rate": 0.43373493975903615
+      },
+      {
+        "n": 85,
+        "mean_probability": 0.7475434672765859,
+        "observed_rate": 0.5529411764705883
+      },
+      {
+        "n": 81,
+        "mean_probability": 0.8560773967476384,
+        "observed_rate": 0.5555555555555556
+      },
+      {
+        "n": 746,
+        "mean_probability": 0.9875781263107106,
+        "observed_rate": 0.7426273458445041
+      }
+    ]
+  },
+  "normal_linear_pooled": {
+    "n": 1080,
+    "positives": 245,
+    "brier": 0.06256258312136395,
+    "state_persistence_brier": 0.10092592592592593,
+    "gaussian_persistence_brier": 0.07308032335326707,
+    "ece": 0.02652145175290766,
+    "mae_in_tolerance_units": 0.11541012255028005,
+    "coverage_95": 0.9268518518518518,
+    "reliability_bins": [
+      {
+        "n": 674,
+        "mean_probability": 0.008199812868154315,
+        "observed_rate": 0.00741839762611276
+      },
+      {
+        "n": 52,
+        "mean_probability": 0.16019469651816448,
+        "observed_rate": 0.17307692307692307
+      },
+      {
+        "n": 45,
+        "mean_probability": 0.24517306799666116,
+        "observed_rate": 0.28888888888888886
+      },
+      {
+        "n": 39,
+        "mean_probability": 0.34410068602859284,
+        "observed_rate": 0.23076923076923078
+      },
+      {
+        "n": 31,
+        "mean_probability": 0.4473522479641875,
+        "observed_rate": 0.5161290322580645
+      },
+      {
+        "n": 28,
+        "mean_probability": 0.5527247440562686,
+        "observed_rate": 0.6428571428571429
+      },
+      {
+        "n": 24,
+        "mean_probability": 0.6370818570594315,
+        "observed_rate": 0.4583333333333333
+      },
+      {
+        "n": 20,
+        "mean_probability": 0.744649486659751,
+        "observed_rate": 0.6
+      },
+      {
+        "n": 23,
+        "mean_probability": 0.8562925801425719,
+        "observed_rate": 0.6521739130434783
+      },
+      {
+        "n": 144,
+        "mean_probability": 0.9828195029045017,
+        "observed_rate": 0.9513888888888888
+      }
+    ]
+  },
+  "by_scenario": {
+    "stable": {
+      "n": 540,
+      "positives": 59,
+      "brier": 0.07522719443175861,
+      "state_persistence_brier": 0.12777777777777777,
+      "gaussian_persistence_brier": 0.08310712051345046,
+      "ece": 0.044703142219858036,
+      "mae_in_tolerance_units": 0.12027842688068399,
+      "coverage_95": 0.9277777777777778,
+      "reliability_bins": [
+        {
+          "n": 380,
+          "mean_probability": 0.007996286639965027,
+          "observed_rate": 0.0
+        },
+        {
+          "n": 26,
+          "mean_probability": 0.16659704518437302,
+          "observed_rate": 0.23076923076923078
+        },
+        {
+          "n": 33,
+          "mean_probability": 0.248420383130338,
+          "observed_rate": 0.2727272727272727
+        },
+        {
+          "n": 22,
+          "mean_probability": 0.3440198605764589,
+          "observed_rate": 0.2727272727272727
+        },
+        {
+          "n": 22,
+          "mean_probability": 0.4475302221123254,
+          "observed_rate": 0.5454545454545454
+        },
+        {
+          "n": 14,
+          "mean_probability": 0.5558459853431161,
+          "observed_rate": 0.5714285714285714
+        },
+        {
+          "n": 18,
+          "mean_probability": 0.6330423510850789,
+          "observed_rate": 0.3888888888888889
+        },
+        {
+          "n": 9,
+          "mean_probability": 0.7390008735874288,
+          "observed_rate": 0.3333333333333333
+        },
+        {
+          "n": 4,
+          "mean_probability": 0.832860170632985,
+          "observed_rate": 0.5
+        },
+        {
+          "n": 12,
+          "mean_probability": 0.9426970481561625,
+          "observed_rate": 0.5
+        }
+      ]
+    },
+    "linear": {
+      "n": 540,
+      "positives": 186,
+      "brier": 0.04989797181096931,
+      "state_persistence_brier": 0.07407407407407407,
+      "gaussian_persistence_brier": 0.06305352619308369,
+      "ece": 0.027532142520930683,
+      "mae_in_tolerance_units": 0.11054181821987608,
+      "coverage_95": 0.9259259259259259,
+      "reliability_bins": [
+        {
+          "n": 294,
+          "mean_probability": 0.008462873979419382,
+          "observed_rate": 0.017006802721088437
+        },
+        {
+          "n": 26,
+          "mean_probability": 0.15379234785195592,
+          "observed_rate": 0.11538461538461539
+        },
+        {
+          "n": 12,
+          "mean_probability": 0.23624295137904985,
+          "observed_rate": 0.3333333333333333
+        },
+        {
+          "n": 17,
+          "mean_probability": 0.3442052836725309,
+          "observed_rate": 0.17647058823529413
+        },
+        {
+          "n": 9,
+          "mean_probability": 0.4469172000465169,
+          "observed_rate": 0.4444444444444444
+        },
+        {
+          "n": 14,
+          "mean_probability": 0.5496035027694212,
+          "observed_rate": 0.7142857142857143
+        },
+        {
+          "n": 6,
+          "mean_probability": 0.6492003749824892,
+          "observed_rate": 0.6666666666666666
+        },
+        {
+          "n": 11,
+          "mean_probability": 0.7492710791734691,
+          "observed_rate": 0.8181818181818182
+        },
+        {
+          "n": 19,
+          "mean_probability": 0.8612257189866954,
+          "observed_rate": 0.6842105263157895
+        },
+        {
+          "n": 132,
+          "mean_probability": 0.9864669987907143,
+          "observed_rate": 0.9924242424242424
+        }
+      ]
+    },
+    "curvature": {
+      "n": 540,
+      "positives": 327,
+      "brier": 0.0789892794635324,
+      "state_persistence_brier": 0.09814814814814815,
+      "gaussian_persistence_brier": 0.07339809699479138,
+      "ece": 0.08070300416829003,
+      "mae_in_tolerance_units": 0.39440914158284257,
+      "coverage_95": 0.5185185185185185,
+      "reliability_bins": [
+        {
+          "n": 199,
+          "mean_probability": 0.010153025983056771,
+          "observed_rate": 0.10050251256281408
+        },
+        {
+          "n": 18,
+          "mean_probability": 0.1459855390736482,
+          "observed_rate": 0.5
+        },
+        {
+          "n": 17,
+          "mean_probability": 0.25215671814140395,
+          "observed_rate": 0.4117647058823529
+        },
+        {
+          "n": 15,
+          "mean_probability": 0.3504521945359316,
+          "observed_rate": 0.6
+        },
+        {
+          "n": 15,
+          "mean_probability": 0.4513053716944463,
+          "observed_rate": 0.5333333333333333
+        },
+        {
+          "n": 11,
+          "mean_probability": 0.5540067547576332,
+          "observed_rate": 0.8181818181818182
+        },
+        {
+          "n": 10,
+          "mean_probability": 0.6548727566801809,
+          "observed_rate": 1.0
+        },
+        {
+          "n": 9,
+          "mean_probability": 0.7433636610865415,
+          "observed_rate": 1.0
+        },
+        {
+          "n": 11,
+          "mean_probability": 0.8639177156243772,
+          "observed_rate": 1.0
+        },
+        {
+          "n": 235,
+          "mean_probability": 0.9941403765213919,
+          "observed_rate": 1.0
+        }
+      ]
+    },
+    "step_change": {
+      "n": 540,
+      "positives": 198,
+      "brier": 0.26044666169505803,
+      "state_persistence_brier": 0.28703703703703703,
+      "gaussian_persistence_brier": 0.25336422098892036,
+      "ece": 0.25297411554152016,
+      "mae_in_tolerance_units": 0.6385685994367668,
+      "coverage_95": 0.024074074074074074,
+      "reliability_bins": [
+        {
+          "n": 299,
+          "mean_probability": 0.0073258876843577125,
+          "observed_rate": 0.24749163879598662
+        },
+        {
+          "n": 30,
+          "mean_probability": 0.14904390761665895,
+          "observed_rate": 0.3
+        },
+        {
+          "n": 20,
+          "mean_probability": 0.2506525367710865,
+          "observed_rate": 0.2
+        },
+        {
+          "n": 3,
+          "mean_probability": 0.321249300606475,
+          "observed_rate": 0.6666666666666666
+        },
+        {
+          "n": 9,
+          "mean_probability": 0.4537575288369382,
+          "observed_rate": 0.2222222222222222
+        },
+        {
+          "n": 4,
+          "mean_probability": 0.5287512675400956,
+          "observed_rate": 0.5
+        },
+        {
+          "n": 19,
+          "mean_probability": 0.6558905814616324,
+          "observed_rate": 0.2631578947368421
+        },
+        {
+          "n": 16,
+          "mean_probability": 0.7522021567501341,
+          "observed_rate": 0.3125
+        },
+        {
+          "n": 12,
+          "mean_probability": 0.8480262117338678,
+          "observed_rate": 0.16666666666666666
+        },
+        {
+          "n": 128,
+          "mean_probability": 0.9870795646771009,
+          "observed_rate": 0.7265625
+        }
+      ]
+    },
+    "heavy_tail": {
+      "n": 540,
+      "positives": 165,
+      "brier": 0.06747272656719605,
+      "state_persistence_brier": 0.1111111111111111,
+      "gaussian_persistence_brier": 0.08214467142549652,
+      "ece": 0.0257387387758393,
+      "mae_in_tolerance_units": 0.20657158799825298,
+      "coverage_95": 0.9185185185185185,
+      "reliability_bins": [
+        {
+          "n": 281,
+          "mean_probability": 0.014093525019833034,
+          "observed_rate": 0.014234875444839857
+        },
+        {
+          "n": 37,
+          "mean_probability": 0.14864154920758876,
+          "observed_rate": 0.08108108108108109
+        },
+        {
+          "n": 25,
+          "mean_probability": 0.25813309784222793,
+          "observed_rate": 0.2
+        },
+        {
+          "n": 13,
+          "mean_probability": 0.3461622369848835,
+          "observed_rate": 0.3076923076923077
+        },
+        {
+          "n": 11,
+          "mean_probability": 0.4491218042100641,
+          "observed_rate": 0.36363636363636365
+        },
+        {
+          "n": 17,
+          "mean_probability": 0.5489411045859619,
+          "observed_rate": 0.47058823529411764
+        },
+        {
+          "n": 16,
+          "mean_probability": 0.6641063121127472,
+          "observed_rate": 0.625
+        },
+        {
+          "n": 25,
+          "mean_probability": 0.7456799093333124,
+          "observed_rate": 0.84
+        },
+        {
+          "n": 21,
+          "mean_probability": 0.8526679871612747,
+          "observed_rate": 0.8095238095238095
+        },
+        {
+          "n": 94,
+          "mean_probability": 0.9813186809240039,
+          "observed_rate": 0.9468085106382979
+        }
+      ]
+    },
+    "maintenance_reset": {
+      "n": 540,
+      "positives": 0,
+      "brier": 0.3187464154989415,
+      "state_persistence_brier": 0.3055555555555556,
+      "gaussian_persistence_brier": 0.258527208668875,
+      "ece": 0.36121655876235714,
+      "mae_in_tolerance_units": 0.8342543826001173,
+      "coverage_95": 0.20925925925925926,
+      "reliability_bins": [
+        {
+          "n": 293,
+          "mean_probability": 0.008717870271284596,
+          "observed_rate": 0.0
+        },
+        {
+          "n": 21,
+          "mean_probability": 0.14860305854841455,
+          "observed_rate": 0.0
+        },
+        {
+          "n": 11,
+          "mean_probability": 0.23978402842070004,
+          "observed_rate": 0.0
+        },
+        {
+          "n": 14,
+          "mean_probability": 0.3491555472430646,
+          "observed_rate": 0.0
+        },
+        {
+          "n": 6,
+          "mean_probability": 0.43604762033276967,
+          "observed_rate": 0.0
+        },
+        {
+          "n": 7,
+          "mean_probability": 0.538356221107458,
+          "observed_rate": 0.0
+        },
+        {
+          "n": 14,
+          "mean_probability": 0.6524580559272545,
+          "observed_rate": 0.0
+        },
+        {
+          "n": 15,
+          "mean_probability": 0.7520466529467301,
+          "observed_rate": 0.0
+        },
+        {
+          "n": 14,
+          "mean_probability": 0.8615787607298738,
+          "observed_rate": 0.0
+        },
+        {
+          "n": 145,
+          "mean_probability": 0.9861665175275144,
+          "observed_rate": 0.0
+        }
+      ]
+    }
+  },
+  "by_family": {
+    "pressure": {
+      "n": 1080,
+      "positives": 315,
+      "brier": 0.15189680027780136,
+      "state_persistence_brier": 0.1925925925925926,
+      "gaussian_persistence_brier": 0.14904027277179108,
+      "ece": 0.11589531926914212,
+      "mae_in_tolerance_units": 0.3842303952272413,
+      "coverage_95": 0.6027777777777777,
+      "reliability_bins": [
+        {
+          "n": 576,
+          "mean_probability": 0.012383106889215649,
+          "observed_rate": 0.0763888888888889
+        },
+        {
+          "n": 69,
+          "mean_probability": 0.15304678808554759,
+          "observed_rate": 0.21739130434782608
+        },
+        {
+          "n": 42,
+          "mean_probability": 0.24011463976164246,
+          "observed_rate": 0.2857142857142857
+        },
+        {
+          "n": 32,
+          "mean_probability": 0.3428203542375483,
+          "observed_rate": 0.3125
+        },
+        {
+          "n": 27,
+          "mean_probability": 0.4477090626061052,
+          "observed_rate": 0.2962962962962963
+        },
+        {
+          "n": 23,
+          "mean_probability": 0.5457861550309607,
+          "observed_rate": 0.5217391304347826
+        },
+        {
+          "n": 24,
+          "mean_probability": 0.6517805936457276,
+          "observed_rate": 0.375
+        },
+        {
+          "n": 18,
+          "mean_probability": 0.7517184456455569,
+          "observed_rate": 0.5555555555555556
+        },
+        {
+          "n": 29,
+          "mean_probability": 0.8626311140001625,
+          "observed_rate": 0.6896551724137931
+        },
+        {
+          "n": 240,
+          "mean_probability": 0.9839300477498033,
+          "observed_rate": 0.7291666666666666
+        }
+      ]
+    },
+    "temperature": {
+      "n": 1080,
+      "positives": 314,
+      "brier": 0.1320162134547494,
+      "state_persistence_brier": 0.14444444444444443,
+      "gaussian_persistence_brier": 0.12308346215043889,
+      "ece": 0.10298409809060212,
+      "mae_in_tolerance_units": 0.3871508999635727,
+      "coverage_95": 0.5611111111111111,
+      "reliability_bins": [
+        {
+          "n": 586,
+          "mean_probability": 0.00849117459497414,
+          "observed_rate": 0.04607508532423208
+        },
+        {
+          "n": 47,
+          "mean_probability": 0.15021301274263524,
+          "observed_rate": 0.1702127659574468
+        },
+        {
+          "n": 42,
+          "mean_probability": 0.2512092255142265,
+          "observed_rate": 0.30952380952380953
+        },
+        {
+          "n": 26,
+          "mean_probability": 0.35399609106078267,
+          "observed_rate": 0.3076923076923077
+        },
+        {
+          "n": 19,
+          "mean_probability": 0.4407276012613474,
+          "observed_rate": 0.5789473684210527
+        },
+        {
+          "n": 19,
+          "mean_probability": 0.5431078794669029,
+          "observed_rate": 0.5789473684210527
+        },
+        {
+          "n": 25,
+          "mean_probability": 0.6374929714752242,
+          "observed_rate": 0.44
+        },
+        {
+          "n": 29,
+          "mean_probability": 0.7542623597830853,
+          "observed_rate": 0.41379310344827586
+        },
+        {
+          "n": 31,
+          "mean_probability": 0.8557630413057482,
+          "observed_rate": 0.45161290322580644
+        },
+        {
+          "n": 256,
+          "mean_probability": 0.9881204768991978,
+          "observed_rate": 0.77734375
+        }
+      ]
+    },
+    "ph": {
+      "n": 1080,
+      "positives": 306,
+      "brier": 0.1414771110011772,
+      "state_persistence_brier": 0.1648148148148148,
+      "gaussian_persistence_brier": 0.13467368747007868,
+      "ece": 0.1120532632878953,
+      "mae_in_tolerance_units": 0.38093068316845585,
+      "coverage_95": 0.5981481481481481,
+      "reliability_bins": [
+        {
+          "n": 584,
+          "mean_probability": 0.007095351199663818,
+          "observed_rate": 0.0547945205479452
+        },
+        {
+          "n": 42,
+          "mean_probability": 0.15307958867049618,
+          "observed_rate": 0.16666666666666666
+        },
+        {
+          "n": 34,
+          "mean_probability": 0.2584662476697721,
+          "observed_rate": 0.11764705882352941
+        },
+        {
+          "n": 26,
+          "mean_probability": 0.340561331307616,
+          "observed_rate": 0.23076923076923078
+        },
+        {
+          "n": 26,
+          "mean_probability": 0.45446055676214736,
+          "observed_rate": 0.4230769230769231
+        },
+        {
+          "n": 25,
+          "mean_probability": 0.5565493302480071,
+          "observed_rate": 0.56
+        },
+        {
+          "n": 34,
+          "mean_probability": 0.6611961301884302,
+          "observed_rate": 0.47058823529411764
+        },
+        {
+          "n": 38,
+          "mean_probability": 0.7404382700836921,
+          "observed_rate": 0.6578947368421053
+        },
+        {
+          "n": 21,
+          "mean_probability": 0.8474910738131339,
+          "observed_rate": 0.5238095238095238
+        },
+        {
+          "n": 250,
+          "mean_probability": 0.9905249147265711,
+          "observed_rate": 0.72
+        }
+      ]
+    }
+  },
+  "by_horizon": {
+    "30": {
+      "n": 1080,
+      "positives": 292,
+      "brier": 0.13146027082775144,
+      "state_persistence_brier": 0.1638888888888889,
+      "gaussian_persistence_brier": 0.1297857658255357,
+      "ece": 0.10327412908289565,
+      "mae_in_tolerance_units": 0.3573228669195746,
+      "coverage_95": 0.6268518518518519,
+      "reliability_bins": [
+        {
+          "n": 611,
+          "mean_probability": 0.008806386303347478,
+          "observed_rate": 0.058919803600654665
+        },
+        {
+          "n": 52,
+          "mean_probability": 0.15424920627916616,
+          "observed_rate": 0.11538461538461539
+        },
+        {
+          "n": 37,
+          "mean_probability": 0.2502959215945253,
+          "observed_rate": 0.1891891891891892
+        },
+        {
+          "n": 25,
+          "mean_probability": 0.3509468813855501,
+          "observed_rate": 0.32
+        },
+        {
+          "n": 19,
+          "mean_probability": 0.4452776043715359,
+          "observed_rate": 0.47368421052631576
+        },
+        {
+          "n": 28,
+          "mean_probability": 0.5444635479014711,
+          "observed_rate": 0.5
+        },
+        {
+          "n": 28,
+          "mean_probability": 0.6596231622506961,
+          "observed_rate": 0.42857142857142855
+        },
+        {
+          "n": 20,
+          "mean_probability": 0.7443411235050064,
+          "observed_rate": 0.5
+        },
+        {
+          "n": 29,
+          "mean_probability": 0.8560811760608003,
+          "observed_rate": 0.5517241379310345
+        },
+        {
+          "n": 231,
+          "mean_probability": 0.9865534701456925,
+          "observed_rate": 0.7532467532467533
+        }
+      ]
+    },
+    "60": {
+      "n": 1080,
+      "positives": 315,
+      "brier": 0.14184751224302228,
+      "state_persistence_brier": 0.1648148148148148,
+      "gaussian_persistence_brier": 0.13418056101522738,
+      "ece": 0.10620273315563382,
+      "mae_in_tolerance_units": 0.38304619979775945,
+      "coverage_95": 0.5694444444444444,
+      "reliability_bins": [
+        {
+          "n": 584,
+          "mean_probability": 0.00944531369892425,
+          "observed_rate": 0.05650684931506849
+        },
+        {
+          "n": 50,
+          "mean_probability": 0.15393606962237918,
+          "observed_rate": 0.26
+        },
+        {
+          "n": 41,
+          "mean_probability": 0.25341661042183034,
+          "observed_rate": 0.24390243902439024
+        },
+        {
+          "n": 27,
+          "mean_probability": 0.3414691034463763,
+          "observed_rate": 0.2962962962962963
+        },
+        {
+          "n": 27,
+          "mean_probability": 0.4498337542709063,
+          "observed_rate": 0.37037037037037035
+        },
+        {
+          "n": 16,
+          "mean_probability": 0.5496449862123355,
+          "observed_rate": 0.5625
+        },
+        {
+          "n": 29,
+          "mean_probability": 0.642909367541602,
+          "observed_rate": 0.4827586206896552
+        },
+        {
+          "n": 31,
+          "mean_probability": 0.7461955216856033,
+          "observed_rate": 0.6129032258064516
+        },
+        {
+          "n": 28,
+          "mean_probability": 0.8575417343427355,
+          "observed_rate": 0.5714285714285714
+        },
+        {
+          "n": 247,
+          "mean_probability": 0.9885152983423247,
+          "observed_rate": 0.7408906882591093
+        }
+      ]
+    },
+    "90": {
+      "n": 1080,
+      "positives": 328,
+      "brier": 0.15208234166295426,
+      "state_persistence_brier": 0.17314814814814813,
+      "gaussian_persistence_brier": 0.14283109555154563,
+      "ece": 0.11865875201739223,
+      "mae_in_tolerance_units": 0.41194291164193586,
+      "coverage_95": 0.5657407407407408,
+      "reliability_bins": [
+        {
+          "n": 551,
+          "mean_probability": 0.009719451451777966,
+          "observed_rate": 0.06170598911070781
+        },
+        {
+          "n": 56,
+          "mean_probability": 0.14878250880949784,
+          "observed_rate": 0.19642857142857142
+        },
+        {
+          "n": 40,
+          "mean_probability": 0.24431061590165676,
+          "observed_rate": 0.3
+        },
+        {
+          "n": 32,
+          "mean_probability": 0.34485645279653115,
+          "observed_rate": 0.25
+        },
+        {
+          "n": 26,
+          "mean_probability": 0.4489291439143315,
+          "observed_rate": 0.4230769230769231
+        },
+        {
+          "n": 23,
+          "mean_probability": 0.5541984961367334,
+          "observed_rate": 0.6086956521739131
+        },
+        {
+          "n": 26,
+          "mean_probability": 0.6518041061176442,
+          "observed_rate": 0.38461538461538464
+        },
+        {
+          "n": 34,
+          "mean_probability": 0.7506562081222344,
+          "observed_rate": 0.5294117647058824
+        },
+        {
+          "n": 24,
+          "mean_probability": 0.8543644362166217,
+          "observed_rate": 0.5416666666666666
+        },
+        {
+          "n": 268,
+          "mean_probability": 0.9875975818417202,
+          "observed_rate": 0.7350746268656716
+        }
+      ]
+    }
+  },
+  "by_training_length": {
+    "8": {
+      "n": 1620,
+      "positives": 357,
+      "brier": 0.1402651645587724,
+      "state_persistence_brier": 0.1697530864197531,
+      "gaussian_persistence_brier": 0.1308081187269275,
+      "ece": 0.10031328305428355,
+      "mae_in_tolerance_units": 0.3391721486692073,
+      "coverage_95": 0.6234567901234568,
+      "reliability_bins": [
+        {
+          "n": 942,
+          "mean_probability": 0.009106366931179416,
+          "observed_rate": 0.06157112526539278
+        },
+        {
+          "n": 102,
+          "mean_probability": 0.15067447240755974,
+          "observed_rate": 0.16666666666666666
+        },
+        {
+          "n": 84,
+          "mean_probability": 0.2488678835301236,
+          "observed_rate": 0.21428571428571427
+        },
+        {
+          "n": 59,
+          "mean_probability": 0.3470490314400954,
+          "observed_rate": 0.2711864406779661
+        },
+        {
+          "n": 44,
+          "mean_probability": 0.44664783715320466,
+          "observed_rate": 0.3409090909090909
+        },
+        {
+          "n": 47,
+          "mean_probability": 0.5465471971375477,
+          "observed_rate": 0.5106382978723404
+        },
+        {
+          "n": 44,
+          "mean_probability": 0.6466882317462992,
+          "observed_rate": 0.4090909090909091
+        },
+        {
+          "n": 37,
+          "mean_probability": 0.7503543677092617,
+          "observed_rate": 0.6486486486486487
+        },
+        {
+          "n": 39,
+          "mean_probability": 0.8543465473346304,
+          "observed_rate": 0.5641025641025641
+        },
+        {
+          "n": 222,
+          "mean_probability": 0.9783629957786002,
+          "observed_rate": 0.6531531531531531
+        }
+      ]
+    },
+    "16": {
+      "n": 1620,
+      "positives": 578,
+      "brier": 0.1433282519303796,
+      "state_persistence_brier": 0.1648148148148148,
+      "gaussian_persistence_brier": 0.14039016286794495,
+      "ece": 0.11907402523435405,
+      "mae_in_tolerance_units": 0.4290358369036393,
+      "coverage_95": 0.5512345679012346,
+      "reliability_bins": [
+        {
+          "n": 804,
+          "mean_probability": 0.009544757875964828,
+          "observed_rate": 0.055970149253731345
+        },
+        {
+          "n": 56,
+          "mean_probability": 0.15501404491779258,
+          "observed_rate": 0.23214285714285715
+        },
+        {
+          "n": 34,
+          "mean_probability": 0.25054566311259907,
+          "observed_rate": 0.3235294117647059
+        },
+        {
+          "n": 25,
+          "mean_probability": 0.34211405848857124,
+          "observed_rate": 0.32
+        },
+        {
+          "n": 28,
+          "mean_probability": 0.45090852697875955,
+          "observed_rate": 0.5357142857142857
+        },
+        {
+          "n": 20,
+          "mean_probability": 0.5549073133159342,
+          "observed_rate": 0.65
+        },
+        {
+          "n": 39,
+          "mean_probability": 0.6565755067678855,
+          "observed_rate": 0.46153846153846156
+        },
+        {
+          "n": 48,
+          "mean_probability": 0.7453767315263984,
+          "observed_rate": 0.4791666666666667
+        },
+        {
+          "n": 42,
+          "mean_probability": 0.8576846140597174,
+          "observed_rate": 0.5476190476190477
+        },
+        {
+          "n": 524,
+          "mean_probability": 0.9914822464979789,
+          "observed_rate": 0.7805343511450382
+        }
+      ]
+    }
+  },
+  "health_v1": {
+    "checks_passed": 294,
+    "weight_sets": [
+      {
+        "risk_90_days": 0.4,
+        "current_error": 0.35,
+        "out_of_tolerance": 0.25
+      },
+      {
+        "risk_90_days": 0.5,
+        "current_error": 0.3,
+        "out_of_tolerance": 0.2
+      },
+      {
+        "risk_90_days": 0.2,
+        "current_error": 0.6,
+        "out_of_tolerance": 0.2
+      }
+    ],
+    "max_change_points": 5.0,
+    "scope": "Metrological v1 design consistency only; incidents and data quality are not implemented."
+  },
+  "protocol_sha256": "fe5a8ed6e327e01cef7d3149933e1503be8b8da9d6d538ddedf888d6cdcfc84a",
+  "code_sha": "cd0610aaf280203002931fd5add21923602b209c"
+}
