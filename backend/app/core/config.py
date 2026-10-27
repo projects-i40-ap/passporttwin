@@ -11,6 +11,7 @@ from pydantic_settings import BaseSettings, SettingsConfigDict
 from pydantic import AnyHttpUrl, Field, field_validator
 
 from app.schemas.health_score import HealthScoreWeights
+from app.schemas.health_score_v2 import LifecycleHealthWeights
 
 
 class Settings(BaseSettings):
@@ -36,6 +37,7 @@ class Settings(BaseSettings):
 
     # JSON environment variable HEALTH_SCORE_WEIGHTS; invalid values fail startup.
     health_score_weights: HealthScoreWeights = Field(default_factory=HealthScoreWeights)
+    lifecycle_health_weights: LifecycleHealthWeights = Field(default_factory=LifecycleHealthWeights)
 
     public_api_base_url: AnyHttpUrl = "http://localhost:8000"
     passport_frontend_base_url: AnyHttpUrl = "http://localhost:5173"

@@ -7,6 +7,7 @@ const number = (value) => value == null ? "No estimable" : Number(value).toLocal
 const probability = (value) => value == null ? "No estimable" :
   value > 0 && value * 100 < 0.001 ? "< 0,001 %" : `${number(value * 100)} %`;
 const reasons = {
+  INSUFFICIENT_POST_MAINTENANCE_HISTORY: "faltan calibraciones posteriores al último mantenimiento",
   INSUFFICIENT_HISTORY: "faltan calibraciones para estimar la incertidumbre",
   DUPLICATE_CALIBRATION_DATES: "hay calibraciones con fechas duplicadas",
   INVALID_CALIBRATION_VALUES: "hay errores o tolerancias no válidos",
@@ -30,7 +31,7 @@ export default function Passport({ apiBaseUrl }) {
       try {
         const instrument = await get(`by-public-id/${encodeURIComponent(publicId)}`);
         const responses = await Promise.allSettled([
-          get(`${instrument.id}/calibrations`), get(`${instrument.id}/predictions`),
+          get(`${instrument.id}/calibrations`), get(`${instrument.id}/health-score`),
           get(`${instrument.id}/tolerance-risk`),
         ]);
         if (!controller.signal.aborted) setState({ instrument,
@@ -62,16 +63,17 @@ export default function Passport({ apiBaseUrl }) {
     </section>
     <section aria-labelledby="score"><h2 id="score">Health Score</h2>
       {!score ? <p role="status">Indicador no disponible. El resto del pasaporte sigue accesible.</p> : <>
-        <p className="passport-score">{number(score.health_score)} <small>/ 100</small></p>
+        <p className="passport-score">{score.health_score == null ? "No calculado" : <>{number(score.health_score)} <small>/ 100</small></>}</p>
+        {score.health_score == null && <p>Faltan componentes fiables para calcular el indicador; no equivale a salud media.</p>}
         {score.health_score_details?.fallback ? <p>Sin calibraciones: valor provisional, no calculado.</p> : <>
           <p>Indicador heurístico. Los pesos y la interpretación están pendientes de validación experimental.</p>
           <ul>{Object.entries(score.health_score_details?.components || {}).map(([name, component]) =>
-            <li key={name}>{({risk_90_days: "Proyección histórica a 90 días", current_error: "Error actual / tolerancia", out_of_tolerance: "Estado fuera de tolerancia"})[name] || name}: −{number(component.penalty_points)} puntos (peso {number(component.weight)})</li>)}</ul>
+            <li key={name}>{({risk_90_days: "Proyección histórica a 90 días", calibration_status: "Estado de calibración", predicted_risk: "Riesgo previsto", recent_incidents: "Incidencias recientes", data_quality: "Calidad de datos", current_error: "Error actual / tolerancia", out_of_tolerance: "Estado fuera de tolerancia"})[name] || name}: {component.penalty_points == null ? "No disponible" : `−${number(component.penalty_points)} puntos`} (peso {number(component.weight)})</li>)}</ul>
         </>}
       </>}
     </section>
     <section aria-labelledby="risk"><h2 id="risk">Riesgo experimental de salida de tolerancia</h2>
-      <p>Estimación en cada fecha objetivo, no de cualquier cruce durante el intervalo. Este modelo no alimenta todavía el Health Score.</p>
+      <p>Estimación en cada fecha objetivo, no de cualquier cruce durante el intervalo. Este modelo aporta el componente de riesgo del Health Score de ciclo de vida.</p>
       {!risk ? <p role="status">Estimación no disponible.</p> : risk.status !== "ESTIMATED" ?
         <p>No estimable: {reasons[risk.reason] || "el historial requiere revisión"}. No equivale a riesgo cero.</p> : <>
           <p>Referencia: {risk.as_of} · {risk.calibrations_used} calibraciones · Probabilidades sin calibración experimental.</p>

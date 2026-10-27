@@ -12,7 +12,7 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
 from app.database.session import Base, engine
-from app.api import instruments, documents, tolerance_risk, analytics_snapshots
+from app.api import instruments, documents, tolerance_risk, analytics_snapshots, lifecycle_health
 from app.core.config import settings
 
 
@@ -63,3 +63,4 @@ app.include_router(instruments.router, prefix="/api/v1")
 app.include_router(documents.router, prefix="/api/v1")
 app.include_router(tolerance_risk.router, prefix="/api/v1")
 app.include_router(analytics_snapshots.router, prefix="/api/v1")
+app.include_router(lifecycle_health.router, prefix="/api/v1")
