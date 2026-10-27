@@ -18,6 +18,8 @@ def db():
         cursor.execute((ROOT / 'infra/postgres/schema.sql').read_text())
         cursor.execute((ROOT / 'bi/sql/fleet_overview.sql').read_text().replace(
             'passporttwin_bi', 'fleet_sql_test_bi'))
+        cursor.execute((ROOT / 'bi/sql/fleet_analytics.sql').read_text().replace(
+            'passporttwin_bi', 'fleet_sql_test_bi'))
         cursor.execute("INSERT INTO instrument_type(name,magnitude,unit) VALUES ('test-fleet','Pressure','bar') RETURNING id")
         type_id = cursor.fetchone()[0]
         cursor.execute("INSERT INTO instrument_unit(instrument_type_id,serial_number,manufacturer,model) VALUES (%s,'TEST-FLEET','TEST','TEST') RETURNING id", (type_id,))
@@ -87,3 +89,27 @@ def test_missing_due_date_and_red_precedence(db):
     assert row(cursor,instrument_id)[:2] == ('gray','MISSING_DUE_DATE')
     cursor.execute("UPDATE instrument_unit SET lifecycle_state='blocked' WHERE id=%s",(instrument_id,))
     assert row(cursor,instrument_id)[:2] == ('red','LIFECYCLE_ALERT')
+
+
+def test_analytics_snapshot_freshness_and_stale_values_hidden(db):
+    import json
+    cursor,instrument_id=db
+    calibrate(cursor,instrument_id)
+    def status():
+        cursor.execute("SELECT analytics_status,current_health_score,snapshot_health_score,current_probability_90 FROM fleet_sql_test_bi.fleet_analytics WHERE instrument_id=%s",(instrument_id,))
+        return cursor.fetchone()
+    assert status() == ('MISSING',None,None,None)
+    cursor.execute("SELECT id,calibration_date,error_value,tolerance FROM calibration_event WHERE instrument_unit_id=%s",(instrument_id,))
+    calibration_id,calibration_date,error,tolerance=cursor.fetchone()
+    manifest={'lifecycle_state':'operational','calibrations':[{'id':calibration_id,'calibration_date':calibration_date.isoformat(),'error_value':float(error),'tolerance':float(tolerance)}]}
+    cursor.execute("""INSERT INTO analytics_snapshot(instrument_unit_id,as_of,input_hash,input_manifest,weights,
+        score_method_version,risk_method_version,score_status,risk_status,health_score,score_result,risk_result)
+        VALUES (%s,CURRENT_DATE,'test',%s,'{}','weighted_penalties_v1','ols_gaussian_predictive_v1','CALCULATED','NOT_ESTIMABLE',92.5,'{}','{}')""",(instrument_id,json.dumps(manifest)))
+    cursor.execute('UPDATE analytics_snapshot SET probability_90=0.2 WHERE instrument_unit_id=%s',(instrument_id,))
+    assert status() == ('CURRENT',92.5,92.5,0.2)
+    cursor.execute('UPDATE calibration_event SET error_value=0.2 WHERE id=%s',(calibration_id,))
+    assert status() == ('STALE_INPUTS',None,92.5,None)
+    cursor.execute('UPDATE calibration_event SET error_value=0.1 WHERE id=%s',(calibration_id,))
+    assert status()[0] == 'CURRENT'
+    cursor.execute('UPDATE analytics_snapshot SET as_of=CURRENT_DATE-1 WHERE instrument_unit_id=%s',(instrument_id,))
+    assert status() == ('STALE_DATE',None,92.5,None)

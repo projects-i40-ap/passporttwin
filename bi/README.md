@@ -1,16 +1,19 @@
 # Dashboard de flota en Metabase
 
-Primer bloque de la tarjeta «Construir dashboard de flota en Metabase con semáforo
-y priorización». Usa datos canónicos actuales y es independiente de las PR #8 y #9.
-No cambia backend, frontend, Health Score ni estimación de riesgo.
+Dashboard de la tarjeta «Construir dashboard de flota en Metabase con semáforo
+y priorización». Usa datos canónicos y snapshots de los indicadores analíticos.
+La capa BI conserva las fórmulas de Health Score y riesgo. El backend añade la
+persistencia explícita descrita en el contrato de snapshots; no se modifica el frontend.
 
 ## Instalación explícita
 
-1. Aplicar `bi/sql/fleet_overview.sql` a la base de aplicación con una cuenta que
+1. Aplicar los tres scripts indicados a la base de aplicación con una cuenta que
    pueda crear esquema y vista. Ejemplo local:
 
    ```sh
+   docker compose exec -T postgres psql -U passporttwin -d passporttwin < infra/postgres/analytics_snapshot.sql
    docker compose exec -T postgres psql -U passporttwin -d passporttwin < bi/sql/fleet_overview.sql
+   docker compose exec -T postgres psql -U passporttwin -d passporttwin < bi/sql/fleet_analytics.sql
    ```
 
    Ajustar usuario y base si no se usan los valores locales. No ejecutarlo sobre
@@ -28,7 +31,7 @@ No cambia backend, frontend, Health Score ni estimación de riesgo.
    python bi/metabase/provision_fleet.py --database-id 2 --collection-id 3
    ```
 
-El script crea un dashboard nuevo y siete preguntas guardadas; imprime su URL.
+El script crea un dashboard nuevo y diez preguntas guardadas; imprime su URL.
 No modifica dashboards existentes. Repetirlo crea otra copia deliberadamente.
 Si falla a mitad puede dejar objetos parciales: revisarlos en la colección antes
 de reintentar. No envía credenciales por consola; usar HTTPS fuera de una red local.
@@ -40,6 +43,8 @@ de reintentar. No envía credenciales por consola; usar HTTPS fuera de una red l
 - Distribución por semáforo, primeras 50 prioridades y próximos vencimientos a 90 días.
 - Filtros de texto por familia y ubicación, aplicados a todas las preguntas.
 - Ratio observado `abs(error) / tolerancia`: no es probabilidad de fallo.
+- Vigencia de snapshots, Health Score por versión/pesos y riesgo experimental
+  a 30/60/90 días, con fecha de referencia y estados de no disponibilidad.
 
 Se excluyen retirados. Una fila por activo; documentos agregados antes de unir
 para evitar duplicar instrumentos. La última calibración no futura se elige por
@@ -59,10 +64,11 @@ para no ocultar alertas secundarias. Orden de intervención: rojo, amarillo, gri
 verde; dentro de cada grupo criticidad y vencimiento. Es una política de diseño
 para revisión del equipo, no una priorización validada experimentalmente.
 
-Los documentos sin activo asignado no entran en el KPI por instrumento. El Health
-Score y la probabilidad predictiva de las PR #8/#9 no están materializados en la
-base: integrarlos con Metabase requiere un contrato de persistencia o una carga
-de snapshots posterior, sin inventar datos ni llamar APIs por cada fila SQL.
+Los documentos sin activo asignado no entran en el KPI por instrumento. Los indicadores analíticos se incorporan mediante snapshots explícitos y versionados.
+Aplicar también `infra/postgres/analytics_snapshot.sql` y `bi/sql/fleet_analytics.sql`,
+y generar resultados antes de usar las tres tarjetas analíticas. Ver
+[contrato e instalación](../docs/architecture/analytics-snapshots.md). Los resultados
+desactualizados o no calculados se muestran sin valor numérico vigente.
 
 ## Pruebas
 
@@ -72,7 +78,7 @@ Usar DATABASE_URL de una base desechable y ejecutar `python -m pytest bi/tests -
 desde la raíz con dependencias del backend. No utilizar una base operativa para tests.
 
 La tarjeta permanece en curso hasta revisar la priorización, validar el dashboard
-en el entorno compartido e incorporar la visualización predictiva acordada.
+en el entorno compartido y validar experimentalmente la visualización predictiva.
 
 ## Evidencia del checkpoint 2026-10-26
 
