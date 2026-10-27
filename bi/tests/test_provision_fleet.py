@@ -46,3 +46,12 @@ def test_http_errors_propagate_without_claiming_success():
 
     with pytest.raises(requests.HTTPError):
         module.provision('http://metabase',2,3,Session())
+
+
+def test_passport_links_have_configured_origin_and_raw_units_remain_available():
+    cards=module.cards('https://passport.example.com/')
+    assert 'measurement_unit' in module.BASE
+    for index in (5,9):
+        assert "'https://passport.example.com' || '/passport/' || public_id::text AS passport_url" in cards[index][2]
+    with pytest.raises(ValueError):module.cards('javascript:alert(1)')
+    with pytest.raises(ValueError):module.cards('https://user:pass@example.com')

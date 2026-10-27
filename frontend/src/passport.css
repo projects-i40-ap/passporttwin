@@ -13,5 +13,7 @@
 .passport-horizon h3 { margin-top: 0; }
 .passport-horizon strong { font-size: 1.5rem; }
 .passport-table { overflow-x: auto; }
+.passport-links { display: flex; flex-wrap: wrap; gap: 16px; margin-top: 20px; }
+.passport aside { background: #fff8e6; padding: 16px; border-radius: 8px; margin: 16px 0; }
 .passport table { width: 100%; border-collapse: collapse; text-align: left; }
 .passport th, .passport td { padding: 12px 10px; border-bottom: 1px solid #dce6f0; white-space: nowrap; }

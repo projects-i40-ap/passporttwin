@@ -1,7 +1,9 @@
 import React, { useState } from "react";
 import ReactDOM from "react-dom/client";
-import { BrowserRouter, Routes, Route } from "react-router-dom";
+import { BrowserRouter, Routes, Route, Link, useSearchParams } from "react-router-dom";
 import Passport from "./Passport";
+import InstrumentFinder from "./InstrumentFinder";
+import { statusLabel } from "./presentation";
 
 
 const API_BASE_URL =
@@ -190,28 +192,28 @@ function AuditSummary({ entityType, trace }) {
       {entityType === "instrument" ? (
         <>
           <div>
-            <strong>Instrument ID:</strong> {trace.instrument_id}
+            <strong>ID de instrumento:</strong> {trace.instrument_id}
           </div>
 
           <div>
-            <strong>Serial number:</strong>{" "}
+            <strong>Número de serie:</strong>{" "}
             {trace.serial_number || "—"}
           </div>
         </>
       ) : (
         <>
           <div>
-            <strong>Document ID:</strong> {trace.document_id}
+            <strong>ID de documento:</strong> {trace.document_id}
           </div>
 
           <div>
-            <strong>Filename:</strong>{" "}
+            <strong>Archivo:</strong>{" "}
             {trace.original_filename || "—"}
           </div>
 
           <div>
-            <strong>Processing status:</strong>{" "}
-            {trace.processing_status || "—"}
+            <strong>Estado de procesamiento:</strong>{" "}
+            {statusLabel(trace.processing_status)}
           </div>
 
           <div style={{ fontFamily: "monospace", wordBreak: "break-all" }}>
@@ -221,7 +223,7 @@ function AuditSummary({ entityType, trace }) {
       )}
 
       <div>
-        <strong>Total events:</strong> {trace.total_events}
+        <strong>Total de eventos:</strong> {trace.total_events}
       </div>
     </section>
   );
@@ -367,9 +369,20 @@ function tabStyle(isActive) {
 
 
 function App() {
+  const [params] = useSearchParams();
+  const initialTab = params.get("tab") === "audit" ? "audit" : "review";
+  const hasDocument = /^\d+$/.test(params.get("documentId") || "");
+  const hasAudit = /^\d+$/.test(params.get("id") || "");
+  const initialDocument = hasDocument ? params.get("documentId") : "1";
+  const initialAudit = hasAudit ? params.get("id") : "1";
+  React.useEffect(() => {
+    if (initialTab === "review" && hasDocument) loadDocument();
+    if (initialTab === "audit" && hasAudit) queryAudit({ preventDefault() {} });
+  }, []);
+
   /* Estado de la vista de revisión documental (pestaña "review"). */
-  const [activeTab, setActiveTab] = useState("review");
-  const [documentId, setDocumentId] = useState("1");
+  const [activeTab, setActiveTab] = useState(initialTab);
+  const [documentId, setDocumentId] = useState(initialDocument);
   const [processingStatus, setProcessingStatus] = useState("");
   const [fields, setFields] = useState([]);
   const [rulesFailed, setRulesFailed] = useState([]);
@@ -377,8 +390,8 @@ function App() {
   const [loading, setLoading] = useState(false);
 
   /* Estado de la vista de auditoría (pestaña "audit"). */
-  const [auditEntityType, setAuditEntityType] = useState("document");
-  const [auditEntityId, setAuditEntityId] = useState("1");
+  const [auditEntityType, setAuditEntityType] = useState(params.get("entity") === "instrument" ? "instrument" : "document");
+  const [auditEntityId, setAuditEntityId] = useState(initialAudit);
   const [auditTrace, setAuditTrace] = useState(null);
   const [auditMessage, setAuditMessage] = useState("");
   const [auditLoading, setAuditLoading] = useState(false);
@@ -397,13 +410,13 @@ function App() {
 
       if (!response.ok) {
         throw new Error(
-          data.detail || "Unable to load document fields."
+          data.detail || "No se han podido cargar los campos del documento."
         );
       }
 
       setProcessingStatus(data.processing_status);
       setFields(data.fields);
-      setMessage("Document loaded.");
+      setMessage("Documento cargado.");
     } catch (error) {
       setProcessingStatus("");
       setFields([]);
@@ -448,7 +461,7 @@ function App() {
 
       if (!response.ok) {
         throw new Error(
-          data.detail || "Unable to save field correction."
+          data.detail || "No se ha podido guardar la corrección."
         );
       }
 
@@ -490,7 +503,7 @@ function App() {
 
       if (!response.ok) {
         throw new Error(
-          data.detail || "Unable to revalidate document."
+          data.detail || "No se ha podido volver a validar el documento."
         );
       }
 
@@ -498,10 +511,10 @@ function App() {
       setRulesFailed(data.rules_failed || []);
 
       if (data.processing_status === "ACCEPTED") {
-        setMessage("Document revalidated and accepted.");
+        setMessage("Documento validado y aceptado.");
       } else {
         setMessage(
-          "Document still requires human review."
+          "El documento todavía requiere revisión."
         );
       }
     } catch (error) {
@@ -535,7 +548,7 @@ function App() {
 
       if (!response.ok) {
         throw new Error(
-          data.detail || "Unable to load the audit trail."
+          data.detail || "No se ha podido cargar la auditoría."
         );
       }
 
@@ -561,9 +574,12 @@ function App() {
       }}
     >
       <h1>PassportTwin</h1>
+      {/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(params.get("passport") || "") &&
+        <Link to={`/passport/${params.get("passport")}`}>Volver al pasaporte</Link>}
+      <InstrumentFinder apiBaseUrl={API_BASE_URL} />
 
       <nav
-        aria-label="Application views"
+        aria-label="Vistas de la aplicación"
         style={{
           display: "flex",
           gap: "10px",
@@ -578,7 +594,7 @@ function App() {
           aria-pressed={activeTab === "review"}
           style={tabStyle(activeTab === "review")}
         >
-          Document Review
+          Revisión documental
         </button>
 
         <button
@@ -587,16 +603,16 @@ function App() {
           aria-pressed={activeTab === "audit"}
           style={tabStyle(activeTab === "audit")}
         >
-          Audit &amp; Traceability Trail
+          Auditoría y trazabilidad
         </button>
       </nav>
 
       {activeTab === "review" && (
         <section>
-          <h2>Document Review</h2>
+          <h2>Revisión documental</h2>
 
           <p>
-            Human-in-the-loop review of extracted document fields.
+            Revisa y corrige los campos extraídos antes de aceptar el documento.
           </p>
 
           <section
@@ -615,7 +631,7 @@ function App() {
                 fontWeight: "bold",
               }}
             >
-              Document ID
+              ID de documento
             </label>
 
             <div
@@ -644,14 +660,14 @@ function App() {
                 onClick={loadDocument}
                 disabled={loading || !documentId}
               >
-                Load document
+                Cargar documento
               </button>
             </div>
           </section>
 
           {processingStatus && (
             <section style={{ marginTop: "24px" }}>
-              <strong>Status:</strong>{" "}
+              <strong>Estado:</strong>{" "}
               <span
                 style={{
                   color:
@@ -663,7 +679,7 @@ function App() {
                   fontWeight: "bold",
                 }}
               >
-                {processingStatus}
+                {statusLabel(processingStatus)}
               </span>
             </section>
           )}
@@ -676,7 +692,7 @@ function App() {
 
           {rulesFailed.length > 0 && (
             <section style={{ marginTop: "24px" }}>
-              <h3>Validation rules failed</h3>
+              <h3>Reglas de validación pendientes</h3>
 
               <ul>
                 {rulesFailed.map((rule) => (
@@ -688,7 +704,7 @@ function App() {
 
           {fields.length > 0 && (
             <section style={{ marginTop: "32px" }}>
-              <h3>Extracted fields</h3>
+              <h3>Campos extraídos</h3>
 
               <div
                 style={{
@@ -716,7 +732,7 @@ function App() {
 
                     <div style={{ marginBottom: "12px" }}>
                       <div>
-                        <strong>Raw value:</strong>
+                        <strong>Valor original:</strong>
                       </div>
 
                       <div>{field.raw_value}</div>
@@ -730,7 +746,7 @@ function App() {
                         fontWeight: "bold",
                       }}
                     >
-                      Normalized value
+                      Valor normalizado
                     </label>
 
                     <div
@@ -761,7 +777,7 @@ function App() {
                         onClick={() => saveField(field)}
                         disabled={loading}
                       >
-                        Save correction
+                        Guardar corrección
                       </button>
                     </div>
 
@@ -771,8 +787,8 @@ function App() {
                         fontSize: "0.9rem",
                       }}
                     >
-                      Validation status:{" "}
-                      {field.validation_status}
+                      Estado de validación:{" "}
+                      {statusLabel(field.validation_status)}
                     </div>
                   </article>
                 ))}
@@ -787,7 +803,7 @@ function App() {
                   padding: "10px 16px",
                 }}
               >
-                Revalidate document
+                Volver a validar documento
               </button>
             </section>
           )}
@@ -796,7 +812,7 @@ function App() {
 
       {activeTab === "audit" && (
         <section>
-          <h2>Audit &amp; Traceability Trail</h2>
+          <h2>Auditoría y trazabilidad</h2>
 
           <p>
             Immutable, chronologically descending history of every
@@ -825,7 +841,7 @@ function App() {
                   fontWeight: "bold",
                 }}
               >
-                Search by
+                Buscar por
               </label>
 
               <select
@@ -836,8 +852,8 @@ function App() {
                 }
                 style={{ padding: "8px", minWidth: "170px" }}
               >
-                <option value="document">Document ID</option>
-                <option value="instrument">Instrument ID</option>
+                <option value="document">ID de documento</option>
+                <option value="instrument">ID de instrumento</option>
               </select>
             </div>
 
@@ -851,8 +867,8 @@ function App() {
                 }}
               >
                 {auditEntityType === "instrument"
-                  ? "Instrument ID"
-                  : "Document ID"}
+                  ? "ID de instrumento"
+                  : "ID de documento"}
               </label>
 
               <input
@@ -871,7 +887,7 @@ function App() {
               type="submit"
               disabled={auditLoading || !auditEntityId}
             >
-              {auditLoading ? "Querying..." : "Query audit trail"}
+              {auditLoading ? "Consultando..." : "Consultar auditoría"}
             </button>
           </form>
 

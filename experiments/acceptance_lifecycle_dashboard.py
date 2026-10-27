@@ -76,7 +76,8 @@ def run(url):
     dburl=engine.url
     database=api('POST','database',{'name':'Disposable acceptance','engine':'postgres','details':{'host':dburl.host,'port':dburl.port or 5432,'dbname':dburl.database,'user':dburl.username,'password':dburl.password,'ssl':False}})
     collection=api('POST','collection',{'name':'Acceptance','color':'#509EE3'})
-    link=provision(url,database['id'],collection['id'],session)
+    passport_origin=os.getenv('PASSPORT_FRONTEND_BASE_URL','http://localhost:5173').rstrip('/')
+    link=provision(url,database['id'],collection['id'],session,passport_base_url=passport_origin)
     dashboard=api('GET','dashboard/'+link.rsplit('/',1)[-1]);assert len(dashboard['dashcards'])==10
     tests=0
     for card in dashboard['dashcards']:
@@ -86,6 +87,13 @@ def run(url):
             result=api('POST',f"card/{card['card_id']}/query",{'parameters':params})
             assert result['status']=='completed'
             if card['card']['name']=='Instrumentos activos':assert result['data']['rows']==[[expected]]
+            if card['card']['name'] in ('Prioridad de intervención','Riesgo experimental · snapshots vigentes'):
+                cols=[c['name'] for c in result['data']['cols']]
+                assert 'passport_url' in cols and 'measurement_unit' in cols
+                for row in result['data']['rows']:
+                    assert row[cols.index('passport_url')].startswith(passport_origin+'/passport/')
+                    assert row[cols.index('measurement_unit')] in ('bar','C')
+
             if card['card']['name']=='Riesgo experimental · snapshots vigentes' and not location and not family:
                 cols=[c['name'] for c in result['data']['cols']]
                 assert result['data']['rows'][0][cols.index('serial_number')]=='RED'
@@ -99,7 +107,7 @@ def run(url):
         db.add(MaintenanceEvent(instrument_unit_id=ids['GREEN'],event_date=date.today(),description='acceptance'));db.commit()
     guarded=client.post(f"/api/v1/instruments/{ids['GREEN']}/analytics-snapshots").json()
     assert guarded['risk_result']['reason']=='INSUFFICIENT_POST_MAINTENANCE_HISTORY' and guarded['health_score'] is None
-    return {'metabase_version':properties['version'],'dashboard_cards':10,'successful_card_queries':tests,
+    return {'metabase_version':properties['version'],'dashboard_cards':10,'dashboard_path':'/dashboard/'+link.rsplit('/',1)[-1],'passport_link_origin':passport_origin,'successful_card_queries':tests,
             'acceptance':'PASS','checks':['parity API/snapshot','family/location/combined/empty filters','risk ordering',
              'missing history','stale inputs','stale date','stale probabilities hidden','incident penalty after refresh','maintenance rebaseline'],
             'scope':'Disposable synthetic acceptance; no shared deployment or real data validation'}

@@ -2,4 +2,4 @@
 SELECT 'CREATE DATABASE metabase'
 WHERE NOT EXISTS (SELECT FROM pg_database WHERE datname = 'metabase')\gexec
 
-GRANT ALL PRIVILEGES ON DATABASE metabase TO passporttwin;
+-- The configured POSTGRES_USER creates and owns this database. No hard-coded role.
