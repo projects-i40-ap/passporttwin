@@ -6,7 +6,8 @@ from sqlalchemy.orm import Session
 from app.database.session import get_db
 from app.models.calibration import CalibrationEvent
 from app.models.instrument import InstrumentUnit
-from app.services.tolerance_risk import estimate_tolerance_risk
+from app.services.lifecycle_health import risk_after_maintenance
+from app.models.maintenance import MaintenanceEvent
 
 router = APIRouter(prefix="/instruments", tags=["risk"])
 
@@ -26,5 +27,8 @@ def get_tolerance_risk(
     return {
         "instrument_id": instrument.id,
         "serial_number": instrument.serial_number,
-        **estimate_tolerance_risk(history, reference_date),
+        **risk_after_maintenance(history, db.query(MaintenanceEvent).filter(
+            MaintenanceEvent.instrument_unit_id == instrument_id,
+            MaintenanceEvent.event_date <= reference_date,
+        ).all(), reference_date),
     }

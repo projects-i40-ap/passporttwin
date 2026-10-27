@@ -8,6 +8,7 @@ from sqlalchemy.orm import Session
 from app.database.session import engine, get_db
 from app.main import app
 from app.models.analytics_snapshot import AnalyticsSnapshot
+from app.models.document import Document
 from app.models.calibration import CalibrationEvent, AuditLog
 from app.models.instrument import InstrumentType, InstrumentUnit
 
@@ -19,7 +20,7 @@ def setup():
     db = Session(bind=connection, join_transaction_mode='create_savepoint')
     family = InstrumentType(name=f'snapshot-{uuid4()}', magnitude='Pressure', unit='bar')
     db.add(family); db.flush()
-    instrument = InstrumentUnit(instrument_type_id=family.id,serial_number=f'SNAP-{uuid4()}',manufacturer='TEST',model='TEST')
+    instrument = InstrumentUnit(instrument_type_id=family.id,serial_number=f'SNAP-{uuid4()}',manufacturer='TEST',model='TEST',location='Lab A')
     db.add(instrument); db.flush()
     def override(): yield db
     previous = app.dependency_overrides.copy()
@@ -34,7 +35,8 @@ def setup():
 def seed(db, instrument):
     for i,error in enumerate([0.1,0.23,0.29,0.47]):
         db.add(CalibrationEvent(instrument_unit_id=instrument.id,
-            calibration_date=date.today()-timedelta(days=(3-i)*30),error_value=error,tolerance=1,result='pass'))
+            calibration_date=date.today()-timedelta(days=(3-i)*30),error_value=error,tolerance=1,result='pass',next_due_date=date.today()+timedelta(days=100)))
+    db.add(Document(instrument_unit_id=instrument.id,original_filename='test',file_path='test',sha256_hash=uuid4().hex,processing_status='ACCEPTED'))
     db.flush()
 
 
@@ -46,8 +48,8 @@ def test_refresh_persists_both_methods_and_append_only_history(setup):
     result=client.post(path)
     assert result.status_code == 201
     first=result.json()
-    assert first['health_score'] == 43.5
-    live=client.get(f'/api/v1/instruments/{instrument.id}/predictions').json()
+    assert first['health_score'] == 99.8
+    live=client.get(f'/api/v1/instruments/{instrument.id}/health-score').json()
     assert first['score_result'] == live['health_score_details']
     assert first['risk_result'] == {
         k:v for k,v in client.get(f'/api/v1/instruments/{instrument.id}/tolerance-risk').json().items()
@@ -56,7 +58,7 @@ def test_refresh_persists_both_methods_and_append_only_history(setup):
     assert first['risk_result']['validation_status'] == 'EXPERIMENTAL_UNCALIBRATED'
     stored=db.get(AnalyticsSnapshot,first['snapshot_id'])
     assert stored.probability_90 == first['risk_result']['horizons']['90_days']['probability_out_of_tolerance']
-    assert first['weights'] == {'risk_90_days':0.4,'current_error':0.35,'out_of_tolerance':0.25}
+    assert first['weights'] == {'calibration_status':.3,'predicted_risk':.3,'recent_incidents':.2,'data_quality':.2}
     second=client.post(path).json()
     assert first['snapshot_id'] != second['snapshot_id']
     assert first['input_hash'] == second['input_hash']
@@ -72,7 +74,7 @@ def test_empty_history_is_null_for_bi_not_fallback_50(setup):
     result=client.post(f'/api/v1/instruments/{instrument.id}/analytics-snapshots').json()
     assert result['health_score'] is None
     assert result['score_status']=='NOT_CALCULATED'
-    assert result['score_result']['fallback'] is True
+    assert result['score_result']['fallback'] is False
     assert result['risk_status']=='NOT_ESTIMABLE'
 
 
@@ -95,5 +97,5 @@ def test_invalid_tolerance_does_not_emit_score_or_probability(setup):
     db.query(CalibrationEvent).filter(CalibrationEvent.instrument_unit_id==instrument.id).update({'tolerance':0})
     result=client.post(f'/api/v1/instruments/{instrument.id}/analytics-snapshots').json()
     assert result['health_score'] is None
-    assert result['score_result']['reason']=='INVALID_CALIBRATION_VALUES'
+    assert 'calibration_status' in result['score_result']['missing_components']
     assert result['risk_result']['reason']=='INVALID_CALIBRATION_VALUES'

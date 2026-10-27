@@ -2,7 +2,7 @@ name: BI checks
 
 on:
   pull_request:
-    branches: [main]
+    branches: [main, feature/analytics-snapshots]
   push:
     branches: [main]
 

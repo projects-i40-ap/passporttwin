@@ -5,7 +5,8 @@ import math
 from app.core.config import settings
 from app.models.analytics_snapshot import AnalyticsSnapshot
 from app.models.calibration import CalibrationEvent
-from app.services.analytics import DriftAnalyticsService
+from app.services.lifecycle_health import calculate_lifecycle_health
+from app.services.health_context import load_context
 from app.services.tolerance_risk import estimate_tolerance_risk
 from app.services.audit_service import AuditService
 
@@ -18,31 +19,27 @@ def numeric(value):
 
 
 def create_snapshot(db, instrument, as_of):
-    history = db.query(CalibrationEvent).filter(
-        CalibrationEvent.instrument_unit_id == instrument.id,
-        CalibrationEvent.calibration_date <= as_of,
-    ).order_by(CalibrationEvent.calibration_date, CalibrationEvent.id).all()
+    context = load_context(db, instrument.id, as_of)
+    history = context['calibrations']
     manifest = {
-        "lifecycle_state": instrument.lifecycle_state,
-        "calibrations": [{"id": c.id, "calibration_date": c.calibration_date.isoformat(),
-                          "error_value": numeric(c.error_value), "tolerance": numeric(c.tolerance)}
-                         for c in history],
+        'input_schema_version': 2,
+        'instrument': {key: getattr(instrument, key) for key in
+                       ('serial_number', 'manufacturer', 'model', 'location', 'lifecycle_state')},
+        'calibrations': [{'id': c.id, 'calibration_date': c.calibration_date.isoformat(),
+                          'error_value': numeric(c.error_value), 'tolerance': numeric(c.tolerance),
+                          'next_due_date': c.next_due_date.isoformat() if c.next_due_date else None,
+                          'result': c.result} for c in history],
+        'documents': [{'id': d.id, 'processing_status': d.processing_status} for d in context['documents']],
+        'incidents': [{'id': i.id, 'incident_date': i.incident_date.isoformat(), 'severity': i.severity,
+                       'resolved_date': i.resolved_at.date().isoformat() if i.resolved_at else None}
+                      for i in context['incidents']],
+        'maintenance': [{'id': m.id, 'event_date': m.event_date.isoformat()} for m in context['maintenance']],
     }
     input_hash = hashlib.sha256(json.dumps(manifest, sort_keys=True, allow_nan=False).encode()).hexdigest()
-    weights = settings.health_score_weights.model_dump()
-    valid_score_inputs = all(
-        c.error_value is not None and math.isfinite(float(c.error_value))
-        and c.tolerance is not None and math.isfinite(float(c.tolerance)) and float(c.tolerance) > 0
-        for c in history
-    )
-    if valid_score_inputs:
-        score = DriftAnalyticsService.calculate_drift_and_risk(
-            instrument, history, health_score_weights=settings.health_score_weights,
-        )["health_score_details"]
-    else:
-        score = {"status": "NOT_CALCULATED", "reason": "INVALID_CALIBRATION_VALUES",
-                 "score": None, "weights": weights, "method_version": "weighted_penalties_v1"}
-    risk = estimate_tolerance_risk(history, as_of)
+    result = calculate_lifecycle_health(instrument, as_of=as_of,
+                                      weights=settings.lifecycle_health_weights, **context)
+    score, risk = result['health_score_details'], result['tolerance_risk']
+    weights = score['weights']
     snapshot = AnalyticsSnapshot(
         instrument_unit_id=instrument.id, as_of=as_of, input_hash=input_hash,
         input_manifest=manifest, weights=weights, score_method_version=score["method_version"],

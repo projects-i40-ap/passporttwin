@@ -6,15 +6,25 @@ WITH latest AS (
     ORDER BY instrument_unit_id, as_of DESC, computed_at DESC, id DESC
 ), source AS (
     SELECT s.*, jsonb_build_object(
-        'lifecycle_state', i.lifecycle_state,
+        'input_schema_version', 2,
+        'instrument', jsonb_build_object('serial_number',i.serial_number,'manufacturer',i.manufacturer,
+            'model',i.model,'location',i.location,'lifecycle_state',i.lifecycle_state),
         'calibrations', COALESCE((
             SELECT jsonb_agg(jsonb_build_object(
                 'id', c.id, 'calibration_date', c.calibration_date,
-                'error_value', c.error_value, 'tolerance', c.tolerance
+                'error_value', c.error_value, 'tolerance', c.tolerance,
+                'next_due_date', c.next_due_date, 'result', c.result
             ) ORDER BY c.calibration_date, c.id)
             FROM calibration_event c
             WHERE c.instrument_unit_id=s.instrument_unit_id AND c.calibration_date<=s.as_of
-        ), '[]'::jsonb)
+        ), '[]'::jsonb),
+        'documents',COALESCE((SELECT jsonb_agg(jsonb_build_object('id',d.id,'processing_status',d.processing_status) ORDER BY d.id)
+            FROM document d WHERE d.instrument_unit_id=i.id),'[]'::jsonb),
+        'incidents',COALESCE((SELECT jsonb_agg(jsonb_build_object('id',e.id,'incident_date',e.incident_date,
+            'severity',e.severity,'resolved_date',e.resolved_at::date) ORDER BY e.id)
+            FROM incident e WHERE e.instrument_unit_id=i.id AND e.incident_date<=s.as_of),'[]'::jsonb),
+        'maintenance',COALESCE((SELECT jsonb_agg(jsonb_build_object('id',m.id,'event_date',m.event_date) ORDER BY m.id)
+            FROM maintenance_event m WHERE m.instrument_unit_id=i.id AND m.event_date<=s.as_of),'[]'::jsonb)
     ) AS current_manifest
     FROM latest s JOIN instrument_unit i ON i.id=s.instrument_unit_id
 )
