@@ -107,12 +107,12 @@ def health_checks():
 
 
 if __name__=='__main__':
-    parser=argparse.ArgumentParser();parser.add_argument('--output',type=Path,required=True);args=parser.parse_args()
+    parser=argparse.ArgumentParser();parser.add_argument('--output',type=Path,required=True);parser.add_argument('--code-sha');args=parser.parse_args()
     protocol_path=Path(__file__).with_name('protocol.json')
     report=run(json.loads(protocol_path.read_text()))
     report['health_v1']=health_checks()
     report['protocol_sha256']=hashlib.sha256(protocol_path.read_bytes()).hexdigest()
-    report['code_sha']=subprocess.check_output(['git','rev-parse','HEAD'],cwd=ROOT,text=True).strip()
+    report['code_sha']=args.code_sha or subprocess.check_output(['git','rev-parse','HEAD'],cwd=ROOT,text=True).strip()
     args.output.write_text(json.dumps(report,indent=2,allow_nan=False)+'\n')
-    print(json.dumps({'forecasts':report['forecasts'],'checks':report['checks'],'normal_linear_pooled':report['normal_linear_pooled'],
+    print(json.dumps({'dataset_sha256':report['dataset_sha256'],'forecasts':report['forecasts'],'checks':report['checks'],'normal_linear_pooled':report['normal_linear_pooled'],
                       'health_v1':report['health_v1']},indent=2))
