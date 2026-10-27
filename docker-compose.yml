@@ -44,7 +44,7 @@ services:
     container_name: passporttwin-backend
     env_file: .env
     environment:
-      DATABASE_URL: postgresql://${POSTGRES_USER:-passporttwin}:${POSTGRES_PASSWORD:-devpassword}@postgres:5432/passporttwin
+      DATABASE_URL: postgresql://${POSTGRES_USER:-passporttwin}:${POSTGRES_PASSWORD:-devpassword}@postgres:5432/${POSTGRES_DB:-passporttwin}
       BASYX_AAS_URL: http://basyx-aas:4001/aasServer
     ports:
       - "8000:8000"

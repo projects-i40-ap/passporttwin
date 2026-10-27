@@ -32,6 +32,10 @@ persistencia explícita descrita en el contrato de snapshots; no se modifica el 
    ```
 
 El script crea un dashboard nuevo y diez preguntas guardadas; imprime su URL.
+Las tablas de prioridad y riesgo incluyen enlaces al pasaporte y la unidad del
+catálogo. Para cambiar el destino, añadir `--passport-base-url https://tu-frontend`
+al comando (origen sin ruta, credenciales ni query). Su valor por defecto es
+`PASSPORT_FRONTEND_BASE_URL` del entorno o `http://localhost:5173`.
 No modifica dashboards existentes. Repetirlo crea otra copia deliberadamente.
 Si falla a mitad puede dejar objetos parciales: revisarlos en la colección antes
 de reintentar. No envía credenciales por consola; usar HTTPS fuera de una red local.

@@ -18,10 +18,9 @@ def numeric(value):
     return number if math.isfinite(number) else str(value)
 
 
-def create_snapshot(db, instrument, as_of):
-    context = load_context(db, instrument.id, as_of)
+def build_manifest(instrument, context):
     history = context['calibrations']
-    manifest = {
+    return {
         'input_schema_version': 2,
         'instrument': {key: getattr(instrument, key) for key in
                        ('serial_number', 'manufacturer', 'model', 'location', 'lifecycle_state')},
@@ -35,6 +34,11 @@ def create_snapshot(db, instrument, as_of):
                       for i in context['incidents']],
         'maintenance': [{'id': m.id, 'event_date': m.event_date.isoformat()} for m in context['maintenance']],
     }
+
+def create_snapshot(db, instrument, as_of):
+    context = load_context(db, instrument.id, as_of)
+    manifest = build_manifest(instrument, context)
+
     input_hash = hashlib.sha256(json.dumps(manifest, sort_keys=True, allow_nan=False).encode()).hexdigest()
     result = calculate_lifecycle_health(instrument, as_of=as_of,
                                       weights=settings.lifecycle_health_weights, **context)
