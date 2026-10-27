@@ -9,6 +9,10 @@ Universitat Politècnica de Catalunya (UPC) · 2026
 
 Developed by **[Alexander Castillo](https://github.com/alexanderj-castillo)** and **[Pau Modolell](https://github.com/paumr90)**.
 
+**MVP status — 27 October 2026:** instrument passports, document review, explainable lifecycle Health Score, experimental tolerance-risk forecasts and a Metabase fleet dashboard are implemented. A reproducible local demo is available. Synthetic evaluation supports technical acceptance; final academic and real-world validation remain pending.
+
+[Run the local demo](#-quick-start) · [Demo walkthrough](docs/demo-usability.md) · [Install the fleet dashboard](bi/README.md) · [Synthetic risk evaluation](experiments/acceptance/README.md)
+
 ---
 
 ## 🎯 The Challenge
@@ -163,15 +167,27 @@ CSV-based fleet ingestion is also available for creating canonical instrument re
 
 ### 🔗 QR & Passport Resolution
 
-Backend endpoints exist for generating instrument QR codes and resolving a stable instrument passport identifier.
+QR codes resolve to a React instrument passport using a stable public UUID. The frontend supports search by serial number or location, identity and operational state, calibration history, measurement units, linked document review and instrument audit navigation.
 
-The visualization and final user-facing passport experience remain part of the evolving demonstrator.
+The passport distinguishes live calculations from saved BI results and shows when the saved result is missing or stale after data changes.
 
-### 📈 Analytics Foundation
+### 📈 Explainable Health Score & Experimental Risk
 
-The backend contains an initial analytics service and prediction endpoint for instrument drift, risk and health-related indicators.
+The lifecycle Health Score combines four configurable components with default weights: calibration status (30%), predicted risk (30%), recent incidents (20%) and data quality (20%). It displays each contribution and actions for missing information. If a required component cannot be estimated, the score is **not calculated**.
 
-These analytical capabilities are still subject to further dataset preparation, metric definition and experimental validation before they can be considered validated research results.
+The tolerance-risk model estimates the probability of exceeding tolerance at target dates 30, 60 and 90 days ahead, using a linear calibration-error trend and Gaussian predictive uncertainty. It checks history sufficiency and uses calibration history after the latest maintenance when applicable. These probabilities are experimental and are not experimentally calibrated guarantees.
+
+- [Lifecycle Health Score contract](docs/architecture/lifecycle-health-v2.md)
+- [Tolerance-risk model and limitations](docs/architecture/tolerance-risk.md)
+- [Frozen synthetic evaluation protocol and results](experiments/acceptance/README.md)
+
+### 📊 Fleet Dashboard & Saved Analytics
+
+The Metabase provisioner creates ten cards covering fleet KPIs, status, intervention priorities, upcoming calibration deadlines, snapshot freshness, Health Score and experimental risk. Family/location filters and links back to instrument passports are included.
+
+Analytical snapshots retain calculation dates, model versions, weights and an input manifest. Refresh is explicit; stale or unavailable results are not presented as current numerical values. Dashboard setup requires a Metabase administrator, a database connection and a target collection; starting the containers alone does not install it.
+
+See [dashboard setup](bi/README.md) and the [snapshot contract](docs/architecture/analytics-snapshots.md).
 
 ---
 
@@ -187,13 +203,13 @@ The current technical foundation includes:
 - document provenance;
 - an interoperable AAS representation;
 - mechanisms to update and reconstruct that representation;
-- an analytical layer under progressive development.
+- explainable lifecycle indicators, experimental risk forecasts and versioned BI snapshots.
 
 The following areas remain necessary to complete and academically validate the Digital Twin proposition:
 
 - experimental validation of analytical models;
-- reproducible evaluation metrics and baselines;
-- stronger treatment of temporal evolution and risk;
+- extension of the existing synthetic evaluation to the final experimental protocol;
+- validation of temporal evolution and risk under real operating conditions;
 - final decision-support workflows;
 - validation of the complete demonstrator against the TFM objectives.
 
@@ -201,34 +217,13 @@ The following areas remain necessary to complete and academically validate the D
 
 ## 🚧 Current Technical Status
 
-The current technical checkpoint includes:
+The integrated MVP includes the canonical PostgreSQL lifecycle model, FastAPI, React/Vite passports, document review and provenance, CSV ingestion, four AAS projections, QR navigation, lifecycle Health Score, experimental tolerance risk, BI snapshots and Metabase provisioning.
 
-- Dockerized development environment;
-- FastAPI backend;
-- PostgreSQL canonical data model;
-- instrument API and schemas;
-- CSV inventory ingestion;
-- document review and human-in-the-loop validation;
-- calibration-event persistence;
-- Eclipse BaSyx AAS integration;
-- four AAS submodels for the MVP;
-- complete AAS reconstruction from PostgreSQL;
-- QR/passport backend endpoints;
-- initial analytics services;
-- automated backend tests.
+The [27 October usability checkpoint](docs/demo-usability.md#evidencia-de-esta-entrega--27102026) records 164 passing backend/BI tests, a successful frontend build, browser checks and queries against a disposable Metabase instance. These are dated technical checks, not a claim of academic validation or a permanent test count.
 
-At checkpoint `74844e0`:
+Four synthetic scenarios support local rehearsal: healthy, expired calibration, document review and insufficient history. The demo preserves manual corrections and refreshes its saved analytics when rerun. It does not exercise ingestion or AAS synchronization.
 
-```text
-Backend test suite: 13/13 PASS
-AAS MVP submodels: 4/4 integrated
-Canonical Source of Truth: PostgreSQL
-AAS runtime: Eclipse BaSyx
-```
-
-Technical integration is demonstrated.
-
-**Experimental and academic validation is still pending.**
+**Final end-to-end rehearsal, shared deployment and academic validation remain pending.**
 
 ---
 
@@ -241,8 +236,8 @@ The current MVP has known limitations that are intentionally kept visible:
 - AAS synchronization does not yet implement robust retry and recovery policies;
 - synchronization error reporting can be improved;
 - some AAS semantics are PassportTwin-specific rather than standardized templates;
-- analytical outputs still require systematic experimental validation;
-- the final BI and user-facing demonstrator is not yet complete.
+- synthetic risk evaluation is available, but analytical outputs still require final experimental and real-world validation;
+- the implemented BI and passport workflows still need final end-to-end rehearsal and shared-environment configuration.
 
 These limitations are treated as implementation or research debt and are not presented as validated capabilities.
 
@@ -264,7 +259,7 @@ These limitations are treated as implementation or research debt and are not pre
 
 ### Visualization
 
-`Business Intelligence` · `Data Visualization` · `Dashboarding`
+`React` · `Vite` · `Metabase`
 
 ### Infrastructure & Development
 
@@ -290,6 +285,9 @@ passporttwin/
 │   └── tests/             # Automated backend tests
 │
 ├── frontend/              # Visualization / application frontend
+├── bi/                    # Fleet SQL views and Metabase provisioning
+├── experiments/           # Synthetic evaluation protocols and results
+├── tools/                 # Cross-platform local start/demo launcher
 ├── generators/            # Data and utility generators
 ├── docs/                  # Architecture and project documentation
 ├── infra/                 # Infrastructure configuration
@@ -315,35 +313,47 @@ git clone https://github.com/projects-i40-ap/passporttwin.git
 cd passporttwin
 ```
 
-### 2. Configure the environment
+### 2. Start services and prepare the demo
 
-Copy:
+Requirements: Docker running with Compose v2 supporting `up --wait`, and Python 3.10+ for the launcher. Application dependencies run inside containers.
 
-```text
-.env.example
+On **Windows PowerShell**, from the repository root:
+
+```powershell
+py tools/dev.py start
+py tools/dev.py demo
 ```
 
-to:
+On **Linux/macOS**, use `python3` instead of `py`.
 
-```text
-.env
-```
+`start` creates `.env` from `.env.example` only if absent, waits for PostgreSQL, ensures the internal Metabase database exists and starts the services. Review local configuration before starting if you need different values. Keep `.env` out of Git.
 
-and configure the required local values.
+`demo` applies the analytics migration and BI views, prepares four synthetic instruments and refreshes their snapshots. It preserves existing fixtures and manual corrections; it is not a reset command. It does not execute document ingestion or AAS synchronization.
 
-### 3. Start the environment
+| Demo serial | Initial scenario |
+| --- | --- |
+| `PTWIN-DEMO-SANO` | No calibration or document alerts |
+| `PTWIN-DEMO-VENCIDO` | Expired calibration |
+| `PTWIN-DEMO-REVISION` | Document serial requiring human correction |
+| `PTWIN-DEMO-SIN-HISTORIAL` | Insufficient history; score/risk unavailable |
 
-```bash
-docker compose up
-```
+The command prints passport URLs. You can also find these instruments from the application home page. Existing fixture dates do not move forward when the command is repeated.
 
-The development environment is designed to run the services defined in `docker-compose.yml`, including the FastAPI backend, PostgreSQL and Eclipse BaSyx.
+### 3. Open the local services
 
-### 4. Run backend tests
+| Service | Default URL |
+| --- | --- |
+| PassportTwin application | http://localhost:5173 |
+| FastAPI documentation | http://localhost:8000/docs |
+| Metabase | http://localhost:3003 |
 
-```bash
-docker compose run --rm backend python -m pytest tests -v
-```
+If a service is still starting, check `docker compose ps`. Follow the [demo walkthrough](docs/demo-usability.md) to review documents, inspect score changes and refresh saved results.
+
+**Metabase requires initial setup:** create your administrator, connect the application database and select a collection, then run the [dashboard provisioner](bi/README.md). `demo` prepares the SQL views and data, not the dashboard itself. Optionally set `VITE_METABASE_DASHBOARD_URL` to the installed dashboard URL and recreate/rebuild the frontend.
+
+### 4. Run checks separately
+
+Run tests only against a disposable test database; tests may create or modify records. See the [backend test notes](backend/tests/README.md), [BI checks](bi/README.md#pruebas) and CI workflows in `.github/workflows/` for configuration. Local rehearsal is separate from the synthetic acceptance experiments and final TFM validation.
 
 ---
 
@@ -433,10 +443,12 @@ The methodology itself is being documented and evaluated as part of the Master's
 ### Analytics
 
 - [x] Initial drift / risk / health analytics service
-- [ ] Dataset and baseline definition
-- [ ] Train / test or equivalent experimental protocol
-- [ ] Quantitative metric validation
-- [ ] Explainability and reproducibility analysis
+- [x] Synthetic tolerance-risk protocol and baseline definition
+- [x] Frozen synthetic evaluation with held-out forecasts
+- [x] Synthetic metric reporting, including adverse stress-test results
+- [ ] Real-world and final experimental validation
+- [x] Explainable lifecycle Health Score and versioned analytics snapshots
+- [ ] Final explainability and reproducibility analysis
 - [ ] Final analytical conclusions
 
 ### Circularity
@@ -449,10 +461,12 @@ The methodology itself is being documented and evaluated as part of the Master's
 ### Decision Support
 
 - [x] QR generation and passport resolution endpoints
-- [ ] Final BI model
-- [ ] Fleet overview
-- [ ] Instrument-level passport visualization
-- [ ] Reliability and risk dashboards
+- [x] MVP BI views and explicit snapshot freshness
+- [x] Metabase fleet overview and intervention priorities
+- [x] React instrument passport visualization
+- [x] Health Score and experimental risk dashboard cards
+- [x] Reproducible four-scenario local demo
+- [ ] Shared-environment setup and final end-to-end rehearsal
 - [ ] Circularity decision-support views
 
 ### Validation & TFM Delivery
