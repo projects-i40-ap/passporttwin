@@ -1,0 +1,22 @@
+{
+  "metabase_version": {
+    "date": "2026-10-23",
+    "tag": "v0.64.3.4",
+    "hash": "3d6c89f"
+  },
+  "dashboard_cards": 10,
+  "successful_card_queries": 50,
+  "acceptance": "PASS",
+  "checks": [
+    "parity API/snapshot",
+    "family/location/combined/empty filters",
+    "risk ordering",
+    "missing history",
+    "stale inputs",
+    "stale date",
+    "stale probabilities hidden",
+    "incident penalty after refresh",
+    "maintenance rebaseline"
+  ],
+  "scope": "Disposable synthetic acceptance; no shared deployment or real data validation"
+}

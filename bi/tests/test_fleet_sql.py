@@ -101,7 +101,9 @@ def test_analytics_snapshot_freshness_and_stale_values_hidden(db):
     assert status() == ('MISSING',None,None,None)
     cursor.execute("SELECT id,calibration_date,error_value,tolerance FROM calibration_event WHERE instrument_unit_id=%s",(instrument_id,))
     calibration_id,calibration_date,error,tolerance=cursor.fetchone()
-    manifest={'lifecycle_state':'operational','calibrations':[{'id':calibration_id,'calibration_date':calibration_date.isoformat(),'error_value':float(error),'tolerance':float(tolerance)}]}
+    cursor.execute('SELECT next_due_date FROM calibration_event WHERE id=%s',(calibration_id,))
+    due=cursor.fetchone()[0]
+    manifest={'input_schema_version':2,'instrument':{'serial_number':'TEST-FLEET','manufacturer':'TEST','model':'TEST','location':None,'lifecycle_state':'operational'},'calibrations':[{'id':calibration_id,'calibration_date':calibration_date.isoformat(),'error_value':float(error),'tolerance':float(tolerance),'next_due_date':due.isoformat(),'result':'pass'}],'documents':[],'incidents':[],'maintenance':[]}
     cursor.execute("""INSERT INTO analytics_snapshot(instrument_unit_id,as_of,input_hash,input_manifest,weights,
         score_method_version,risk_method_version,score_status,risk_status,health_score,score_result,risk_result)
         VALUES (%s,CURRENT_DATE,'test',%s,'{}','weighted_penalties_v1','ols_gaussian_predictive_v1','CALCULATED','NOT_ESTIMABLE',92.5,'{}','{}')""",(instrument_id,json.dumps(manifest)))

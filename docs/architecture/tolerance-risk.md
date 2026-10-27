@@ -31,13 +31,20 @@ devuelven `NOT_ESTIMABLE` con motivo y horizontes vacíos. Una recta perfecta de
 proyección, pero probabilidad nula (`null`) con `ZERO_RESIDUAL_VARIANCE`: ausencia de
 residuos no demuestra certeza. Activo inexistente: 404; fecha mal formada: 422.
 
-## Coordinación con Health Score / PR #8
+## Historial: coordinación inicial con Health Score / PR #8
 
 Esta rama parte de `main` y no modifica `analytics.py`, configuración de Health
 Score, su esquema ni sus pruebas. Añade servicio, router y registro en `main.py`.
 El endpoint `/predictions` mantiene su contrato y su riesgo anterior. El nuevo
 riesgo todavía no alimenta el Health Score: esa conexión requiere una decisión
 explícita y nuevos ensayos. Las PR pueden revisarse e integrarse independientemente.
+
+## Contexto de mantenimiento
+
+El endpoint utiliza ahora `rebaseline_after_any_maintenance_v1`: exige tres
+calibraciones posteriores al último mantenimiento conocido y no supone orden
+intradía. La ficha y snapshots comparten esta política; ver
+[lifecycle-health-v2.md](lifecycle-health-v2.md). El núcleo OLS permanece igual.
 
 ## Comprobación sintética reproducible
 

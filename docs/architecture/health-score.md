@@ -1,4 +1,8 @@
-# Health Score explicable y configurable
+# Health Score metrológico v1 — compatibilidad
+
+La ficha y snapshots utilizan el nuevo [Health Score de ciclo de vida v2](lifecycle-health-v2.md),
+que completa los cuatro factores originales. Este documento conserva el contrato
+histórico de `/predictions`; no debe confundirse con el indicador v2.
 
 El endpoint existente `GET /api/v1/instruments/{id}/predictions` conserva
 `health_score` y añade `health_score_details`. No requiere cambios de esquema.

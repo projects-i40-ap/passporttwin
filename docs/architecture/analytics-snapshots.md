@@ -6,18 +6,17 @@
 nuevo y un evento de auditoría en la misma transacción. Fecha opcional: hoy en el
 servidor; fechas futuras se rechazan con 422. Activo inexistente: 404.
 
-No modifica los GET de score/riesgo ni sus fórmulas. No cambia el Health Score
-para consumir la nueva probabilidad. El score del snapshot usa su método histórico
-con observaciones hasta `as_of`; el riesgo usa su servicio independiente. La
-familia B1 no interviene en el score; no se almacena como si fuera su origen.
-El score conserva horizontes desde la última calibración; el riesgo los calcula
-desde `as_of`. Guardar ambos no convierte sus escalas ni fechas de proyección
-en equivalentes.
+El snapshot utiliza el Health Score de ciclo de vida v2, con calibración, riesgo,
+incidencias y calidad de datos. `/predictions` conserva el indicador metrológico
+v1 por compatibilidad. La ficha, `/health-score` y snapshots comparten el mismo
+servicio v2; riesgo utiliza la política de rebaseline tras mantenimiento. Ver
+[lifecycle-health-v2.md](lifecycle-health-v2.md).
 
 Se guardan: instrumento, referencia, fecha de cálculo, versiones de métodos,
 pesos, manifiesto de entradas, SHA-256 del manifiesto, resultados completos y
-columnas numéricas para BI. El manifiesto incluye estado operativo y las
-calibraciones utilizadas (ID, fecha, error y tolerancia). No se consulta el futuro.
+columnas numéricas para BI. El manifiesto v2 incluye identidad/estado, calibraciones con resultado y vencimiento,
+documentos, incidencias y mantenimiento. Esos cambios invalidan la vigencia. Las
+calibraciones y eventos posteriores a la referencia no entran en el cálculo.
 El estado operativo es el capturado al calcular: no reconstruye el estado histórico
 ni el momento de ingesta/corrección. No se presenta como un backtest histórico exacto.
 
@@ -26,8 +25,8 @@ registro con distinto ID, aunque los datos y el hash sean iguales. No hay endpoi
 de edición/borrado. La política de retención y permisos SQL son responsabilidad
 del despliegue; no se garantiza inmutabilidad frente a un administrador de BD.
 
-Sin calibraciones, BI guarda health_score NULL y NOT_CALCULATED; el payload
-original conserva el fallback 50 para trazabilidad. Datos metrológicos inválidos
+Sin calibraciones, BI guarda health_score NULL y NOT_CALCULATED; v2 no inventa fallback. Los registros v1 anteriores pueden conservar su fallback
+50 en el payload histórico, pero no como score vigente. Datos metrológicos inválidos
 no producen score numérico. Riesgo no estimable o sin dispersión conserva NULL
 en las probabilidades; NULL nunca se convierte a cero.
 

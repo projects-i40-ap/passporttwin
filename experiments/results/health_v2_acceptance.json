@@ -1,0 +1,27 @@
+{
+  "seed": 20261027,
+  "cases": 1000,
+  "checks_passed": 12000,
+  "max_weight_sensitivity_points": 10.000000000000004,
+  "weights": [
+    {
+      "calibration_status": 0.3,
+      "predicted_risk": 0.3,
+      "recent_incidents": 0.2,
+      "data_quality": 0.2
+    },
+    {
+      "calibration_status": 0.4,
+      "predicted_risk": 0.3,
+      "recent_incidents": 0.15,
+      "data_quality": 0.15
+    },
+    {
+      "calibration_status": 0.2,
+      "predicted_risk": 0.4,
+      "recent_incidents": 0.2,
+      "data_quality": 0.2
+    }
+  ],
+  "scope": "Design consistency and bounded sensitivity; no clinical/metrological optimality claim"
+}

@@ -3,6 +3,7 @@ from fastapi.testclient import TestClient
 from app.database.session import get_db
 from app.main import app
 from app.models.instrument import InstrumentUnit
+from app.models.maintenance import MaintenanceEvent
 from tests.test_drift_analytics import make_instrument
 from tests.test_tolerance_risk import history
 
@@ -23,7 +24,7 @@ def test_risk_endpoint_temporal_filter_contract_and_not_found():
 
         def all(self):
             # Future observation must be excluded even if supplied by a test double.
-            return history([0.1, 0.23, 0.29, 1000])
+            return [] if self.model is MaintenanceEvent else history([0.1, 0.23, 0.29, 1000])
 
     session = Session()
 
