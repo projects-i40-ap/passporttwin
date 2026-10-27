@@ -9,7 +9,7 @@ import os
 import requests
 
 
-BASE = "SELECT * FROM passporttwin_bi.fleet_overview WHERE 1=1 [[AND family = {{family}}]] [[AND location = {{location}}]]"
+BASE = "SELECT * FROM passporttwin_bi.fleet_analytics WHERE 1=1 [[AND family = {{family}}]] [[AND location = {{location}}]]"
 
 
 def cards():
@@ -21,6 +21,9 @@ def cards():
         ("Semáforo de flota", "bar", "SELECT traffic_light, COUNT(*) AS instruments FROM fleet GROUP BY traffic_light ORDER BY MIN(priority_rank)"),
         ("Prioridad de intervención", "table", "SELECT serial_number, family, location, traffic_light, primary_reason, days_to_due, observed_error_ratio, documents_to_review, criticality FROM fleet ORDER BY priority_rank, CASE UPPER(criticality) WHEN 'HIGH' THEN 1 WHEN 'MEDIUM' THEN 2 ELSE 3 END, days_to_due NULLS LAST, instrument_id LIMIT 50"),
         ("Próximos vencimientos", "table", "SELECT serial_number, family, location, next_due_date, days_to_due FROM fleet WHERE days_to_due BETWEEN 0 AND 90 ORDER BY days_to_due, instrument_id"),
+        ("Estado de snapshots analíticos", "table", "SELECT analytics_status, COUNT(*) AS instruments FROM fleet GROUP BY analytics_status ORDER BY analytics_status"),
+        ("Health Score · por versión y pesos", "table", "SELECT score_method_version, score_weights::jsonb::text AS weights, COUNT(current_health_score) AS instruments_with_score, AVG(current_health_score) AS mean_health_score FROM fleet WHERE current_health_score IS NOT NULL GROUP BY score_method_version, score_weights::jsonb::text ORDER BY score_method_version, score_weights::jsonb::text"),
+        ("Riesgo experimental · snapshots vigentes", "table", "SELECT serial_number, family, location, analytics_status, analytics_as_of, analytics_computed_at, score_status, score_reason, current_health_score, risk_status, risk_reason, risk_uncertainty_90, current_probability_30, current_probability_60, current_probability_90, risk_method_version FROM fleet ORDER BY current_probability_90 DESC NULLS LAST, current_health_score ASC NULLS LAST, instrument_id LIMIT 50"),
     ]
 
 

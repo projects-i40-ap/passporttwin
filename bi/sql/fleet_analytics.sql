@@ -1,0 +1,45 @@
+-- Requires fleet_overview.sql and the analytics_snapshot additive migration.
+CREATE OR REPLACE VIEW passporttwin_bi.fleet_analytics AS
+WITH latest AS (
+    SELECT DISTINCT ON (instrument_unit_id) * FROM analytics_snapshot
+    WHERE as_of <= CURRENT_DATE
+    ORDER BY instrument_unit_id, as_of DESC, computed_at DESC, id DESC
+), source AS (
+    SELECT s.*, jsonb_build_object(
+        'lifecycle_state', i.lifecycle_state,
+        'calibrations', COALESCE((
+            SELECT jsonb_agg(jsonb_build_object(
+                'id', c.id, 'calibration_date', c.calibration_date,
+                'error_value', c.error_value, 'tolerance', c.tolerance
+            ) ORDER BY c.calibration_date, c.id)
+            FROM calibration_event c
+            WHERE c.instrument_unit_id=s.instrument_unit_id AND c.calibration_date<=s.as_of
+        ), '[]'::jsonb)
+    ) AS current_manifest
+    FROM latest s JOIN instrument_unit i ON i.id=s.instrument_unit_id
+)
+SELECT f.*, s.id AS snapshot_id, s.as_of AS analytics_as_of,
+    s.computed_at AS analytics_computed_at, s.input_hash,
+    s.score_method_version, s.risk_method_version, s.weights AS score_weights,
+    s.score_status, s.risk_status,
+    s.score_result->>'reason' AS score_reason,
+    s.risk_result->>'reason' AS risk_reason,
+    s.risk_result->'horizons'->'90_days'->>'uncertainty_status' AS risk_uncertainty_90,
+    CASE WHEN s.id IS NULL THEN 'MISSING'
+         WHEN s.as_of < CURRENT_DATE THEN 'STALE_DATE'
+         WHEN s.input_manifest::jsonb <> s.current_manifest THEN 'STALE_INPUTS'
+         ELSE 'CURRENT' END AS analytics_status,
+    s.health_score AS snapshot_health_score,
+    s.probability_30 AS snapshot_probability_30,
+    s.probability_60 AS snapshot_probability_60,
+    s.probability_90 AS snapshot_probability_90,
+    CASE WHEN s.as_of=CURRENT_DATE AND s.input_manifest::jsonb=s.current_manifest
+         THEN s.health_score END AS current_health_score,
+    CASE WHEN s.as_of=CURRENT_DATE AND s.input_manifest::jsonb=s.current_manifest
+         THEN s.probability_30 END AS current_probability_30,
+    CASE WHEN s.as_of=CURRENT_DATE AND s.input_manifest::jsonb=s.current_manifest
+         THEN s.probability_60 END AS current_probability_60,
+    CASE WHEN s.as_of=CURRENT_DATE AND s.input_manifest::jsonb=s.current_manifest
+         THEN s.probability_90 END AS current_probability_90
+FROM passporttwin_bi.fleet_overview f
+LEFT JOIN source s ON s.instrument_unit_id=f.instrument_id;

@@ -26,13 +26,13 @@ def test_dashboard_cards_filters_and_layout_are_created_without_deleting_existin
 
     session = Session()
     assert module.provision('http://metabase', 2, 3, session) == 'http://metabase/dashboard/1'
-    assert len(session.posts) == 8
+    assert len(session.posts) == 11
     for url, card in session.posts[1:]:
         assert card['dataset_query']['database'] == 2
         assert card['collection_id'] == 3
         assert set(card['dataset_query']['native']['template-tags']) == {'family','location'}
     dashcards = session.updates[0][1]['dashcards']
-    assert len(dashcards) == 7
+    assert len(dashcards) == 10
     assert all(len(card['parameter_mappings']) == 2 for card in dashcards)
     assert all(card['col'] + card['size_x'] <= 24 for card in dashcards)
 
