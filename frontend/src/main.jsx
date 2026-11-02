@@ -770,12 +770,13 @@ function App() {
                         display: "flex",
                         gap: "12px",
                         alignItems: "center",
+                        flexWrap: "wrap",
                       }}
                     >
                       {field.field_name === "serial_number" && serialCandidates.length > 1 ? (
                         <select id={`field-${field.field_id}`} value={field.normalized_value ?? ""}
                           onChange={(event) => updateNormalizedValue(field.field_id, event.target.value)}
-                          style={{ flex: 1, padding: "8px" }}>
+                          style={{ flex: 1, padding: "8px", minWidth: 0 }}>
                           <option value="">Selecciona una serie tras revisar el certificado</option>
                           {serialCandidates.map((serial) => <option key={serial} value={serial}>{serial}</option>)}
                         </select>
@@ -791,6 +792,7 @@ function App() {
                         }
                         style={{
                           flex: 1,
+                          minWidth: 0,
                           padding: "8px",
                         }}
                       />}
