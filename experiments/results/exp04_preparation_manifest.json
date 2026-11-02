@@ -1,0 +1,36 @@
+{
+  "kind": "EXP04_PREPARATION_BUNDLE_V1",
+  "scope": "Known synthetic linear development data; not an independent final test",
+  "seed": 42,
+  "generation": {
+    "instruments_per_family": 20,
+    "calibrations_per_instrument": 8,
+    "interval_days": 90,
+    "base_start_date": "2023-01-01"
+  },
+  "generator_sha256": "03f767b3930054a4d3295a86a529c2251f5168f4f8a9aeeaac0dde796bdc2de4",
+  "dataset_sha256": "182256822d9a2fd731beb88209207a23fe24c394e41b396fce55589999b2537d",
+  "rows": 480,
+  "instruments": 60,
+  "units": {
+    "pressure_transmitter": "bar",
+    "temperature_sensor": "°C",
+    "ph_sensor": "pH"
+  },
+  "protocol": {
+    "version": "exp04_preparation_v1",
+    "train_calibrations": 6,
+    "origin": "last training calibration per asset; fixed for all its test targets",
+    "family_pool": "training prefixes only, filtered by calendar date <= each forecast origin; includes target asset",
+    "prediction_rounding_decimals": 4,
+    "models": {
+      "B0": "last observed error",
+      "B1": "mean of eligible asset endpoint slopes in same family",
+      "M1": "per-asset OLS"
+    },
+    "normalization": "prediction residual divided by positive tolerance at forecast origin",
+    "pooled_metric": "micro average of normalized forecast errors",
+    "acceptance_thresholds": null
+  },
+  "python_generation": "3.11.17"
+}
