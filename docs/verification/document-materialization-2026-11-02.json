@@ -1,0 +1,26 @@
+{
+  "result": "PASS",
+  "checks": [
+    "Unsaved edits disable validation and incorporation",
+    "Saving/revalidation leave canonical history empty",
+    "Explicit UI incorporation creates one calibration; history points to canonical target, not stale query context",
+    "Reload reconstructs materialization proof and read-only UI",
+    "Passport history visibly includes the new calibration",
+    "Stale-tab duplicate 409 refreshes actual canonical state without duplicate",
+    "Materialization UI fits 390px mobile",
+    "Stopped real BaSyx: UI reports committed PostgreSQL calibration and failed projection separately",
+    "Projection failure persists AAS ERROR and leaves exactly one calibration; no re-incorporation button"
+  ],
+  "js_errors": [],
+  "base_commit": "541c2a31cf639c63fd995f375dd5322650f5fc0d",
+  "base_pr": 29,
+  "backend_bi_passed": 292,
+  "new_materialization_tests": 10,
+  "frontend_build": "PASS Node 20/Vite 5.4.21",
+  "scope": "Synthetic technical UI/API rehearsal, not human study or final experiment",
+  "source_sha256": {
+    "backend/app/api/documents.py": "ea2f9f72db603f354ab3c675e2a687d204975664a8df010b2721dbfafaf69439",
+    "backend/app/services/document_materialization.py": "0642a84aa746ee19e29369561d2c7bab811efe5cfba9083aa65ee15784310ca9",
+    "frontend/src/main.jsx": "c82288cf67ec6281e1142aad102d38a804f99223179b95c87ac30cf6c038ea92"
+  }
+}

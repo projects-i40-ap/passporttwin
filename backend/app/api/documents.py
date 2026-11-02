@@ -27,6 +27,7 @@ from app.services.aas_builder import AASBuilder
 from app.services.audit_service import AuditService
 from app.services.document_identity import SERIAL_CANDIDATES_FIELD
 from app.services.document_original import original_response
+from app.services.document_materialization import ingestion_event, materialization_state
 
 router = APIRouter(prefix="/documents", tags=["documents"])
 
@@ -275,22 +276,11 @@ def accept_document_to_canonical(document_id: int, db: Session = Depends(get_db)
     if not doc:
         raise HTTPException(status_code=404, detail="Documento no encontrado.")
 
-    # R-DUP-ACCEPT (RF-RULE-04): idempotencia de la materialización.
-    # Se recorre la auditoría de la sesión (compatible con SQLAlchemy y con los
-    # `FakeSession` de los tests) para detectar una ingesta previa del documento.
-    for audit_entry in db.query(AuditLog).filter(
-        AuditLog.action == "CALIBRATION_INGESTED"
-    ).all():
-        details = getattr(audit_entry, "details", None) or {}
+    if ingestion_event(db, doc.id) is not None:
+        raise HTTPException(409, "R-DUP-ACCEPT: El documento ya fue materializado previamente en el modelo canónico.")
 
-        if (
-            getattr(audit_entry, "action", None) == "CALIBRATION_INGESTED"
-            and details.get("document_id") == doc.id
-        ):
-            raise HTTPException(
-                status_code=409,
-                detail="R-DUP-ACCEPT: El documento ya fue materializado previamente en el modelo canónico."
-            )
+    if doc.source_type != "PDF_CERTIFICATE":
+        raise HTTPException(400, "Solo los certificados de calibración se incorporan a este historial.")
 
     if doc.processing_status != "ACCEPTED":
         raise HTTPException(
@@ -335,6 +325,10 @@ def accept_document_to_canonical(document_id: int, db: Session = Depends(get_db)
     )
     db.add(new_calibration)
 
+    flush = getattr(db, "flush", None)
+    if callable(flush):
+        flush()  # Capture the canonical event ID in the same ingestion transaction.
+
     # 4. Actualizar estado operativo del activo en instrument_unit
     previous_lifecycle_state = instrument.lifecycle_state
     instrument.lifecycle_state = "out_of_tolerance" if is_out_of_tol else "operational"
@@ -352,6 +346,8 @@ def accept_document_to_canonical(document_id: int, db: Session = Depends(get_db)
         details={
             "document_id": doc.id,
             "certificate_sha256": doc.sha256_hash,
+            "calibration_event_id": new_calibration.id,
+            "instrument_id": instrument.id,
             "error_value": error_val,
             "tolerance": tolerance_val,
             "result": result_status,
@@ -384,22 +380,33 @@ def accept_document_to_canonical(document_id: int, db: Session = Depends(get_db)
 
     # 9. Proyectar los submodelos dinámicos hacia Eclipse BaSyx.
     # PostgreSQL sigue siendo Source of Truth aunque la proyección AAS falle.
-    AASBuilder.sync_calibration_submodel(
+    calibration_synced = AASBuilder.sync_calibration_submodel(
         instrument,
         calibration_history
     )
 
-    AASBuilder.sync_document_provenance(
+    provenance_synced = AASBuilder.sync_document_provenance(
         instrument,
         document_provenance
     )
 
-    AASBuilder.sync_operational_state(
+    operational_synced = AASBuilder.sync_operational_state(
         instrument
     )
 
+    projection_updated = all((calibration_synced, provenance_synced, operational_synced))
+    if not projection_updated:
+        previous_status = instrument.aas_sync_status
+        instrument.aas_sync_status = "ERROR"
+        AuditService.log_event(db=db, entity_name="instrument_unit", entity_id=instrument.id,
+            action="AAS_SYNC_FAILED", source="api.documents.accept",
+            before={"aas_sync_status": previous_status}, after={"aas_sync_status": "ERROR"},
+            details={"document_id": doc.id, "scope": "dynamic_submodels"})
+        db.commit()
+
     return {
         "status": "CANONICAL_COMMITTED",
+        "aas_projection": {"status": "UPDATED" if projection_updated else "ERROR"},
         "calibration_event_id": new_calibration.id,
         "instrument_id": instrument.id,
         "serial_number": instrument.serial_number,
@@ -427,6 +434,9 @@ def get_extracted_fields(
     return {
         "document_id": doc.id,
         "processing_status": doc.processing_status,
+        "source_type": doc.source_type,
+        "matched_instrument_id": doc.instrument_unit_id,
+        "materialization": materialization_state(db, doc),
         "fields": [
             {
                 "field_id": field.id,

@@ -397,6 +397,11 @@ function App() {
   const [processingStatus, setProcessingStatus] = useState("");
   const [fields, setFields] = useState([]);
   const serialCandidates = candidateSerials(fields.find((field) => field.field_name === "serial_candidates")?.raw_value);
+  const [materialization, setMaterialization] = useState(null);
+  const [savedValues, setSavedValues] = useState({});
+  const [projectionWarning, setProjectionWarning] = useState("");
+  const hasUnsavedChanges = fields.some(field => field.normalized_value !== savedValues[field.field_id]);
+  const isMaterialized = materialization?.status === "MATERIALIZED";
   const [rulesFailed, setRulesFailed] = useState([]);
   const [message, setMessage] = useState("");
   const [loading, setLoading] = useState(false);
@@ -408,36 +413,30 @@ function App() {
   const [auditMessage, setAuditMessage] = useState("");
   const [auditLoading, setAuditLoading] = useState(false);
 
+  async function refreshDocument(id) {
+    const response = await fetch(`${API_BASE_URL}/api/v1/documents/${id}/fields`);
+    const data = await response.json();
+    if (!response.ok) throw new Error(data.detail || "No se han podido cargar los campos del documento.");
+    setProcessingStatus(data.processing_status);
+    setLoadedDocumentId(data.document_id);
+    setFields(data.fields);
+    setSavedValues(Object.fromEntries(data.fields.map(field => [field.field_id, field.normalized_value])));
+    setMaterialization(data.materialization);
+    return data;
+  }
+
   async function loadDocument() {
     setLoading(true);
     setMessage("");
     setRulesFailed([]);
-
+    setProjectionWarning("");
     try {
-      const response = await fetch(
-        `${API_BASE_URL}/api/v1/documents/${documentId}/fields`
-      );
-
-      const data = await response.json();
-
-      if (!response.ok) {
-        throw new Error(
-          data.detail || "No se han podido cargar los campos del documento."
-        );
-      }
-
-      setProcessingStatus(data.processing_status);
-      setLoadedDocumentId(data.document_id);
-      setFields(data.fields);
+      await refreshDocument(documentId);
       setMessage("Documento cargado.");
     } catch (error) {
-      setProcessingStatus("");
-      setLoadedDocumentId(null);
-      setFields([]);
+      setProcessingStatus(""); setLoadedDocumentId(null); setFields([]); setMaterialization(null);
       setMessage(error.message);
-    } finally {
-      setLoading(false);
-    }
+    } finally { setLoading(false); }
   }
 
   function updateNormalizedValue(fieldId, value) {
@@ -459,7 +458,7 @@ function App() {
 
     try {
       const response = await fetch(
-        `${API_BASE_URL}/api/v1/documents/${documentId}/fields/${field.field_id}`,
+        `${API_BASE_URL}/api/v1/documents/${loadedDocumentId}/fields/${field.field_id}`,
         {
           method: "PATCH",
           headers: {
@@ -490,9 +489,10 @@ function App() {
         )
       );
 
-      setMessage(
-        `Field "${data.field_name}" saved successfully.`
-      );
+      setSavedValues(current => ({ ...current, [data.field_id]: data.normalized_value }));
+      setProcessingStatus("REVIEW_REQUIRED");
+      setMaterialization({ status: "NOT_MATERIALIZED", can_materialize: false, message: "Corrección guardada. Vuelve a validar los campos." });
+      setMessage("Corrección guardada. Vuelve a validar los campos antes de incorporar la calibración.");
     } catch (error) {
       setMessage(error.message);
     } finally {
@@ -507,7 +507,7 @@ function App() {
 
     try {
       const response = await fetch(
-        `${API_BASE_URL}/api/v1/documents/${documentId}/revalidate`,
+        `${API_BASE_URL}/api/v1/documents/${loadedDocumentId}/revalidate`,
         {
           method: "POST",
         }
@@ -521,11 +521,11 @@ function App() {
         );
       }
 
-      setProcessingStatus(data.processing_status);
+      await refreshDocument(loadedDocumentId);
       setRulesFailed(data.rules_failed || []);
 
       if (data.processing_status === "ACCEPTED") {
-        setMessage("Documento validado y aceptado.");
+        setMessage("Campos validados. La calibración todavía no se ha incorporado al historial.");
       } else {
         setMessage(
           "El documento todavía requiere revisión."
@@ -536,6 +536,29 @@ function App() {
     } finally {
       setLoading(false);
     }
+  }
+
+  async function materializeDocument() {
+    if (!loadedDocumentId || loading || hasUnsavedChanges || !materialization?.can_materialize) return;
+    const id = loadedDocumentId;
+    setLoading(true); setMessage(""); setProjectionWarning("");
+    try {
+      const response = await fetch(`${API_BASE_URL}/api/v1/documents/${id}/accept`, { method: "POST" });
+      const data = await response.json();
+      if (!response.ok) {
+        // A previous request may have committed while its response was lost.
+        // Only canonical evidence from the refreshed server state can confirm it.
+        await refreshDocument(id);
+        throw new Error(data.detail || "No se ha podido incorporar la calibración.");
+      }
+      if (data.status !== "CANONICAL_COMMITTED") throw new Error("No se ha podido confirmar la incorporación al historial.");
+      setMessage("Calibración incorporada al historial canónico.");
+      if (data.aas_projection?.status === "ERROR") setProjectionWarning("La calibración está guardada en PostgreSQL, pero la actualización AAS no se ha completado. Revisa la sincronización del instrumento.");
+      try { await refreshDocument(id); }
+      catch { setMaterialization({ status: "MATERIALIZED", can_materialize: false, instrument_id: data.instrument_id, calibration_event_id: data.calibration_event_id, message: "Incorporación confirmada. Recarga el documento para consultar su estado actualizado." }); }
+    } catch (error) {
+      setMessage(error.message);
+    } finally { setLoading(false); }
   }
 
   async function queryAudit(event) {
@@ -685,7 +708,7 @@ function App() {
 
           {processingStatus && (
             <section style={{ marginTop: "24px" }}>
-              <strong>Estado:</strong>{" "}
+              <strong>Estado de los campos del documento:</strong>{" "}
               <span
                 style={{
                   color:
@@ -697,13 +720,27 @@ function App() {
                   fontWeight: "bold",
                 }}
               >
-                {statusLabel(processingStatus)}
+                {processingStatus === "ACCEPTED" ? "Validado para incorporación" : statusLabel(processingStatus)}
               </span>
             </section>
           )}
 
+          {loadedDocumentId && materialization && <section aria-labelledby="materialization-heading" style={{ marginTop: "24px" }}>
+            <h3 id="materialization-heading">Incorporación al historial</h3>
+            <p role="status">{materialization.message}</p>
+            {hasUnsavedChanges && <p>Hay cambios sin guardar. Guarda las correcciones y vuelve a validar antes de continuar.</p>}
+            {isMaterialized ? <>
+              <p>La consulta es de solo lectura: editar estos campos no actualizaría la calibración ya incorporada.</p>
+              {materialization.instrument_public_id && <Link to={`/passport/${encodeURIComponent(materialization.instrument_public_id)}`}>Ver historial en el pasaporte</Link>}
+            </> : <button type="button" onClick={materializeDocument}
+              disabled={loading || hasUnsavedChanges || !materialization.can_materialize}>
+              Incorporar calibración al historial
+            </button>}
+            {projectionWarning && <p role="alert">{projectionWarning}</p>}
+          </section>}
+
           {message && (
-            <p style={{ marginTop: "20px" }}>
+            <p role="status" style={{ marginTop: "20px" }}>
               {message}
             </p>
           )}
@@ -784,13 +821,14 @@ function App() {
                       {field.field_name === "serial_number" && serialCandidates.length > 1 ? (
                         <select id={`field-${field.field_id}`} value={field.normalized_value ?? ""}
                           onChange={(event) => updateNormalizedValue(field.field_id, event.target.value)}
-                          style={{ flex: 1, padding: "8px", minWidth: 0 }}>
+                          disabled={loading || isMaterialized} style={{ flex: 1, padding: "8px", minWidth: 0 }}>
                           <option value="">Selecciona una serie tras revisar el certificado</option>
                           {serialCandidates.map((serial) => <option key={serial} value={serial}>{serial}</option>)}
                         </select>
                       ) : <input
                         id={`field-${field.field_id}`}
                         type="text"
+                        disabled={loading || isMaterialized}
                         value={field.normalized_value ?? ""}
                         onChange={(event) =>
                           updateNormalizedValue(
@@ -808,7 +846,7 @@ function App() {
                       <button
                         type="button"
                         onClick={() => saveField(field)}
-                        disabled={loading}
+                        disabled={loading || isMaterialized}
                       >
                         Guardar corrección
                       </button>
@@ -830,13 +868,13 @@ function App() {
               <button
                 type="button"
                 onClick={revalidateDocument}
-                disabled={loading}
+                disabled={loading || isMaterialized || hasUnsavedChanges}
                 style={{
                   marginTop: "24px",
                   padding: "10px 16px",
                 }}
               >
-                Volver a validar documento
+                Validar campos guardados
               </button>
             </section>
           )}
