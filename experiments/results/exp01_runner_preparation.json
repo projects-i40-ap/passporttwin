@@ -1,0 +1,1572 @@
+{
+  "execution_status": "COMPLETE",
+  "planned_documents": 20,
+  "evaluated_documents": 20,
+  "errors": 0,
+  "metrics": {
+    "per_field": {
+      "serial_number": {
+        "annotated_slots": 20,
+        "expected_present": 20,
+        "exact_matches": 20,
+        "tp": 20,
+        "fp": 0,
+        "fn": 0,
+        "tn": 0,
+        "accuracy": 1.0,
+        "precision": 1.0,
+        "recall": 1.0,
+        "f1": 1.0,
+        "potential_review_fraction": 0.0
+      },
+      "calibration_date": {
+        "annotated_slots": 20,
+        "expected_present": 20,
+        "exact_matches": 20,
+        "tp": 20,
+        "fp": 0,
+        "fn": 0,
+        "tn": 0,
+        "accuracy": 1.0,
+        "precision": 1.0,
+        "recall": 1.0,
+        "f1": 1.0,
+        "potential_review_fraction": 0.0
+      },
+      "next_due_date": {
+        "annotated_slots": 20,
+        "expected_present": 20,
+        "exact_matches": 20,
+        "tp": 20,
+        "fp": 0,
+        "fn": 0,
+        "tn": 0,
+        "accuracy": 1.0,
+        "precision": 1.0,
+        "recall": 1.0,
+        "f1": 1.0,
+        "potential_review_fraction": 0.0
+      },
+      "error_value": {
+        "annotated_slots": 20,
+        "expected_present": 20,
+        "exact_matches": 20,
+        "tp": 20,
+        "fp": 0,
+        "fn": 0,
+        "tn": 0,
+        "accuracy": 1.0,
+        "precision": 1.0,
+        "recall": 1.0,
+        "f1": 1.0,
+        "potential_review_fraction": 0.0
+      },
+      "tolerance": {
+        "annotated_slots": 20,
+        "expected_present": 20,
+        "exact_matches": 20,
+        "tp": 20,
+        "fp": 0,
+        "fn": 0,
+        "tn": 0,
+        "accuracy": 1.0,
+        "precision": 1.0,
+        "recall": 1.0,
+        "f1": 1.0,
+        "potential_review_fraction": 0.0
+      },
+      "unit": {
+        "annotated_slots": 0,
+        "expected_present": 0,
+        "exact_matches": 0,
+        "tp": 0,
+        "fp": 0,
+        "fn": 0,
+        "tn": 0,
+        "accuracy": null,
+        "precision": null,
+        "recall": null,
+        "f1": null,
+        "potential_review_fraction": null
+      },
+      "operating_range": {
+        "annotated_slots": 0,
+        "expected_present": 0,
+        "exact_matches": 0,
+        "tp": 0,
+        "fp": 0,
+        "fn": 0,
+        "tn": 0,
+        "accuracy": null,
+        "precision": null,
+        "recall": null,
+        "f1": null,
+        "potential_review_fraction": null
+      }
+    },
+    "micro": {
+      "annotated_slots": 100,
+      "expected_present": 100,
+      "exact_matches": 100,
+      "tp": 100,
+      "fp": 0,
+      "fn": 0,
+      "tn": 0,
+      "accuracy": 1.0,
+      "precision": 1.0,
+      "recall": 1.0,
+      "f1": 1.0,
+      "potential_review_fraction": 0.0
+    },
+    "documents_all_annotated_fields_correct": 20,
+    "human_corrections_measured": null
+  },
+  "partial_diagnostics_not_final_metrics": null,
+  "details": [
+    {
+      "certificate_id": 1,
+      "filename": "cert_001.pdf",
+      "execution_status": "EVALUATED",
+      "stage": "complete",
+      "fields": {
+        "serial_number": {
+          "expected": "PH-MT-301",
+          "actual": "PH-MT-301",
+          "correct": true,
+          "expected_present": true,
+          "actual_present": true,
+          "invalid_prediction": false,
+          "tp": 1,
+          "fp": 0,
+          "fn": 0,
+          "tn": 0
+        },
+        "calibration_date": {
+          "expected": "2026-06-08",
+          "actual": "2026-06-08",
+          "correct": true,
+          "expected_present": true,
+          "actual_present": true,
+          "invalid_prediction": false,
+          "tp": 1,
+          "fp": 0,
+          "fn": 0,
+          "tn": 0
+        },
+        "next_due_date": {
+          "expected": "2027-06-08",
+          "actual": "2027-06-08",
+          "correct": true,
+          "expected_present": true,
+          "actual_present": true,
+          "invalid_prediction": false,
+          "tp": 1,
+          "fp": 0,
+          "fn": 0,
+          "tn": 0
+        },
+        "error_value": {
+          "expected": 0.047,
+          "actual": 0.047,
+          "correct": true,
+          "expected_present": true,
+          "actual_present": true,
+          "invalid_prediction": false,
+          "tp": 1,
+          "fp": 0,
+          "fn": 0,
+          "tn": 0
+        },
+        "tolerance": {
+          "expected": 0.2,
+          "actual": 0.2,
+          "correct": true,
+          "expected_present": true,
+          "actual_present": true,
+          "invalid_prediction": false,
+          "tp": 1,
+          "fp": 0,
+          "fn": 0,
+          "tn": 0
+        }
+      },
+      "unannotated_predictions": []
+    },
+    {
+      "certificate_id": 2,
+      "filename": "cert_002.pdf",
+      "execution_status": "EVALUATED",
+      "stage": "complete",
+      "fields": {
+        "serial_number": {
+          "expected": "PT-WIKA-101",
+          "actual": "PT-WIKA-101",
+          "correct": true,
+          "expected_present": true,
+          "actual_present": true,
+          "invalid_prediction": false,
+          "tp": 1,
+          "fp": 0,
+          "fn": 0,
+          "tn": 0
+        },
+        "calibration_date": {
+          "expected": "2026-10-31",
+          "actual": "2026-10-31",
+          "correct": true,
+          "expected_present": true,
+          "actual_present": true,
+          "invalid_prediction": false,
+          "tp": 1,
+          "fp": 0,
+          "fn": 0,
+          "tn": 0
+        },
+        "next_due_date": {
+          "expected": "2027-10-31",
+          "actual": "2027-10-31",
+          "correct": true,
+          "expected_present": true,
+          "actual_present": true,
+          "invalid_prediction": false,
+          "tp": 1,
+          "fp": 0,
+          "fn": 0,
+          "tn": 0
+        },
+        "error_value": {
+          "expected": 0.016,
+          "actual": 0.016,
+          "correct": true,
+          "expected_present": true,
+          "actual_present": true,
+          "invalid_prediction": false,
+          "tp": 1,
+          "fp": 0,
+          "fn": 0,
+          "tn": 0
+        },
+        "tolerance": {
+          "expected": 0.1,
+          "actual": 0.1,
+          "correct": true,
+          "expected_present": true,
+          "actual_present": true,
+          "invalid_prediction": false,
+          "tp": 1,
+          "fp": 0,
+          "fn": 0,
+          "tn": 0
+        }
+      },
+      "unannotated_predictions": []
+    },
+    {
+      "certificate_id": 3,
+      "filename": "cert_003.pdf",
+      "execution_status": "EVALUATED",
+      "stage": "complete",
+      "fields": {
+        "serial_number": {
+          "expected": "TT-EH-201",
+          "actual": "TT-EH-201",
+          "correct": true,
+          "expected_present": true,
+          "actual_present": true,
+          "invalid_prediction": false,
+          "tp": 1,
+          "fp": 0,
+          "fn": 0,
+          "tn": 0
+        },
+        "calibration_date": {
+          "expected": "2026-07-25",
+          "actual": "2026-07-25",
+          "correct": true,
+          "expected_present": true,
+          "actual_present": true,
+          "invalid_prediction": false,
+          "tp": 1,
+          "fp": 0,
+          "fn": 0,
+          "tn": 0
+        },
+        "next_due_date": {
+          "expected": "2027-07-25",
+          "actual": "2027-07-25",
+          "correct": true,
+          "expected_present": true,
+          "actual_present": true,
+          "invalid_prediction": false,
+          "tp": 1,
+          "fp": 0,
+          "fn": 0,
+          "tn": 0
+        },
+        "error_value": {
+          "expected": 0.095,
+          "actual": 0.095,
+          "correct": true,
+          "expected_present": true,
+          "actual_present": true,
+          "invalid_prediction": false,
+          "tp": 1,
+          "fp": 0,
+          "fn": 0,
+          "tn": 0
+        },
+        "tolerance": {
+          "expected": 0.5,
+          "actual": 0.5,
+          "correct": true,
+          "expected_present": true,
+          "actual_present": true,
+          "invalid_prediction": false,
+          "tp": 1,
+          "fp": 0,
+          "fn": 0,
+          "tn": 0
+        }
+      },
+      "unannotated_predictions": []
+    },
+    {
+      "certificate_id": 4,
+      "filename": "cert_004.pdf",
+      "execution_status": "EVALUATED",
+      "stage": "complete",
+      "fields": {
+        "serial_number": {
+          "expected": "UNKNOWN-ERR-765",
+          "actual": "UNKNOWN-ERR-765",
+          "correct": true,
+          "expected_present": true,
+          "actual_present": true,
+          "invalid_prediction": false,
+          "tp": 1,
+          "fp": 0,
+          "fn": 0,
+          "tn": 0
+        },
+        "calibration_date": {
+          "expected": "2026-03-27",
+          "actual": "2026-03-27",
+          "correct": true,
+          "expected_present": true,
+          "actual_present": true,
+          "invalid_prediction": false,
+          "tp": 1,
+          "fp": 0,
+          "fn": 0,
+          "tn": 0
+        },
+        "next_due_date": {
+          "expected": "2027-03-27",
+          "actual": "2027-03-27",
+          "correct": true,
+          "expected_present": true,
+          "actual_present": true,
+          "invalid_prediction": false,
+          "tp": 1,
+          "fp": 0,
+          "fn": 0,
+          "tn": 0
+        },
+        "error_value": {
+          "expected": 0.088,
+          "actual": 0.088,
+          "correct": true,
+          "expected_present": true,
+          "actual_present": true,
+          "invalid_prediction": false,
+          "tp": 1,
+          "fp": 0,
+          "fn": 0,
+          "tn": 0
+        },
+        "tolerance": {
+          "expected": 0.5,
+          "actual": 0.5,
+          "correct": true,
+          "expected_present": true,
+          "actual_present": true,
+          "invalid_prediction": false,
+          "tp": 1,
+          "fp": 0,
+          "fn": 0,
+          "tn": 0
+        }
+      },
+      "unannotated_predictions": []
+    },
+    {
+      "certificate_id": 5,
+      "filename": "cert_005.pdf",
+      "execution_status": "EVALUATED",
+      "stage": "complete",
+      "fields": {
+        "serial_number": {
+          "expected": "PH-MT-301",
+          "actual": "PH-MT-301",
+          "correct": true,
+          "expected_present": true,
+          "actual_present": true,
+          "invalid_prediction": false,
+          "tp": 1,
+          "fp": 0,
+          "fn": 0,
+          "tn": 0
+        },
+        "calibration_date": {
+          "expected": "2026-06-22",
+          "actual": "2026-06-22",
+          "correct": true,
+          "expected_present": true,
+          "actual_present": true,
+          "invalid_prediction": false,
+          "tp": 1,
+          "fp": 0,
+          "fn": 0,
+          "tn": 0
+        },
+        "next_due_date": {
+          "expected": "2027-06-22",
+          "actual": "2027-06-22",
+          "correct": true,
+          "expected_present": true,
+          "actual_present": true,
+          "invalid_prediction": false,
+          "tp": 1,
+          "fp": 0,
+          "fn": 0,
+          "tn": 0
+        },
+        "error_value": {
+          "expected": 0.077,
+          "actual": 0.077,
+          "correct": true,
+          "expected_present": true,
+          "actual_present": true,
+          "invalid_prediction": false,
+          "tp": 1,
+          "fp": 0,
+          "fn": 0,
+          "tn": 0
+        },
+        "tolerance": {
+          "expected": 0.2,
+          "actual": 0.2,
+          "correct": true,
+          "expected_present": true,
+          "actual_present": true,
+          "invalid_prediction": false,
+          "tp": 1,
+          "fp": 0,
+          "fn": 0,
+          "tn": 0
+        }
+      },
+      "unannotated_predictions": []
+    },
+    {
+      "certificate_id": 6,
+      "filename": "cert_006.pdf",
+      "execution_status": "EVALUATED",
+      "stage": "complete",
+      "fields": {
+        "serial_number": {
+          "expected": "PT-WIKA-102",
+          "actual": "PT-WIKA-102",
+          "correct": true,
+          "expected_present": true,
+          "actual_present": true,
+          "invalid_prediction": false,
+          "tp": 1,
+          "fp": 0,
+          "fn": 0,
+          "tn": 0
+        },
+        "calibration_date": {
+          "expected": "2026-08-16",
+          "actual": "2026-08-16",
+          "correct": true,
+          "expected_present": true,
+          "actual_present": true,
+          "invalid_prediction": false,
+          "tp": 1,
+          "fp": 0,
+          "fn": 0,
+          "tn": 0
+        },
+        "next_due_date": {
+          "expected": "2026-07-17",
+          "actual": "2026-07-17",
+          "correct": true,
+          "expected_present": true,
+          "actual_present": true,
+          "invalid_prediction": false,
+          "tp": 1,
+          "fp": 0,
+          "fn": 0,
+          "tn": 0
+        },
+        "error_value": {
+          "expected": 0.063,
+          "actual": 0.063,
+          "correct": true,
+          "expected_present": true,
+          "actual_present": true,
+          "invalid_prediction": false,
+          "tp": 1,
+          "fp": 0,
+          "fn": 0,
+          "tn": 0
+        },
+        "tolerance": {
+          "expected": 0.1,
+          "actual": 0.1,
+          "correct": true,
+          "expected_present": true,
+          "actual_present": true,
+          "invalid_prediction": false,
+          "tp": 1,
+          "fp": 0,
+          "fn": 0,
+          "tn": 0
+        }
+      },
+      "unannotated_predictions": []
+    },
+    {
+      "certificate_id": 7,
+      "filename": "cert_007.pdf",
+      "execution_status": "EVALUATED",
+      "stage": "complete",
+      "fields": {
+        "serial_number": {
+          "expected": "UNKNOWN-ERR-320",
+          "actual": "UNKNOWN-ERR-320",
+          "correct": true,
+          "expected_present": true,
+          "actual_present": true,
+          "invalid_prediction": false,
+          "tp": 1,
+          "fp": 0,
+          "fn": 0,
+          "tn": 0
+        },
+        "calibration_date": {
+          "expected": "2026-05-22",
+          "actual": "2026-05-22",
+          "correct": true,
+          "expected_present": true,
+          "actual_present": true,
+          "invalid_prediction": false,
+          "tp": 1,
+          "fp": 0,
+          "fn": 0,
+          "tn": 0
+        },
+        "next_due_date": {
+          "expected": "2027-05-22",
+          "actual": "2027-05-22",
+          "correct": true,
+          "expected_present": true,
+          "actual_present": true,
+          "invalid_prediction": false,
+          "tp": 1,
+          "fp": 0,
+          "fn": 0,
+          "tn": 0
+        },
+        "error_value": {
+          "expected": 0.029,
+          "actual": 0.029,
+          "correct": true,
+          "expected_present": true,
+          "actual_present": true,
+          "invalid_prediction": false,
+          "tp": 1,
+          "fp": 0,
+          "fn": 0,
+          "tn": 0
+        },
+        "tolerance": {
+          "expected": 0.1,
+          "actual": 0.1,
+          "correct": true,
+          "expected_present": true,
+          "actual_present": true,
+          "invalid_prediction": false,
+          "tp": 1,
+          "fp": 0,
+          "fn": 0,
+          "tn": 0
+        }
+      },
+      "unannotated_predictions": []
+    },
+    {
+      "certificate_id": 8,
+      "filename": "cert_008.pdf",
+      "execution_status": "EVALUATED",
+      "stage": "complete",
+      "fields": {
+        "serial_number": {
+          "expected": "PH-MT-302",
+          "actual": "PH-MT-302",
+          "correct": true,
+          "expected_present": true,
+          "actual_present": true,
+          "invalid_prediction": false,
+          "tp": 1,
+          "fp": 0,
+          "fn": 0,
+          "tn": 0
+        },
+        "calibration_date": {
+          "expected": "2026-07-25",
+          "actual": "2026-07-25",
+          "correct": true,
+          "expected_present": true,
+          "actual_present": true,
+          "invalid_prediction": false,
+          "tp": 1,
+          "fp": 0,
+          "fn": 0,
+          "tn": 0
+        },
+        "next_due_date": {
+          "expected": "2027-07-25",
+          "actual": "2027-07-25",
+          "correct": true,
+          "expected_present": true,
+          "actual_present": true,
+          "invalid_prediction": false,
+          "tp": 1,
+          "fp": 0,
+          "fn": 0,
+          "tn": 0
+        },
+        "error_value": {
+          "expected": 0.067,
+          "actual": 0.067,
+          "correct": true,
+          "expected_present": true,
+          "actual_present": true,
+          "invalid_prediction": false,
+          "tp": 1,
+          "fp": 0,
+          "fn": 0,
+          "tn": 0
+        },
+        "tolerance": {
+          "expected": 0.2,
+          "actual": 0.2,
+          "correct": true,
+          "expected_present": true,
+          "actual_present": true,
+          "invalid_prediction": false,
+          "tp": 1,
+          "fp": 0,
+          "fn": 0,
+          "tn": 0
+        }
+      },
+      "unannotated_predictions": []
+    },
+    {
+      "certificate_id": 9,
+      "filename": "cert_009.pdf",
+      "execution_status": "EVALUATED",
+      "stage": "complete",
+      "fields": {
+        "serial_number": {
+          "expected": "PT-WIKA-102",
+          "actual": "PT-WIKA-102",
+          "correct": true,
+          "expected_present": true,
+          "actual_present": true,
+          "invalid_prediction": false,
+          "tp": 1,
+          "fp": 0,
+          "fn": 0,
+          "tn": 0
+        },
+        "calibration_date": {
+          "expected": "2026-03-16",
+          "actual": "2026-03-16",
+          "correct": true,
+          "expected_present": true,
+          "actual_present": true,
+          "invalid_prediction": false,
+          "tp": 1,
+          "fp": 0,
+          "fn": 0,
+          "tn": 0
+        },
+        "next_due_date": {
+          "expected": "2026-02-14",
+          "actual": "2026-02-14",
+          "correct": true,
+          "expected_present": true,
+          "actual_present": true,
+          "invalid_prediction": false,
+          "tp": 1,
+          "fp": 0,
+          "fn": 0,
+          "tn": 0
+        },
+        "error_value": {
+          "expected": 0.029,
+          "actual": 0.029,
+          "correct": true,
+          "expected_present": true,
+          "actual_present": true,
+          "invalid_prediction": false,
+          "tp": 1,
+          "fp": 0,
+          "fn": 0,
+          "tn": 0
+        },
+        "tolerance": {
+          "expected": 0.1,
+          "actual": 0.1,
+          "correct": true,
+          "expected_present": true,
+          "actual_present": true,
+          "invalid_prediction": false,
+          "tp": 1,
+          "fp": 0,
+          "fn": 0,
+          "tn": 0
+        }
+      },
+      "unannotated_predictions": []
+    },
+    {
+      "certificate_id": 10,
+      "filename": "cert_010.pdf",
+      "execution_status": "EVALUATED",
+      "stage": "complete",
+      "fields": {
+        "serial_number": {
+          "expected": "PT-WIKA-001",
+          "actual": "PT-WIKA-001",
+          "correct": true,
+          "expected_present": true,
+          "actual_present": true,
+          "invalid_prediction": false,
+          "tp": 1,
+          "fp": 0,
+          "fn": 0,
+          "tn": 0
+        },
+        "calibration_date": {
+          "expected": "2026-10-31",
+          "actual": "2026-10-31",
+          "correct": true,
+          "expected_present": true,
+          "actual_present": true,
+          "invalid_prediction": false,
+          "tp": 1,
+          "fp": 0,
+          "fn": 0,
+          "tn": 0
+        },
+        "next_due_date": {
+          "expected": "2027-10-31",
+          "actual": "2027-10-31",
+          "correct": true,
+          "expected_present": true,
+          "actual_present": true,
+          "invalid_prediction": false,
+          "tp": 1,
+          "fp": 0,
+          "fn": 0,
+          "tn": 0
+        },
+        "error_value": {
+          "expected": 0.019,
+          "actual": 0.019,
+          "correct": true,
+          "expected_present": true,
+          "actual_present": true,
+          "invalid_prediction": false,
+          "tp": 1,
+          "fp": 0,
+          "fn": 0,
+          "tn": 0
+        },
+        "tolerance": {
+          "expected": 0.1,
+          "actual": 0.1,
+          "correct": true,
+          "expected_present": true,
+          "actual_present": true,
+          "invalid_prediction": false,
+          "tp": 1,
+          "fp": 0,
+          "fn": 0,
+          "tn": 0
+        }
+      },
+      "unannotated_predictions": []
+    },
+    {
+      "certificate_id": 11,
+      "filename": "cert_011.pdf",
+      "execution_status": "EVALUATED",
+      "stage": "complete",
+      "fields": {
+        "serial_number": {
+          "expected": "TT-EH-201",
+          "actual": "TT-EH-201",
+          "correct": true,
+          "expected_present": true,
+          "actual_present": true,
+          "invalid_prediction": false,
+          "tp": 1,
+          "fp": 0,
+          "fn": 0,
+          "tn": 0
+        },
+        "calibration_date": {
+          "expected": "2026-06-03",
+          "actual": "2026-06-03",
+          "correct": true,
+          "expected_present": true,
+          "actual_present": true,
+          "invalid_prediction": false,
+          "tp": 1,
+          "fp": 0,
+          "fn": 0,
+          "tn": 0
+        },
+        "next_due_date": {
+          "expected": "2027-06-03",
+          "actual": "2027-06-03",
+          "correct": true,
+          "expected_present": true,
+          "actual_present": true,
+          "invalid_prediction": false,
+          "tp": 1,
+          "fp": 0,
+          "fn": 0,
+          "tn": 0
+        },
+        "error_value": {
+          "expected": 0.333,
+          "actual": 0.333,
+          "correct": true,
+          "expected_present": true,
+          "actual_present": true,
+          "invalid_prediction": false,
+          "tp": 1,
+          "fp": 0,
+          "fn": 0,
+          "tn": 0
+        },
+        "tolerance": {
+          "expected": 0.5,
+          "actual": 0.5,
+          "correct": true,
+          "expected_present": true,
+          "actual_present": true,
+          "invalid_prediction": false,
+          "tp": 1,
+          "fp": 0,
+          "fn": 0,
+          "tn": 0
+        }
+      },
+      "unannotated_predictions": []
+    },
+    {
+      "certificate_id": 12,
+      "filename": "cert_012.pdf",
+      "execution_status": "EVALUATED",
+      "stage": "complete",
+      "fields": {
+        "serial_number": {
+          "expected": "TT-EH-202",
+          "actual": "TT-EH-202",
+          "correct": true,
+          "expected_present": true,
+          "actual_present": true,
+          "invalid_prediction": false,
+          "tp": 1,
+          "fp": 0,
+          "fn": 0,
+          "tn": 0
+        },
+        "calibration_date": {
+          "expected": "2026-05-17",
+          "actual": "2026-05-17",
+          "correct": true,
+          "expected_present": true,
+          "actual_present": true,
+          "invalid_prediction": false,
+          "tp": 1,
+          "fp": 0,
+          "fn": 0,
+          "tn": 0
+        },
+        "next_due_date": {
+          "expected": "2026-04-17",
+          "actual": "2026-04-17",
+          "correct": true,
+          "expected_present": true,
+          "actual_present": true,
+          "invalid_prediction": false,
+          "tp": 1,
+          "fp": 0,
+          "fn": 0,
+          "tn": 0
+        },
+        "error_value": {
+          "expected": 0.235,
+          "actual": 0.235,
+          "correct": true,
+          "expected_present": true,
+          "actual_present": true,
+          "invalid_prediction": false,
+          "tp": 1,
+          "fp": 0,
+          "fn": 0,
+          "tn": 0
+        },
+        "tolerance": {
+          "expected": 0.5,
+          "actual": 0.5,
+          "correct": true,
+          "expected_present": true,
+          "actual_present": true,
+          "invalid_prediction": false,
+          "tp": 1,
+          "fp": 0,
+          "fn": 0,
+          "tn": 0
+        }
+      },
+      "unannotated_predictions": []
+    },
+    {
+      "certificate_id": 13,
+      "filename": "cert_013.pdf",
+      "execution_status": "EVALUATED",
+      "stage": "complete",
+      "fields": {
+        "serial_number": {
+          "expected": "PH-MT-301",
+          "actual": "PH-MT-301",
+          "correct": true,
+          "expected_present": true,
+          "actual_present": true,
+          "invalid_prediction": false,
+          "tp": 1,
+          "fp": 0,
+          "fn": 0,
+          "tn": 0
+        },
+        "calibration_date": {
+          "expected": "2026-03-01",
+          "actual": "2026-03-01",
+          "correct": true,
+          "expected_present": true,
+          "actual_present": true,
+          "invalid_prediction": false,
+          "tp": 1,
+          "fp": 0,
+          "fn": 0,
+          "tn": 0
+        },
+        "next_due_date": {
+          "expected": "2027-03-01",
+          "actual": "2027-03-01",
+          "correct": true,
+          "expected_present": true,
+          "actual_present": true,
+          "invalid_prediction": false,
+          "tp": 1,
+          "fp": 0,
+          "fn": 0,
+          "tn": 0
+        },
+        "error_value": {
+          "expected": 0.044,
+          "actual": 0.044,
+          "correct": true,
+          "expected_present": true,
+          "actual_present": true,
+          "invalid_prediction": false,
+          "tp": 1,
+          "fp": 0,
+          "fn": 0,
+          "tn": 0
+        },
+        "tolerance": {
+          "expected": 0.2,
+          "actual": 0.2,
+          "correct": true,
+          "expected_present": true,
+          "actual_present": true,
+          "invalid_prediction": false,
+          "tp": 1,
+          "fp": 0,
+          "fn": 0,
+          "tn": 0
+        }
+      },
+      "unannotated_predictions": []
+    },
+    {
+      "certificate_id": 14,
+      "filename": "cert_014.pdf",
+      "execution_status": "EVALUATED",
+      "stage": "complete",
+      "fields": {
+        "serial_number": {
+          "expected": "PT-WIKA-102",
+          "actual": "PT-WIKA-102",
+          "correct": true,
+          "expected_present": true,
+          "actual_present": true,
+          "invalid_prediction": false,
+          "tp": 1,
+          "fp": 0,
+          "fn": 0,
+          "tn": 0
+        },
+        "calibration_date": {
+          "expected": "2026-06-19",
+          "actual": "2026-06-19",
+          "correct": true,
+          "expected_present": true,
+          "actual_present": true,
+          "invalid_prediction": false,
+          "tp": 1,
+          "fp": 0,
+          "fn": 0,
+          "tn": 0
+        },
+        "next_due_date": {
+          "expected": "2027-06-19",
+          "actual": "2027-06-19",
+          "correct": true,
+          "expected_present": true,
+          "actual_present": true,
+          "invalid_prediction": false,
+          "tp": 1,
+          "fp": 0,
+          "fn": 0,
+          "tn": 0
+        },
+        "error_value": {
+          "expected": 0.15,
+          "actual": 0.15,
+          "correct": true,
+          "expected_present": true,
+          "actual_present": true,
+          "invalid_prediction": false,
+          "tp": 1,
+          "fp": 0,
+          "fn": 0,
+          "tn": 0
+        },
+        "tolerance": {
+          "expected": 0.1,
+          "actual": 0.1,
+          "correct": true,
+          "expected_present": true,
+          "actual_present": true,
+          "invalid_prediction": false,
+          "tp": 1,
+          "fp": 0,
+          "fn": 0,
+          "tn": 0
+        }
+      },
+      "unannotated_predictions": []
+    },
+    {
+      "certificate_id": 15,
+      "filename": "cert_015.pdf",
+      "execution_status": "EVALUATED",
+      "stage": "complete",
+      "fields": {
+        "serial_number": {
+          "expected": "TT-EH-201",
+          "actual": "TT-EH-201",
+          "correct": true,
+          "expected_present": true,
+          "actual_present": true,
+          "invalid_prediction": false,
+          "tp": 1,
+          "fp": 0,
+          "fn": 0,
+          "tn": 0
+        },
+        "calibration_date": {
+          "expected": "2026-03-08",
+          "actual": "2026-03-08",
+          "correct": true,
+          "expected_present": true,
+          "actual_present": true,
+          "invalid_prediction": false,
+          "tp": 1,
+          "fp": 0,
+          "fn": 0,
+          "tn": 0
+        },
+        "next_due_date": {
+          "expected": "2027-03-08",
+          "actual": "2027-03-08",
+          "correct": true,
+          "expected_present": true,
+          "actual_present": true,
+          "invalid_prediction": false,
+          "tp": 1,
+          "fp": 0,
+          "fn": 0,
+          "tn": 0
+        },
+        "error_value": {
+          "expected": 0.335,
+          "actual": 0.335,
+          "correct": true,
+          "expected_present": true,
+          "actual_present": true,
+          "invalid_prediction": false,
+          "tp": 1,
+          "fp": 0,
+          "fn": 0,
+          "tn": 0
+        },
+        "tolerance": {
+          "expected": 0.5,
+          "actual": 0.5,
+          "correct": true,
+          "expected_present": true,
+          "actual_present": true,
+          "invalid_prediction": false,
+          "tp": 1,
+          "fp": 0,
+          "fn": 0,
+          "tn": 0
+        }
+      },
+      "unannotated_predictions": []
+    },
+    {
+      "certificate_id": 16,
+      "filename": "cert_016.pdf",
+      "execution_status": "EVALUATED",
+      "stage": "complete",
+      "fields": {
+        "serial_number": {
+          "expected": "PT-WIKA-101",
+          "actual": "PT-WIKA-101",
+          "correct": true,
+          "expected_present": true,
+          "actual_present": true,
+          "invalid_prediction": false,
+          "tp": 1,
+          "fp": 0,
+          "fn": 0,
+          "tn": 0
+        },
+        "calibration_date": {
+          "expected": "2026-06-25",
+          "actual": "2026-06-25",
+          "correct": true,
+          "expected_present": true,
+          "actual_present": true,
+          "invalid_prediction": false,
+          "tp": 1,
+          "fp": 0,
+          "fn": 0,
+          "tn": 0
+        },
+        "next_due_date": {
+          "expected": "2027-06-25",
+          "actual": "2027-06-25",
+          "correct": true,
+          "expected_present": true,
+          "actual_present": true,
+          "invalid_prediction": false,
+          "tp": 1,
+          "fp": 0,
+          "fn": 0,
+          "tn": 0
+        },
+        "error_value": {
+          "expected": 0.057,
+          "actual": 0.057,
+          "correct": true,
+          "expected_present": true,
+          "actual_present": true,
+          "invalid_prediction": false,
+          "tp": 1,
+          "fp": 0,
+          "fn": 0,
+          "tn": 0
+        },
+        "tolerance": {
+          "expected": 0.1,
+          "actual": 0.1,
+          "correct": true,
+          "expected_present": true,
+          "actual_present": true,
+          "invalid_prediction": false,
+          "tp": 1,
+          "fp": 0,
+          "fn": 0,
+          "tn": 0
+        }
+      },
+      "unannotated_predictions": []
+    },
+    {
+      "certificate_id": 17,
+      "filename": "cert_017.pdf",
+      "execution_status": "EVALUATED",
+      "stage": "complete",
+      "fields": {
+        "serial_number": {
+          "expected": "PH-MT-301",
+          "actual": "PH-MT-301",
+          "correct": true,
+          "expected_present": true,
+          "actual_present": true,
+          "invalid_prediction": false,
+          "tp": 1,
+          "fp": 0,
+          "fn": 0,
+          "tn": 0
+        },
+        "calibration_date": {
+          "expected": "2026-03-05",
+          "actual": "2026-03-05",
+          "correct": true,
+          "expected_present": true,
+          "actual_present": true,
+          "invalid_prediction": false,
+          "tp": 1,
+          "fp": 0,
+          "fn": 0,
+          "tn": 0
+        },
+        "next_due_date": {
+          "expected": "2027-03-05",
+          "actual": "2027-03-05",
+          "correct": true,
+          "expected_present": true,
+          "actual_present": true,
+          "invalid_prediction": false,
+          "tp": 1,
+          "fp": 0,
+          "fn": 0,
+          "tn": 0
+        },
+        "error_value": {
+          "expected": 0.3,
+          "actual": 0.3,
+          "correct": true,
+          "expected_present": true,
+          "actual_present": true,
+          "invalid_prediction": false,
+          "tp": 1,
+          "fp": 0,
+          "fn": 0,
+          "tn": 0
+        },
+        "tolerance": {
+          "expected": 0.2,
+          "actual": 0.2,
+          "correct": true,
+          "expected_present": true,
+          "actual_present": true,
+          "invalid_prediction": false,
+          "tp": 1,
+          "fp": 0,
+          "fn": 0,
+          "tn": 0
+        }
+      },
+      "unannotated_predictions": []
+    },
+    {
+      "certificate_id": 18,
+      "filename": "cert_018.pdf",
+      "execution_status": "EVALUATED",
+      "stage": "complete",
+      "fields": {
+        "serial_number": {
+          "expected": "PH-MT-301",
+          "actual": "PH-MT-301",
+          "correct": true,
+          "expected_present": true,
+          "actual_present": true,
+          "invalid_prediction": false,
+          "tp": 1,
+          "fp": 0,
+          "fn": 0,
+          "tn": 0
+        },
+        "calibration_date": {
+          "expected": "2026-06-16",
+          "actual": "2026-06-16",
+          "correct": true,
+          "expected_present": true,
+          "actual_present": true,
+          "invalid_prediction": false,
+          "tp": 1,
+          "fp": 0,
+          "fn": 0,
+          "tn": 0
+        },
+        "next_due_date": {
+          "expected": "2027-06-16",
+          "actual": "2027-06-16",
+          "correct": true,
+          "expected_present": true,
+          "actual_present": true,
+          "invalid_prediction": false,
+          "tp": 1,
+          "fp": 0,
+          "fn": 0,
+          "tn": 0
+        },
+        "error_value": {
+          "expected": 0.035,
+          "actual": 0.035,
+          "correct": true,
+          "expected_present": true,
+          "actual_present": true,
+          "invalid_prediction": false,
+          "tp": 1,
+          "fp": 0,
+          "fn": 0,
+          "tn": 0
+        },
+        "tolerance": {
+          "expected": 0.2,
+          "actual": 0.2,
+          "correct": true,
+          "expected_present": true,
+          "actual_present": true,
+          "invalid_prediction": false,
+          "tp": 1,
+          "fp": 0,
+          "fn": 0,
+          "tn": 0
+        }
+      },
+      "unannotated_predictions": []
+    },
+    {
+      "certificate_id": 19,
+      "filename": "cert_019.pdf",
+      "execution_status": "EVALUATED",
+      "stage": "complete",
+      "fields": {
+        "serial_number": {
+          "expected": "TT-EH-201",
+          "actual": "TT-EH-201",
+          "correct": true,
+          "expected_present": true,
+          "actual_present": true,
+          "invalid_prediction": false,
+          "tp": 1,
+          "fp": 0,
+          "fn": 0,
+          "tn": 0
+        },
+        "calibration_date": {
+          "expected": "2026-03-07",
+          "actual": "2026-03-07",
+          "correct": true,
+          "expected_present": true,
+          "actual_present": true,
+          "invalid_prediction": false,
+          "tp": 1,
+          "fp": 0,
+          "fn": 0,
+          "tn": 0
+        },
+        "next_due_date": {
+          "expected": "2027-03-07",
+          "actual": "2027-03-07",
+          "correct": true,
+          "expected_present": true,
+          "actual_present": true,
+          "invalid_prediction": false,
+          "tp": 1,
+          "fp": 0,
+          "fn": 0,
+          "tn": 0
+        },
+        "error_value": {
+          "expected": 0.278,
+          "actual": 0.278,
+          "correct": true,
+          "expected_present": true,
+          "actual_present": true,
+          "invalid_prediction": false,
+          "tp": 1,
+          "fp": 0,
+          "fn": 0,
+          "tn": 0
+        },
+        "tolerance": {
+          "expected": 0.5,
+          "actual": 0.5,
+          "correct": true,
+          "expected_present": true,
+          "actual_present": true,
+          "invalid_prediction": false,
+          "tp": 1,
+          "fp": 0,
+          "fn": 0,
+          "tn": 0
+        }
+      },
+      "unannotated_predictions": []
+    },
+    {
+      "certificate_id": 20,
+      "filename": "cert_020.pdf",
+      "execution_status": "EVALUATED",
+      "stage": "complete",
+      "fields": {
+        "serial_number": {
+          "expected": "UNKNOWN-ERR-132",
+          "actual": "UNKNOWN-ERR-132",
+          "correct": true,
+          "expected_present": true,
+          "actual_present": true,
+          "invalid_prediction": false,
+          "tp": 1,
+          "fp": 0,
+          "fn": 0,
+          "tn": 0
+        },
+        "calibration_date": {
+          "expected": "2026-08-03",
+          "actual": "2026-08-03",
+          "correct": true,
+          "expected_present": true,
+          "actual_present": true,
+          "invalid_prediction": false,
+          "tp": 1,
+          "fp": 0,
+          "fn": 0,
+          "tn": 0
+        },
+        "next_due_date": {
+          "expected": "2027-08-03",
+          "actual": "2027-08-03",
+          "correct": true,
+          "expected_present": true,
+          "actual_present": true,
+          "invalid_prediction": false,
+          "tp": 1,
+          "fp": 0,
+          "fn": 0,
+          "tn": 0
+        },
+        "error_value": {
+          "expected": 0.026,
+          "actual": 0.026,
+          "correct": true,
+          "expected_present": true,
+          "actual_present": true,
+          "invalid_prediction": false,
+          "tp": 1,
+          "fp": 0,
+          "fn": 0,
+          "tn": 0
+        },
+        "tolerance": {
+          "expected": 0.1,
+          "actual": 0.1,
+          "correct": true,
+          "expected_present": true,
+          "actual_present": true,
+          "invalid_prediction": false,
+          "tp": 1,
+          "fp": 0,
+          "fn": 0,
+          "tn": 0
+        }
+      },
+      "unannotated_predictions": []
+    }
+  ],
+  "experiment": "EXP-01",
+  "scope": "Synthetic deterministic PDF extraction preparation; not final acceptance",
+  "calculated_at": "2026-11-01T19:54:45.312089+00:00",
+  "python": "3.11.17",
+  "packages": {
+    "pdfplumber": "0.11.4",
+    "pdfminer.six": "20231228",
+    "pydantic": "2.9.2",
+    "pydantic-settings": "2.5.2"
+  },
+  "git": {
+    "commit": "d73291785e3a95413f731293041ef4e15f2aafe0",
+    "working_tree_dirty": null,
+    "source": "caller_supplied_not_verified"
+  },
+  "inputs": {
+    "manifest": "10ee01c07930fe30af5badd48daa43ac5bb8b41f396e59c18bb5d681147577d8",
+    "pdfs": {
+      "cert_001.pdf": "99300af4d137ae2463276211aace954b827d09379493b214d3729838ce2ece29",
+      "cert_002.pdf": "f03fb9636520a71926f7e38c3a150330e9dfe331d6e8c3022f41f217fefb7156",
+      "cert_003.pdf": "f22d7fdcc0f7a5f6215d63d0dd4bf2140ed331f568f41b829598108b98a5082c",
+      "cert_004.pdf": "9287e14a57d045c728d5bbb40ad5a766e7859455775cabf265d3e247d756ad0e",
+      "cert_005.pdf": "564c38610e064442d5129b22e3099bd70bb223cb52b6ce984b9cf95cde5511b2",
+      "cert_006.pdf": "9d35197e043d04e840bc271085aa284485db2633d1d83ce73831a3806f3e64c6",
+      "cert_007.pdf": "3d26ff5aff6eb5f915ebda70149d479f2991e0cea81733d2727c7dbd52bec882",
+      "cert_008.pdf": "29d19a20adbc7ede83f1cd31d7c4dfbeca53838ee1e9062aaa06f41408129eec",
+      "cert_009.pdf": "236370c304ee392f22ef004cf63ac96b1c2498c21b3c7173f3f01981a51f9765",
+      "cert_010.pdf": "458e23f91e951392fa2129eef73f97fd209396579cb46bd3fe7b491d17336894",
+      "cert_011.pdf": "88bf4c2835efd07350e7b057a8353e17b793662c3b90fcfaa16a9a6f5a1e0488",
+      "cert_012.pdf": "d351b1b952f4b8519b1d907f7cba38e22e31dd47cd1364703257e07e7cde3177",
+      "cert_013.pdf": "d2b7e0a32cb48ef8bb66f7b3b15115e0b502c8459df407d12a6542551bad0b2b",
+      "cert_014.pdf": "2d172ed72723890fcc25df1bd3b5e597c12eb6442a509c2b276f6398808958c4",
+      "cert_015.pdf": "e812e82f0ff07ace751bd47263eb996b6aca6fc7a99d60f0ca5831b716459c91",
+      "cert_016.pdf": "5ef74c825743aec31ec7541a25476c4ae19f2a8ae25c753aca74705fff1ed2e1",
+      "cert_017.pdf": "49fe0af2966ba8d305b8faee79a909131c1d026667372aa59ceebd7f84f1a515",
+      "cert_018.pdf": "84e56d5089bcc8b286e2b70655444cb6ee29b01349107ebf8aa8384d940d0540",
+      "cert_019.pdf": "ce03dafbe07f0d9d3f7f442abf53d1ee2853ce7b9cbbc35ce592e9fe512a0999",
+      "cert_020.pdf": "d0490047bbecf882b9fd2bf52e231b39ac14b679709eabbd822fe0b0502790a6"
+    }
+  },
+  "input_manifest_sha256": "12ca5b226a5736236c77011361bcc4fd1c233a501b904303341f2e4fb594fbd8",
+  "source_sha256": {
+    "experiments/run_extraction_exp01.py": "169ebe22b4cd9b51cbd914358b4f24364261543374731aa0e38e6d058680eaf9",
+    "backend/app/services/pdf_extractor.py": "2ab465a9f7c209faf11448f0a9f5935765d0a6d87220a1ca1a74cb7320ddd560",
+    "backend/app/core/config.py": "bfd8387f7a2066ea4e3fbe7df857af99ed56be572d0ca289f8c555e40a2e83b0",
+    "backend/requirements.txt": "ffd05970a6d2c6de37fac1759c73951e6f56199902742984b6f7627088d528b8"
+  },
+  "planned_annotated_slots": 100,
+  "extractor": "production_deterministic_pdf",
+  "baseline_comparison": {
+    "status": "NOT_EVALUATED",
+    "reason": "No independent manual or alternative extractor baseline measured"
+  },
+  "comparison_policy": {
+    "version": "exp01_preparation_v1",
+    "text": "strip outer whitespace; case and punctuation preserved; no unit conversion",
+    "dates": "calendar-valid ISO or DD/MM/YYYY normalized to ISO; no chronology rules",
+    "numbers": "exact finite Decimal equality; decimal comma normalized; no numerical tolerance",
+    "wrong_present_value": "one FP and one FN when gold present",
+    "unannotated_fields": "excluded, never counted as true negatives",
+    "undefined_denominators": null,
+    "review_fraction": "disagreeing annotated slots / annotated slots, not measured human edits",
+    "acceptance_thresholds": null
+  },
+  "input_integrity": "UNCHANGED"
+}
