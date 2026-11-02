@@ -1,0 +1,296 @@
+{
+  "version": "exp02_preparation_v1",
+  "scope": "Synthetic preparation, not final acceptance",
+  "ambiguity_policy": "Two distinct valid serials in one document require abstention/review; preparation design expectation pending team confirmation",
+  "catalog": [
+    {
+      "serial_number": "PT-WIKA-001",
+      "family": "pressure_transmitter",
+      "manufacturer": "WIKA",
+      "model": "S-20"
+    },
+    {
+      "serial_number": "PT-WIKA-101",
+      "family": "pressure_transmitter",
+      "manufacturer": "WIKA",
+      "model": "S-20"
+    },
+    {
+      "serial_number": "PT-WIKA-102",
+      "family": "pressure_transmitter",
+      "manufacturer": "WIKA",
+      "model": "S-20"
+    },
+    {
+      "serial_number": "TT-EH-201",
+      "family": "temperature_sensor",
+      "manufacturer": "Endress+Hauser",
+      "model": "iTHERM-TM411"
+    },
+    {
+      "serial_number": "TT-EH-202",
+      "family": "temperature_sensor",
+      "manufacturer": "Endress+Hauser",
+      "model": "iTHERM-TM411"
+    },
+    {
+      "serial_number": "PH-MT-301",
+      "family": "ph_sensor",
+      "manufacturer": "Mettler Toledo",
+      "model": "InPro-3250i"
+    },
+    {
+      "serial_number": "PH-MT-302",
+      "family": "ph_sensor",
+      "manufacturer": "Mettler Toledo",
+      "model": "InPro-3250i"
+    }
+  ],
+  "families": {
+    "pressure_transmitter": {
+      "magnitude": "Pressure",
+      "unit": "bar"
+    },
+    "temperature_sensor": {
+      "magnitude": "Temperature",
+      "unit": "°C"
+    },
+    "ph_sensor": {
+      "magnitude": "pH",
+      "unit": "pH"
+    }
+  },
+  "cases": [
+    {
+      "case_id": "legacy-001",
+      "scenario": "known_serial",
+      "pdf_filename": "cert_001.pdf",
+      "expected_target": "PH-MT-301",
+      "expected_matching_review": false
+    },
+    {
+      "case_id": "legacy-002",
+      "scenario": "known_serial",
+      "pdf_filename": "cert_002.pdf",
+      "expected_target": "PT-WIKA-101",
+      "expected_matching_review": false
+    },
+    {
+      "case_id": "legacy-003",
+      "scenario": "known_serial",
+      "pdf_filename": "cert_003.pdf",
+      "expected_target": "TT-EH-201",
+      "expected_matching_review": false
+    },
+    {
+      "case_id": "legacy-004",
+      "scenario": "unknown_serial",
+      "pdf_filename": "cert_004.pdf",
+      "expected_target": null,
+      "expected_matching_review": true
+    },
+    {
+      "case_id": "legacy-005",
+      "scenario": "known_serial",
+      "pdf_filename": "cert_005.pdf",
+      "expected_target": "PH-MT-301",
+      "expected_matching_review": false
+    },
+    {
+      "case_id": "legacy-006",
+      "scenario": "known_serial",
+      "pdf_filename": "cert_006.pdf",
+      "expected_target": "PT-WIKA-102",
+      "expected_matching_review": false
+    },
+    {
+      "case_id": "legacy-007",
+      "scenario": "unknown_serial",
+      "pdf_filename": "cert_007.pdf",
+      "expected_target": null,
+      "expected_matching_review": true
+    },
+    {
+      "case_id": "legacy-008",
+      "scenario": "known_serial",
+      "pdf_filename": "cert_008.pdf",
+      "expected_target": "PH-MT-302",
+      "expected_matching_review": false
+    },
+    {
+      "case_id": "legacy-009",
+      "scenario": "known_serial",
+      "pdf_filename": "cert_009.pdf",
+      "expected_target": "PT-WIKA-102",
+      "expected_matching_review": false
+    },
+    {
+      "case_id": "legacy-010",
+      "scenario": "known_serial",
+      "pdf_filename": "cert_010.pdf",
+      "expected_target": "PT-WIKA-001",
+      "expected_matching_review": false
+    },
+    {
+      "case_id": "legacy-011",
+      "scenario": "known_serial",
+      "pdf_filename": "cert_011.pdf",
+      "expected_target": "TT-EH-201",
+      "expected_matching_review": false
+    },
+    {
+      "case_id": "legacy-012",
+      "scenario": "known_serial",
+      "pdf_filename": "cert_012.pdf",
+      "expected_target": "TT-EH-202",
+      "expected_matching_review": false
+    },
+    {
+      "case_id": "legacy-013",
+      "scenario": "known_serial",
+      "pdf_filename": "cert_013.pdf",
+      "expected_target": "PH-MT-301",
+      "expected_matching_review": false
+    },
+    {
+      "case_id": "legacy-014",
+      "scenario": "known_serial",
+      "pdf_filename": "cert_014.pdf",
+      "expected_target": "PT-WIKA-102",
+      "expected_matching_review": false
+    },
+    {
+      "case_id": "legacy-015",
+      "scenario": "known_serial",
+      "pdf_filename": "cert_015.pdf",
+      "expected_target": "TT-EH-201",
+      "expected_matching_review": false
+    },
+    {
+      "case_id": "legacy-016",
+      "scenario": "known_serial",
+      "pdf_filename": "cert_016.pdf",
+      "expected_target": "PT-WIKA-101",
+      "expected_matching_review": false
+    },
+    {
+      "case_id": "legacy-017",
+      "scenario": "known_serial",
+      "pdf_filename": "cert_017.pdf",
+      "expected_target": "PH-MT-301",
+      "expected_matching_review": false
+    },
+    {
+      "case_id": "legacy-018",
+      "scenario": "known_serial",
+      "pdf_filename": "cert_018.pdf",
+      "expected_target": "PH-MT-301",
+      "expected_matching_review": false
+    },
+    {
+      "case_id": "legacy-019",
+      "scenario": "known_serial",
+      "pdf_filename": "cert_019.pdf",
+      "expected_target": "TT-EH-201",
+      "expected_matching_review": false
+    },
+    {
+      "case_id": "legacy-020",
+      "scenario": "unknown_serial",
+      "pdf_filename": "cert_020.pdf",
+      "expected_target": null,
+      "expected_matching_review": true
+    },
+    {
+      "case_id": "known-clean",
+      "scenario": "known_serial",
+      "pdf_lines": [
+        "Serial: PT-WIKA-001",
+        "Calibration Date: 2026-01-01",
+        "Due Date: 2027-01-01"
+      ],
+      "expected_target": "PT-WIKA-001",
+      "expected_matching_review": false
+    },
+    {
+      "case_id": "unknown",
+      "scenario": "unknown_serial",
+      "pdf_lines": [
+        "Serial: UNKNOWN-EXP02-001",
+        "Calibration Date: 2026-01-01",
+        "Due Date: 2027-01-01"
+      ],
+      "expected_target": null,
+      "expected_matching_review": true
+    },
+    {
+      "case_id": "missing",
+      "scenario": "missing_serial",
+      "pdf_lines": [
+        "Certificate without an instrument identifier",
+        "Calibration Date: 2026-01-01",
+        "Due Date: 2027-01-01"
+      ],
+      "expected_target": null,
+      "expected_matching_review": true
+    },
+    {
+      "case_id": "near-neighbour",
+      "scenario": "non_exact_serial",
+      "pdf_lines": [
+        "Serial: PT-WIKA-10",
+        "Calibration Date: 2026-01-01",
+        "Due Date: 2027-01-01"
+      ],
+      "expected_target": null,
+      "expected_matching_review": true
+    },
+    {
+      "case_id": "lowercase",
+      "scenario": "non_exact_serial",
+      "pdf_lines": [
+        "Serial: pt-wika-001",
+        "Calibration Date: 2026-01-01",
+        "Due Date: 2027-01-01"
+      ],
+      "expected_target": null,
+      "expected_matching_review": true
+    },
+    {
+      "case_id": "outer-whitespace",
+      "scenario": "known_serial",
+      "pdf_lines": [
+        "Serial:    PT-WIKA-001   ",
+        "Calibration Date: 2026-01-01",
+        "Due Date: 2027-01-01"
+      ],
+      "expected_target": "PT-WIKA-001",
+      "expected_matching_review": false
+    },
+    {
+      "case_id": "two-serials-a",
+      "scenario": "ambiguous_document",
+      "pdf_lines": [
+        "Serial: PT-WIKA-001",
+        "Serial: TT-EH-201",
+        "Calibration Date: 2026-01-01",
+        "Due Date: 2027-01-01"
+      ],
+      "expected_target": null,
+      "expected_matching_review": true
+    },
+    {
+      "case_id": "two-serials-b",
+      "scenario": "ambiguous_document",
+      "pdf_lines": [
+        "Serial: TT-EH-201",
+        "Serial: PT-WIKA-001",
+        "Calibration Date: 2026-01-01",
+        "Due Date: 2027-01-01"
+      ],
+      "expected_target": null,
+      "expected_matching_review": true
+    }
+  ],
+  "acceptance_thresholds": null
+}
