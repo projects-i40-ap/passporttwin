@@ -39,3 +39,5 @@ backend/storage/raw/
 
 # Docs exports
 *.aasx
+# Local experiment runs (curated reports may be committed under experiments/results)
+experiments/runs/

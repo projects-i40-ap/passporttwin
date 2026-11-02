@@ -1,5 +1,5 @@
 import re
-from datetime import datetime
+from datetime import date, datetime
 
 from sqlalchemy.orm import Session
 
@@ -122,9 +122,16 @@ def _resolve_canonical_unit(db: Session, target_unit: InstrumentUnit) -> str | N
     return getattr(instrument_type, "unit", None)
 
 
+def validation_reference_date() -> date:
+    """UTC date in normal requests; overridable in an isolated experiment app."""
+    return datetime.utcnow().date()
+
+
 def validate_document_fields(
     db: Session,
     fields: dict,
+    *,
+    reference_date: date | None = None,
 ) -> tuple[InstrumentUnit | None, list[str]]:
     """
     Ejecuta el matching determinista y las reglas de validación documental.
@@ -137,6 +144,8 @@ def validate_document_fields(
     - la lista de reglas incumplidas.
     """
 
+    if reference_date is None:
+        reference_date = validation_reference_date()
     fields = fields or {}
     rules_failed = []
 
@@ -195,7 +204,7 @@ def validate_document_fields(
     if cal_date_str:
         cal_date = datetime.strptime(cal_date_str, "%Y-%m-%d").date()
 
-        if cal_date > datetime.utcnow().date():
+        if cal_date > reference_date:
             rules_failed.append(
                 "R-DATE-01: La fecha de calibración es futura."
             )

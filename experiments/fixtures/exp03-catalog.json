@@ -1,0 +1,16 @@
+{
+  "types": [
+    {"name": "pressure_transmitter", "magnitude": "Pressure", "unit": "bar"},
+    {"name": "temperature_sensor", "magnitude": "Temperature", "unit": "°C"},
+    {"name": "ph_sensor", "magnitude": "pH", "unit": "pH"}
+  ],
+  "instruments": [
+    {"serial_number": "PT-WIKA-001", "type": "pressure_transmitter", "manufacturer": "WIKA", "model": "S-20"},
+    {"serial_number": "PT-WIKA-101", "type": "pressure_transmitter", "manufacturer": "WIKA", "model": "S-20"},
+    {"serial_number": "PT-WIKA-102", "type": "pressure_transmitter", "manufacturer": "WIKA", "model": "S-20"},
+    {"serial_number": "TT-EH-201", "type": "temperature_sensor", "manufacturer": "Endress+Hauser", "model": "iTHERM-TM411"},
+    {"serial_number": "TT-EH-202", "type": "temperature_sensor", "manufacturer": "Endress+Hauser", "model": "iTHERM-TM411"},
+    {"serial_number": "PH-MT-301", "type": "ph_sensor", "manufacturer": "Mettler Toledo", "model": "InPro-3250i"},
+    {"serial_number": "PH-MT-302", "type": "ph_sensor", "manufacturer": "Mettler Toledo", "model": "InPro-3250i"}
+  ]
+}

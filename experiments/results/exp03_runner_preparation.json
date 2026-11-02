@@ -1,0 +1,529 @@
+{
+  "experiment": "EXP-03",
+  "run_id": "73da0119-1dd2-48e8-9113-ce832b81387e",
+  "started_at": "2026-11-01T19:35:52.211822+00:00",
+  "reference_date": "2026-10-01",
+  "python": "3.11.17",
+  "packages": {
+    "fastapi": "0.115.0",
+    "sqlalchemy": "2.0.35",
+    "pdfplumber": "0.11.4",
+    "requests": "2.31.0",
+    "httpx": "0.27.2",
+    "psycopg2-binary": "2.9.9",
+    "reportlab": "4.2.5",
+    "starlette": "0.38.6",
+    "anyio": "4.15.1",
+    "pydantic": "2.9.2"
+  },
+  "git": {
+    "commit": "d07f55ad476d9144ca5cc1791f98ec801aea1944",
+    "working_tree_dirty": null,
+    "identity_source": "caller_supplied_not_verified; executed sources hashed separately"
+  },
+  "inputs": [
+    {
+      "name": "manifest",
+      "sha256": "10ee01c07930fe30af5badd48daa43ac5bb8b41f396e59c18bb5d681147577d8"
+    },
+    {
+      "name": "catalog",
+      "sha256": "6d6fb095d0cdfc30725e987b27302cd0532cbfeb925acc848f7fbe755c444a99"
+    },
+    {
+      "name": "cert_001.pdf",
+      "sha256": "99300af4d137ae2463276211aace954b827d09379493b214d3729838ce2ece29"
+    },
+    {
+      "name": "cert_002.pdf",
+      "sha256": "f03fb9636520a71926f7e38c3a150330e9dfe331d6e8c3022f41f217fefb7156"
+    },
+    {
+      "name": "cert_003.pdf",
+      "sha256": "f22d7fdcc0f7a5f6215d63d0dd4bf2140ed331f568f41b829598108b98a5082c"
+    },
+    {
+      "name": "cert_004.pdf",
+      "sha256": "9287e14a57d045c728d5bbb40ad5a766e7859455775cabf265d3e247d756ad0e"
+    },
+    {
+      "name": "cert_005.pdf",
+      "sha256": "564c38610e064442d5129b22e3099bd70bb223cb52b6ce984b9cf95cde5511b2"
+    },
+    {
+      "name": "cert_006.pdf",
+      "sha256": "9d35197e043d04e840bc271085aa284485db2633d1d83ce73831a3806f3e64c6"
+    },
+    {
+      "name": "cert_007.pdf",
+      "sha256": "3d26ff5aff6eb5f915ebda70149d479f2991e0cea81733d2727c7dbd52bec882"
+    },
+    {
+      "name": "cert_008.pdf",
+      "sha256": "29d19a20adbc7ede83f1cd31d7c4dfbeca53838ee1e9062aaa06f41408129eec"
+    },
+    {
+      "name": "cert_009.pdf",
+      "sha256": "236370c304ee392f22ef004cf63ac96b1c2498c21b3c7173f3f01981a51f9765"
+    },
+    {
+      "name": "cert_010.pdf",
+      "sha256": "458e23f91e951392fa2129eef73f97fd209396579cb46bd3fe7b491d17336894"
+    },
+    {
+      "name": "cert_011.pdf",
+      "sha256": "88bf4c2835efd07350e7b057a8353e17b793662c3b90fcfaa16a9a6f5a1e0488"
+    },
+    {
+      "name": "cert_012.pdf",
+      "sha256": "d351b1b952f4b8519b1d907f7cba38e22e31dd47cd1364703257e07e7cde3177"
+    },
+    {
+      "name": "cert_013.pdf",
+      "sha256": "d2b7e0a32cb48ef8bb66f7b3b15115e0b502c8459df407d12a6542551bad0b2b"
+    },
+    {
+      "name": "cert_014.pdf",
+      "sha256": "2d172ed72723890fcc25df1bd3b5e597c12eb6442a509c2b276f6398808958c4"
+    },
+    {
+      "name": "cert_015.pdf",
+      "sha256": "e812e82f0ff07ace751bd47263eb996b6aca6fc7a99d60f0ca5831b716459c91"
+    },
+    {
+      "name": "cert_016.pdf",
+      "sha256": "5ef74c825743aec31ec7541a25476c4ae19f2a8ae25c753aca74705fff1ed2e1"
+    },
+    {
+      "name": "cert_017.pdf",
+      "sha256": "49fe0af2966ba8d305b8faee79a909131c1d026667372aa59ceebd7f84f1a515"
+    },
+    {
+      "name": "cert_018.pdf",
+      "sha256": "84e56d5089bcc8b286e2b70655444cb6ee29b01349107ebf8aa8384d940d0540"
+    },
+    {
+      "name": "cert_019.pdf",
+      "sha256": "ce03dafbe07f0d9d3f7f442abf53d1ee2853ce7b9cbbc35ce592e9fe512a0999"
+    },
+    {
+      "name": "cert_020.pdf",
+      "sha256": "d0490047bbecf882b9fd2bf52e231b39ac14b679709eabbd822fe0b0502790a6"
+    }
+  ],
+  "input_manifest_sha256": "8ed484ed3fe6419abbbb66d8756cb61faafdaa1a1ee2ef2ce852c63234fb2f0c",
+  "source_sha256": {
+    "experiments/run_rules_exp03.py": "8c9c9ce7e2ef8b9a9975370f9e482824f09d55b2ecb60f07edf1f204cfa3d467",
+    "backend/app/services/document_validation.py": "eb7e52ce9034f5de7740febba42623565b71658d4dbddc492be86af38ce1d50e",
+    "backend/app/services/pdf_extractor.py": "2ab465a9f7c209faf11448f0a9f5935765d0a6d87220a1ca1a74cb7320ddd560",
+    "backend/app/api/documents.py": "0ba50d8b66eceb9e49ce775217248036e9269283c17a4b9f27343b721ff0e645",
+    "backend/app/database/session.py": "9ad5affe69e76ec777e58e828efbf48b7aeee84cb956a0359ff0f76dadca9a51",
+    "backend/app/core/config.py": "bfd8387f7a2066ea4e3fbe7df857af99ed56be572d0ca289f8c555e40a2e83b0",
+    "backend/requirements.txt": "ffd05970a6d2c6de37fac1759c73951e6f56199902742984b6f7627088d528b8"
+  },
+  "scope": "Synthetic document detection via isolated upload/process routes; preparation run, not final acceptance",
+  "excluded_rules": {
+    "R-DUP-01": "upload rule, not document classification",
+    "R-TOL-01": "canonical acceptance, not document classification"
+  },
+  "metric_policy": "Undefined denominators are null; incomplete runs have no final metrics. COMPLETE does not mean acceptance passed.",
+  "execution_status": "COMPLETE",
+  "planned": 20,
+  "evaluated": 20,
+  "errors": 0,
+  "expected_rule_support": {
+    "R-ID-01": 3,
+    "R-DATE-01": 2,
+    "R-DATE-02": 3,
+    "R-UNIT-01": 0,
+    "R-RANGE-01": 0,
+    "R-MISSING-01": 0
+  },
+  "metrics": {
+    "document_detection": {
+      "tp": 8,
+      "fp": 0,
+      "fn": 0,
+      "tn": 12,
+      "evaluated": 20,
+      "positive_support": 8,
+      "accuracy": 1.0,
+      "precision": 1.0,
+      "recall": 1.0,
+      "f1": 1.0
+    },
+    "status_exact_match": 1.0,
+    "rule_set_exact_match": 1.0,
+    "per_rule": {
+      "R-DATE-01": {
+        "tp": 2,
+        "fp": 0,
+        "fn": 0,
+        "tn": 18,
+        "evaluated": 20,
+        "positive_support": 2,
+        "accuracy": 1.0,
+        "precision": 1.0,
+        "recall": 1.0,
+        "f1": 1.0
+      },
+      "R-DATE-02": {
+        "tp": 3,
+        "fp": 0,
+        "fn": 0,
+        "tn": 17,
+        "evaluated": 20,
+        "positive_support": 3,
+        "accuracy": 1.0,
+        "precision": 1.0,
+        "recall": 1.0,
+        "f1": 1.0
+      },
+      "R-ID-01": {
+        "tp": 3,
+        "fp": 0,
+        "fn": 0,
+        "tn": 17,
+        "evaluated": 20,
+        "positive_support": 3,
+        "accuracy": 1.0,
+        "precision": 1.0,
+        "recall": 1.0,
+        "f1": 1.0
+      },
+      "R-MISSING-01": {
+        "tp": 0,
+        "fp": 0,
+        "fn": 0,
+        "tn": 20,
+        "evaluated": 20,
+        "positive_support": 0,
+        "accuracy": 1.0,
+        "precision": null,
+        "recall": null,
+        "f1": null
+      },
+      "R-RANGE-01": {
+        "tp": 0,
+        "fp": 0,
+        "fn": 0,
+        "tn": 20,
+        "evaluated": 20,
+        "positive_support": 0,
+        "accuracy": 1.0,
+        "precision": null,
+        "recall": null,
+        "f1": null
+      },
+      "R-UNIT-01": {
+        "tp": 0,
+        "fp": 0,
+        "fn": 0,
+        "tn": 20,
+        "evaluated": 20,
+        "positive_support": 0,
+        "accuracy": 1.0,
+        "precision": null,
+        "recall": null,
+        "f1": null
+      }
+    }
+  },
+  "partial_diagnostics_not_final_metrics": null,
+  "details": [
+    {
+      "certificate_id": 1,
+      "filename": "cert_001.pdf",
+      "expected_status": "ACCEPTED",
+      "expected_rules": [],
+      "execution_status": "EVALUATED",
+      "stage": "complete",
+      "document_id": 1,
+      "actual_status": "ACCEPTED",
+      "triggered_rules": [],
+      "matched_instrument_id": 6,
+      "extractor_used": "deterministic"
+    },
+    {
+      "certificate_id": 2,
+      "filename": "cert_002.pdf",
+      "expected_status": "REVIEW_REQUIRED",
+      "expected_rules": [
+        "R-DATE-01"
+      ],
+      "execution_status": "EVALUATED",
+      "stage": "complete",
+      "document_id": 2,
+      "actual_status": "REVIEW_REQUIRED",
+      "triggered_rules": [
+        "R-DATE-01"
+      ],
+      "matched_instrument_id": 2,
+      "extractor_used": "deterministic"
+    },
+    {
+      "certificate_id": 3,
+      "filename": "cert_003.pdf",
+      "expected_status": "ACCEPTED",
+      "expected_rules": [],
+      "execution_status": "EVALUATED",
+      "stage": "complete",
+      "document_id": 3,
+      "actual_status": "ACCEPTED",
+      "triggered_rules": [],
+      "matched_instrument_id": 4,
+      "extractor_used": "deterministic"
+    },
+    {
+      "certificate_id": 4,
+      "filename": "cert_004.pdf",
+      "expected_status": "REVIEW_REQUIRED",
+      "expected_rules": [
+        "R-ID-01"
+      ],
+      "execution_status": "EVALUATED",
+      "stage": "complete",
+      "document_id": 4,
+      "actual_status": "REVIEW_REQUIRED",
+      "triggered_rules": [
+        "R-ID-01"
+      ],
+      "matched_instrument_id": null,
+      "extractor_used": "deterministic"
+    },
+    {
+      "certificate_id": 5,
+      "filename": "cert_005.pdf",
+      "expected_status": "ACCEPTED",
+      "expected_rules": [],
+      "execution_status": "EVALUATED",
+      "stage": "complete",
+      "document_id": 5,
+      "actual_status": "ACCEPTED",
+      "triggered_rules": [],
+      "matched_instrument_id": 6,
+      "extractor_used": "deterministic"
+    },
+    {
+      "certificate_id": 6,
+      "filename": "cert_006.pdf",
+      "expected_status": "REVIEW_REQUIRED",
+      "expected_rules": [
+        "R-DATE-02"
+      ],
+      "execution_status": "EVALUATED",
+      "stage": "complete",
+      "document_id": 6,
+      "actual_status": "REVIEW_REQUIRED",
+      "triggered_rules": [
+        "R-DATE-02"
+      ],
+      "matched_instrument_id": 3,
+      "extractor_used": "deterministic"
+    },
+    {
+      "certificate_id": 7,
+      "filename": "cert_007.pdf",
+      "expected_status": "REVIEW_REQUIRED",
+      "expected_rules": [
+        "R-ID-01"
+      ],
+      "execution_status": "EVALUATED",
+      "stage": "complete",
+      "document_id": 7,
+      "actual_status": "REVIEW_REQUIRED",
+      "triggered_rules": [
+        "R-ID-01"
+      ],
+      "matched_instrument_id": null,
+      "extractor_used": "deterministic"
+    },
+    {
+      "certificate_id": 8,
+      "filename": "cert_008.pdf",
+      "expected_status": "ACCEPTED",
+      "expected_rules": [],
+      "execution_status": "EVALUATED",
+      "stage": "complete",
+      "document_id": 8,
+      "actual_status": "ACCEPTED",
+      "triggered_rules": [],
+      "matched_instrument_id": 7,
+      "extractor_used": "deterministic"
+    },
+    {
+      "certificate_id": 9,
+      "filename": "cert_009.pdf",
+      "expected_status": "REVIEW_REQUIRED",
+      "expected_rules": [
+        "R-DATE-02"
+      ],
+      "execution_status": "EVALUATED",
+      "stage": "complete",
+      "document_id": 9,
+      "actual_status": "REVIEW_REQUIRED",
+      "triggered_rules": [
+        "R-DATE-02"
+      ],
+      "matched_instrument_id": 3,
+      "extractor_used": "deterministic"
+    },
+    {
+      "certificate_id": 10,
+      "filename": "cert_010.pdf",
+      "expected_status": "REVIEW_REQUIRED",
+      "expected_rules": [
+        "R-DATE-01"
+      ],
+      "execution_status": "EVALUATED",
+      "stage": "complete",
+      "document_id": 10,
+      "actual_status": "REVIEW_REQUIRED",
+      "triggered_rules": [
+        "R-DATE-01"
+      ],
+      "matched_instrument_id": 1,
+      "extractor_used": "deterministic"
+    },
+    {
+      "certificate_id": 11,
+      "filename": "cert_011.pdf",
+      "expected_status": "ACCEPTED",
+      "expected_rules": [],
+      "execution_status": "EVALUATED",
+      "stage": "complete",
+      "document_id": 11,
+      "actual_status": "ACCEPTED",
+      "triggered_rules": [],
+      "matched_instrument_id": 4,
+      "extractor_used": "deterministic"
+    },
+    {
+      "certificate_id": 12,
+      "filename": "cert_012.pdf",
+      "expected_status": "REVIEW_REQUIRED",
+      "expected_rules": [
+        "R-DATE-02"
+      ],
+      "execution_status": "EVALUATED",
+      "stage": "complete",
+      "document_id": 12,
+      "actual_status": "REVIEW_REQUIRED",
+      "triggered_rules": [
+        "R-DATE-02"
+      ],
+      "matched_instrument_id": 5,
+      "extractor_used": "deterministic"
+    },
+    {
+      "certificate_id": 13,
+      "filename": "cert_013.pdf",
+      "expected_status": "ACCEPTED",
+      "expected_rules": [],
+      "execution_status": "EVALUATED",
+      "stage": "complete",
+      "document_id": 13,
+      "actual_status": "ACCEPTED",
+      "triggered_rules": [],
+      "matched_instrument_id": 6,
+      "extractor_used": "deterministic"
+    },
+    {
+      "certificate_id": 14,
+      "filename": "cert_014.pdf",
+      "expected_status": "ACCEPTED",
+      "expected_rules": [],
+      "execution_status": "EVALUATED",
+      "stage": "complete",
+      "document_id": 14,
+      "actual_status": "ACCEPTED",
+      "triggered_rules": [],
+      "matched_instrument_id": 3,
+      "extractor_used": "deterministic"
+    },
+    {
+      "certificate_id": 15,
+      "filename": "cert_015.pdf",
+      "expected_status": "ACCEPTED",
+      "expected_rules": [],
+      "execution_status": "EVALUATED",
+      "stage": "complete",
+      "document_id": 15,
+      "actual_status": "ACCEPTED",
+      "triggered_rules": [],
+      "matched_instrument_id": 4,
+      "extractor_used": "deterministic"
+    },
+    {
+      "certificate_id": 16,
+      "filename": "cert_016.pdf",
+      "expected_status": "ACCEPTED",
+      "expected_rules": [],
+      "execution_status": "EVALUATED",
+      "stage": "complete",
+      "document_id": 16,
+      "actual_status": "ACCEPTED",
+      "triggered_rules": [],
+      "matched_instrument_id": 2,
+      "extractor_used": "deterministic"
+    },
+    {
+      "certificate_id": 17,
+      "filename": "cert_017.pdf",
+      "expected_status": "ACCEPTED",
+      "expected_rules": [],
+      "execution_status": "EVALUATED",
+      "stage": "complete",
+      "document_id": 17,
+      "actual_status": "ACCEPTED",
+      "triggered_rules": [],
+      "matched_instrument_id": 6,
+      "extractor_used": "deterministic"
+    },
+    {
+      "certificate_id": 18,
+      "filename": "cert_018.pdf",
+      "expected_status": "ACCEPTED",
+      "expected_rules": [],
+      "execution_status": "EVALUATED",
+      "stage": "complete",
+      "document_id": 18,
+      "actual_status": "ACCEPTED",
+      "triggered_rules": [],
+      "matched_instrument_id": 6,
+      "extractor_used": "deterministic"
+    },
+    {
+      "certificate_id": 19,
+      "filename": "cert_019.pdf",
+      "expected_status": "ACCEPTED",
+      "expected_rules": [],
+      "execution_status": "EVALUATED",
+      "stage": "complete",
+      "document_id": 19,
+      "actual_status": "ACCEPTED",
+      "triggered_rules": [],
+      "matched_instrument_id": 4,
+      "extractor_used": "deterministic"
+    },
+    {
+      "certificate_id": 20,
+      "filename": "cert_020.pdf",
+      "expected_status": "REVIEW_REQUIRED",
+      "expected_rules": [
+        "R-ID-01"
+      ],
+      "execution_status": "EVALUATED",
+      "stage": "complete",
+      "document_id": 20,
+      "actual_status": "REVIEW_REQUIRED",
+      "triggered_rules": [
+        "R-ID-01"
+      ],
+      "matched_instrument_id": null,
+      "extractor_used": "deterministic"
+    }
+  ],
+  "input_integrity": "UNCHANGED",
+  "finished_at": "2026-11-01T19:35:53.267233+00:00"
+}

@@ -4,7 +4,7 @@ from fastapi import APIRouter, UploadFile, File, Depends, HTTPException, status
 from sqlalchemy.orm import Session
 from app.database.session import get_db
 from app.models.document import Document
-from datetime import datetime
+from datetime import date, datetime
 from app.models.document import ExtractedField
 from app.models.instrument import InstrumentUnit
 from app.services.pdf_extractor import (
@@ -21,7 +21,7 @@ from app.schemas.document import (
     DocumentQueryRequest,
     DocumentQueryResponse,
 )
-from app.services.document_validation import validate_document_fields
+from app.services.document_validation import validate_document_fields, validation_reference_date
 from app.services.rag_service import DocumentRAGService
 from app.services.aas_builder import AASBuilder
 from app.services.audit_service import AuditService
@@ -169,6 +169,7 @@ def process_document(
     document_id: int,
     extractor: str = "auto",
     db: Session = Depends(get_db),
+    reference_date: date = Depends(validation_reference_date),
 ):
     doc = db.query(Document).filter(Document.id == document_id).first()
     if not doc:
@@ -235,7 +236,8 @@ def process_document(
     else:
         target_unit, rules_failed = validate_document_fields(
             db=db,
-            fields=extracted
+            fields=extracted,
+            reference_date=reference_date,
         )
         if target_unit:
             doc.instrument_unit_id = target_unit.id
@@ -547,7 +549,8 @@ def correct_extracted_field(
 @router.post("/{document_id}/revalidate", summary="Revalida un documento después de la revisión humana")
 def revalidate_document(
     document_id: int,
-    db: Session = Depends(get_db)
+    db: Session = Depends(get_db),
+    reference_date: date = Depends(validation_reference_date),
 ):
     doc = db.query(Document).filter(Document.id == document_id).first()
     if not doc:
@@ -573,7 +576,8 @@ def revalidate_document(
 
     target_unit, rules_failed = validate_document_fields(
         db=db,
-        fields=normalized_fields
+        fields=normalized_fields,
+        reference_date=reference_date,
     )
 
     # Estado previo a la revalidación (RF-AUDIT-03).
