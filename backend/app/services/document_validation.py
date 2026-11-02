@@ -4,6 +4,7 @@ from datetime import date, datetime
 from sqlalchemy.orm import Session
 
 from app.models.instrument import InstrumentType, InstrumentUnit
+from app.services.document_identity import unresolved_serial_ambiguity
 
 # R-UNIT-01: familias de unidades dimensionalmente compatibles.
 UNIT_COMPATIBILITY_MAP: dict[str, set[str]] = {
@@ -163,7 +164,11 @@ def validate_document_fields(
     matched_serial = fields.get("serial_number")
     target_unit = None
 
-    if matched_serial:
+    ambiguous = unresolved_serial_ambiguity(fields)
+    if ambiguous:
+        rules_failed.append("R-ID-AMBIGUOUS: Varias series detectadas; selecciona una candidata y vuelve a validar.")
+
+    if matched_serial and not ambiguous:
         target_unit = (
             db.query(InstrumentUnit)
             .filter(InstrumentUnit.serial_number == matched_serial)

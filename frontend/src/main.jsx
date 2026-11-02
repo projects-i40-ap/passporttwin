@@ -14,6 +14,15 @@ const API_BASE_URL =
  * Helpers de presentación de la línea temporal de auditoría (RF-AUDIT-08).
  * ---------------------------------------------------------------------- */
 
+function candidateSerials(value) {
+  try {
+    const parsed = JSON.parse(value || "[]");
+    return Array.isArray(parsed) ? parsed.filter((item) => typeof item === "string") : [];
+  } catch {
+    return [];
+  }
+}
+
 function formatTimestamp(value) {
   if (!value) {
     return "—";
@@ -385,6 +394,7 @@ function App() {
   const [documentId, setDocumentId] = useState(initialDocument);
   const [processingStatus, setProcessingStatus] = useState("");
   const [fields, setFields] = useState([]);
+  const serialCandidates = candidateSerials(fields.find((field) => field.field_name === "serial_candidates")?.raw_value);
   const [rulesFailed, setRulesFailed] = useState([]);
   const [message, setMessage] = useState("");
   const [loading, setLoading] = useState(false);
@@ -713,7 +723,13 @@ function App() {
                 }}
               >
                 {fields.map((field) => (
-                  <article
+                  field.field_name === "serial_candidates" ? (
+                    <article key={field.field_id} style={{ padding: "16px", border: "1px solid #ddd", borderRadius: "8px" }}>
+                      <h4>Series detectadas en el documento</h4>
+                      <ul>{candidateSerials(field.raw_value).map((serial) => <li key={serial}>{serial}</li>)}</ul>
+                      <p>Comprueba el certificado, elige una serie en el campo de vinculación, guarda la corrección y vuelve a validar. Esta evidencia es de solo lectura.</p>
+                    </article>
+                  ) : <article
                     key={field.field_id}
                     style={{
                       padding: "16px",
@@ -727,7 +743,7 @@ function App() {
                         fontWeight: "bold",
                       }}
                     >
-                      {field.field_name}
+                      {field.field_name === "serial_number" && serialCandidates.length > 1 ? "Serie para vincular" : field.field_name}
                     </div>
 
                     <div style={{ marginBottom: "12px" }}>
@@ -756,7 +772,14 @@ function App() {
                         alignItems: "center",
                       }}
                     >
-                      <input
+                      {field.field_name === "serial_number" && serialCandidates.length > 1 ? (
+                        <select id={`field-${field.field_id}`} value={field.normalized_value ?? ""}
+                          onChange={(event) => updateNormalizedValue(field.field_id, event.target.value)}
+                          style={{ flex: 1, padding: "8px" }}>
+                          <option value="">Selecciona una serie tras revisar el certificado</option>
+                          {serialCandidates.map((serial) => <option key={serial} value={serial}>{serial}</option>)}
+                        </select>
+                      ) : <input
                         id={`field-${field.field_id}`}
                         type="text"
                         value={field.normalized_value ?? ""}
@@ -770,7 +793,7 @@ function App() {
                           flex: 1,
                           padding: "8px",
                         }}
-                      />
+                      />}
 
                       <button
                         type="button"

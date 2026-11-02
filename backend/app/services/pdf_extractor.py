@@ -6,6 +6,7 @@ import logging
 import requests
 
 from app.core.config import settings
+from app.services.document_identity import serial_identity_fields, guard_merged_identity
 
 logger = logging.getLogger("passporttwin.extractor")
 
@@ -32,9 +33,7 @@ class PDFCertificateExtractor:
         fields = {}
 
         # 1. Extracción de Número de Serie (ej. S/N: PT-WIKA-001 o Serial: PT-WIKA-001)
-        serial_match = re.search(r"(?:S/N|Serial|Número de Serie)[:\s]+([A-Za-z0-9\-_]+)", raw_text, re.IGNORECASE)
-        if serial_match:
-            fields["serial_number"] = serial_match.group(1).strip()
+        fields.update(serial_identity_fields(raw_text))
 
         # 2. Extracción de Fecha de Calibración (Formatos ISO YYYY-MM-DD o DD/MM/YYYY)
         cal_date_match = re.search(r"(?:Calibration Date|Fecha de Calibración)[:\s]+(\d{4}-\d{2}-\d{2}|\d{2}/\d{2}/\d{4})", raw_text, re.IGNORECASE)
@@ -209,6 +208,7 @@ class LLMOCRDocumentExtractor:
 
         merged = dict(deterministic)
         merged.update(llm_fields)
+        guard_merged_identity(merged, deterministic)
         merged["extractor_used"] = "llm"
         return merged
 

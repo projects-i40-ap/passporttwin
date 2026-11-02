@@ -25,6 +25,7 @@ from app.services.document_validation import validate_document_fields, validatio
 from app.services.rag_service import DocumentRAGService
 from app.services.aas_builder import AASBuilder
 from app.services.audit_service import AuditService
+from app.services.document_identity import SERIAL_CANDIDATES_FIELD
 
 router = APIRouter(prefix="/documents", tags=["documents"])
 
@@ -194,6 +195,8 @@ def process_document(
         extractor_used = parsed.pop("extractor_used", "deterministic")
         full_text = parsed.pop(FULL_TEXT_FIELD, "")
         extracted = parsed
+        # Reprocessing must discard any previous automatic link before matching again.
+        doc.instrument_unit_id = None
 
     if not extracted:
         doc.processing_status = "FAILED_EXTRACTION"
@@ -422,7 +425,8 @@ def get_extracted_fields(
                 "raw_value": field.raw_value,
                 "normalized_value": field.normalized_value,
                 "confidence": field.confidence,
-                "validation_status": field.validation_status
+                "validation_status": field.validation_status,
+                "read_only": field.field_name == SERIAL_CANDIDATES_FIELD,
             }
             for field in visible_fields
         ]
@@ -511,6 +515,14 @@ def correct_extracted_field(
             status_code=404,
             detail="Campo extraído no encontrado para este documento."
         )
+
+    if field.field_name in (SERIAL_CANDIDATES_FIELD, FULL_TEXT_FIELD):
+        raise HTTPException(status_code=400, detail="La evidencia extraída es de solo lectura.")
+
+    # Saving a correction requires revalidation before canonical acceptance.
+    doc.processing_status = "REVIEW_REQUIRED"
+    if field.field_name == "serial_number":
+        doc.instrument_unit_id = None
 
     # Human-in-the-loop:
     # raw_value se conserva como evidencia original.
