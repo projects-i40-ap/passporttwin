@@ -3,7 +3,12 @@ import json
 import re
 
 SERIAL_CANDIDATES_FIELD = 'serial_candidates'
-_SERIAL_PATTERN = re.compile(r'(?:S/N|Serial|Número de Serie)[:\s]+([A-Za-z0-9\-_]+)', re.IGNORECASE)
+# Prefer the complete label; never fall back to treating its word Number as a value.
+# Horizontal separators keep an empty field from consuming the next PDF text line.
+_SERIAL_PATTERN = re.compile(
+    r'(?<!\w)(?:S/N|Serial[ \t]+Number\b|Serial(?![ \t]+Number)|Número[ \t]+de[ \t]+Serie)'
+    r'(?:[ \t]*:[ \t]*|[ \t]+)([A-Za-z0-9\-_]+)', re.IGNORECASE,
+)
 
 
 def serial_identity_fields(text):
