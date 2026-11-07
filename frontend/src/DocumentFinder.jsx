@@ -2,7 +2,7 @@ import React, { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import { statusLabel } from "./presentation";
 
-export default function DocumentFinder({ apiBaseUrl, mode }) {
+export default function DocumentFinder({ apiBaseUrl, mode, refresh }) {
   const [query, setQuery] = useState("");
   const [reviewOnly, setReviewOnly] = useState(false);
   const [retry, setRetry] = useState(0);
@@ -20,7 +20,7 @@ export default function DocumentFinder({ apiBaseUrl, mode }) {
       }).then(data => { if (!controller.signal.aborted) setState(data); })
       .catch(error => { if (!controller.signal.aborted) setState({ items: [], error: "No se han podido cargar los documentos. Vuelve a intentarlo." }); });
     return () => controller.abort();
-  }, [apiBaseUrl, query, reviewOnly, offset, retry]);
+  }, [apiBaseUrl, query, reviewOnly, offset, retry, refresh]);
   return <section aria-labelledby={`${prefix}-heading`}>
     <h3 id={`${prefix}-heading`}>Buscar un documento</h3>
     <label htmlFor={`${prefix}-search`}>Nombre del documento, serie o ubicación</label>{" "}

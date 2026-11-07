@@ -5,6 +5,7 @@ import Passport from "./Passport";
 import DocumentOriginal from "./DocumentOriginal";
 import InstrumentFinder from "./InstrumentFinder";
 import DocumentFinder from "./DocumentFinder";
+import CertificateUpload from "./CertificateUpload";
 import "./workspace.css";
 import { statusLabel } from "./presentation";
 
@@ -370,6 +371,7 @@ function AuditTrailTable({ events }) {
 
 function App() {
   const [params] = useSearchParams();
+  const [documentRefresh, setDocumentRefresh] = useState(0);
   const initialTab = params.get("tab") === "audit" ? "audit" : (params.get("tab") === "review" || params.has("documentId")) ? "review" : "home";
   const hasDocument = /^\d+$/.test(params.get("documentId") || "");
   const hasAudit = /^\d+$/.test(params.get("id") || "");
@@ -386,6 +388,9 @@ function App() {
   const [loadedDocumentId, setLoadedDocumentId] = useState(null);
   const [loadedDocumentName, setLoadedDocumentName] = useState("");
   const [processingStatus, setProcessingStatus] = useState("");
+  const [documentType, setDocumentType] = useState("");
+  const canProcessCertificate = documentType === "PDF_CERTIFICATE" &&
+    ["RECEIVED", "FAILED_EXTRACTION"].includes(processingStatus);
   const [fields, setFields] = useState([]);
   const serialCandidates = candidateSerials(fields.find((field) => field.field_name === "serial_candidates")?.raw_value);
   const [materialization, setMaterialization] = useState(null);
@@ -426,6 +431,7 @@ function App() {
     const data = await response.json();
     if (!response.ok) throw new Error(data.detail || "No se han podido cargar los campos del documento.");
     setProcessingStatus(data.processing_status);
+    setDocumentType(data.source_type);
     setLoadedDocumentId(data.document_id);
     setLoadedDocumentName(data.original_filename || "");
     setFields(data.fields);
@@ -447,6 +453,40 @@ function App() {
       setProcessingStatus(""); setLoadedDocumentId(null); setLoadedDocumentName(""); setFields([]); setMaterialization(null);
       setMessage(error.message);
     } finally { setLoading(false); }
+  }
+
+  async function processCertificate() {
+    if (!loadedDocumentId || !canProcessCertificate || loading || hasUnsavedChanges) return;
+    const id = loadedDocumentId;
+    setLoading(true);
+    setMessage("Procesando certificado…");
+    setRulesFailed([]);
+    let processed = false;
+
+    try {
+      const response = await fetch(
+        `${API_BASE_URL}/api/v1/documents/${id}/process?extractor=deterministic`,
+        { method: "POST" },
+      );
+      // The API persists FAILED_EXTRACTION before returning 422.
+      if (!response.ok && response.status !== 422) throw new Error();
+      const result = await response.json();
+      const status = response.status === 422 ? "FAILED_EXTRACTION" : result.processing_status;
+      processed = true;
+      setProcessingStatus(status);
+      setDocumentRefresh(value => value + 1);
+      await refreshDocument(id);
+      setRulesFailed(result.rules_failed || []);
+      setMessage(status === "FAILED_EXTRACTION"
+        ? "No se pudieron extraer los campos del PDF."
+        : "Certificado procesado. Comprueba los campos extraídos.");
+    } catch {
+      setMessage(processed
+        ? "El certificado se procesó, pero no se pudieron cargar los campos. Recarga la página."
+        : "No se pudo confirmar el procesado. Recarga el documento antes de volver a intentarlo.");
+    } finally {
+      setLoading(false);
+    }
   }
 
   function updateNormalizedValue(fieldId, value) {
@@ -645,7 +685,8 @@ function App() {
             Busca el documento, comprueba su original y revisa los campos antes de incorporar una calibración al historial.
           </p>
 
-          <DocumentFinder apiBaseUrl={API_BASE_URL} mode="review" />
+          <CertificateUpload apiBaseUrl={API_BASE_URL} onUploaded={() => setDocumentRefresh(value => value + 1)} />
+          <DocumentFinder apiBaseUrl={API_BASE_URL} mode="review" refresh={documentRefresh} />
           <details className="workspace-advanced">
             <summary>Buscar por ID de documento (avanzado)</summary>
           <section
@@ -702,7 +743,11 @@ function App() {
 
           {loadedDocumentId && (
             <section aria-label="Documento seleccionado"><h3>{loadedDocumentName || `Documento ${loadedDocumentId}`}</h3>
-            <p><Link to={`/documents/${loadedDocumentId}/original${params.get("passport") ? `?passport=${encodeURIComponent(params.get("passport"))}` : ""}`}>Abrir original</Link></p></section>
+            <p><Link to={`/documents/${loadedDocumentId}/original${params.get("passport") ? `?passport=${encodeURIComponent(params.get("passport"))}` : ""}`}>Abrir original</Link></p>
+            {canProcessCertificate && <button type="button" onClick={processCertificate} disabled={loading || hasUnsavedChanges}>
+              {processingStatus === "FAILED_EXTRACTION" ? "Reintentar extracción" : "Procesar certificado"}
+            </button>}
+            </section>
           )}
 
           {processingStatus && (
