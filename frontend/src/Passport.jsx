@@ -124,7 +124,6 @@ export default function Passport({ apiBaseUrl, planOnly = false }) {
           <div className="passport-identity-band">
             {demoMedia ? <figure className="passport-photo-placeholder passport-demo-photo">
               <img src={demoMedia.photo} alt={`Imagen de referencia · ${instrument.technical_name || instrument.model}`} />
-              <figcaption>Imagen sintética</figcaption>
             </figure> : <span className="passport-photo-placeholder" aria-label="Foto no disponible">Sin foto</span>}
             <div><p>Pasaporte del instrumento</p>
               <h1>{instrument.technical_name || instrument.model || "Instrumento"}</h1>
