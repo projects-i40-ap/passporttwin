@@ -379,6 +379,9 @@ function App() {
   const hasAudit = /^\d+$/.test(params.get("id") || "");
   const reviewingDocument = initialTab === "review" && hasDocument;
   const auditingDocument = initialTab === "audit" && hasAudit && params.get("entity") !== "instrument";
+  const passportId = params.get("passport");
+  const hasPassport = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(passportId || "");
+  const auditingPassport = initialTab === "audit" && hasAudit && params.get("entity") === "instrument" && hasPassport;
   const initialDocument = hasDocument ? params.get("documentId") : "";
   const initialAudit = hasAudit ? params.get("id") : "";
   const passportQuery = params.get("passport") ? `&passport=${encodeURIComponent(params.get("passport"))}` : "";
@@ -398,8 +401,8 @@ function App() {
     }
   }, [hash, loadedDocumentId, reviewingDocument]);
   React.useEffect(() => {
-    if (auditingDocument) document.getElementById("workspace-title")?.focus();
-  }, [auditingDocument]);
+    if (auditingDocument || auditingPassport) document.getElementById("workspace-title")?.focus();
+  }, [auditingDocument, auditingPassport]);
   const [loadedDocumentName, setLoadedDocumentName] = useState("");
   const [processingStatus, setProcessingStatus] = useState("");
   const [documentType, setDocumentType] = useState("");
@@ -660,12 +663,11 @@ function App() {
     <main className="passport workspace-page" data-view={activeTab}>
       <header className="workspace-heading">
       <p>Espacio de trabajo</p>
-      <h1 id="workspace-title" tabIndex={-1}>{{ home: "Inventario", review: "Revisión documental", audit: "Auditoría y trazabilidad" }[activeTab]}</h1>
+      <h1 id="workspace-title" tabIndex={-1}>{auditingPassport ? "Historial de eventos" : { home: "Inventario", review: "Revisión documental", audit: "Auditoría y trazabilidad" }[activeTab]}</h1>
       {(reviewingDocument || auditingDocument) && <p>
         <Link to={`/?tab=${activeTab}${passportQuery}`}>Volver a buscar documentos</Link>
       </p>}
-      {/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(params.get("passport") || "") &&
-        <Link className="workspace-back" to={`/passport/${params.get("passport")}`}>Volver al pasaporte</Link>}
+      {hasPassport && <Link className={auditingPassport ? "passport-primary-action" : "workspace-back"} to={`/passport/${passportId}`}>Volver al pasaporte</Link>}
       </header>
 
       {activeTab === "home" && <>
@@ -946,8 +948,7 @@ function App() {
               <Link to={`/documents/${initialAudit}/original${originalQuery}`}>Abrir original</Link>
               <Link to={`/?tab=review&documentId=${initialAudit}${passportQuery}`}>Revisar campos</Link>
             </nav>
-            {auditLoading && <p role="status">Cargando auditoría…</p>}
-          </> : <>
+          </> : !auditingPassport && <>
           <p>
             Consulta el historial de eventos y correcciones, ordenado del más reciente al más antiguo.
           </p>
@@ -1034,6 +1035,7 @@ function App() {
           {auditMessage && (
             <p style={{ marginTop: "20px" }}>{auditMessage}</p>
           )}
+          {(auditingDocument || auditingPassport) && auditLoading && <p role="status">Cargando auditoría…</p>}
 
           <AuditSummary
             entityType={auditEntityType}

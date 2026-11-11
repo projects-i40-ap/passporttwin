@@ -72,9 +72,9 @@
 .passport-calibration-history th { background: #eaf1fc; }
 .passport-calibration-history tbody tr:nth-child(even) { background: #f6f8fb; }
 .passport-redesign > section { --section-accent: #406da0; --section-tint: #edf3fb; }
-.passport-redesign > section:is([aria-labelledby=score], [aria-labelledby=calibrations]) { --section-accent: #176b65; --section-tint: #e9f5f2; }
-.passport-redesign > section:is([aria-labelledby=risk], [aria-labelledby=maintenance]) { --section-accent: #9a611f; --section-tint: #fcf3e7; }
-.passport-redesign > section:is([aria-labelledby=documents-heading], [aria-labelledby=events]) { --section-accent: #635496; --section-tint: #f2eef9; }
+.passport-redesign:is([data-detail=score], [data-detail=calibrations]) > section { --section-accent: #176b65; --section-tint: #e9f5f2; }
+.passport-redesign:is([data-detail=risk], [data-detail=maintenance]) > section { --section-accent: #9a611f; --section-tint: #fcf3e7; }
+.passport-redesign[data-detail=documents] > section { --section-accent: #635496; --section-tint: #f2eef9; }
 .passport-redesign > section > h2::after { content: ""; display: block; width: 2.4rem; height: 3px; margin-top: 7px; border-radius: 3px; background: var(--section-accent); }
 .passport-redesign > section .passport-summary-card,
 .passport-redesign > section .passport-horizon { border-inline-start: 3px solid var(--section-accent); }

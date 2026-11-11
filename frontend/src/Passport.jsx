@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { Link, useLocation, useParams } from "react-router-dom";
+import { Link, Navigate, useLocation, useParams, useSearchParams } from "react-router-dom";
 import AppShell from "./AppShell";
 import { demoInstrumentMedia, DemoLocationPlan } from "./DemoInstrumentMedia";
 import "./passport.css";
@@ -18,13 +18,21 @@ const percentFormat = new Intl.NumberFormat("es-ES", {
 });
 const probability = (value) => value == null ? "No estimable" : percentFormat.format(value);
 const sectionIcons = {
-  summary: "M3 10 12 3l9 7M5 9v11h5v-6h4v6h5V9",
   identity: "M12 11v5m0-8h.01M22 12a10 10 0 1 1-20 0 10 10 0 0 1 20 0Z",
   calibrations: "M7 3v4m10-4v4M4 9h16M4 5h16v16H4zM8 15l2 2 5-5",
   maintenance: "M14 6a4 4 0 0 0-5 5L3 17l4 4 6-6a4 4 0 0 0 5-5l-3 2-3-3z",
   documents: "M6 3h8l4 4v14H6zM14 3v5h4M9 12h6m-6 4h6",
   audit: "M3 12a9 9 0 1 1 2.6 6.4M3 5v7h7m2-5v5l3 2",
   score: "M3 12h4l3-7 4 14 3-7h4",
+};
+const detailTitles = {
+  identity: "Datos técnicos",
+  calibrations: "Calibraciones",
+  maintenance: "Mantenimiento",
+  documents: "Documentación vinculada",
+  events: "Historial de eventos",
+  score: "Salud del instrumento",
+  risk: "Riesgo estimado",
 };
 const reasons = {
   INSUFFICIENT_POST_MAINTENANCE_HISTORY: "faltan calibraciones posteriores al último mantenimiento",
@@ -37,6 +45,13 @@ const reasons = {
 export default function Passport({ apiBaseUrl, planOnly = false }) {
   const { publicId } = useParams();
   const { hash } = useLocation();
+  const [params] = useSearchParams();
+  const requestedView = params.get("vista") || hash.slice(1);
+  const detail = requestedView === "location-plan" ? "identity"
+    : requestedView === "freshness" ? "score"
+    : Object.hasOwn(detailTitles, requestedView) ? requestedView : null;
+  const passportUrl = `/passport/${encodeURIComponent(publicId)}`;
+  const detailUrl = view => `${passportUrl}?vista=${view}`;
   const [state, setState] = useState({ loading: true });
 
   useEffect(() => {
@@ -76,10 +91,11 @@ export default function Passport({ apiBaseUrl, planOnly = false }) {
   }, [publicId, apiBaseUrl, planOnly]);
 
   useEffect(() => {
-    if (!planOnly && hash === "#location-plan" && state.instrument) {
-      document.getElementById("location-plan")?.focus();
-    }
-  }, [hash, planOnly, state.instrument]);
+    if (!state.instrument) return;
+    const headingId = hash === "#location-plan" && detail === "identity"
+      ? "location-plan" : "passport-view-title";
+    document.getElementById(headingId)?.focus();
+  }, [detail, hash, state.instrument]);
 
   if (state.loading) return <main className="passport"><p role="status">Cargando pasaporte…</p></main>;
   if (state.error) return <main className="passport"><h1>Pasaporte digital</h1><p role="alert">{state.error}</p><Link to="/">Volver a PassportTwin</Link></main>;
@@ -90,8 +106,8 @@ export default function Passport({ apiBaseUrl, planOnly = false }) {
   if (planOnly) return <AppShell>
     <main className="passport passport-redesign passport-plan-page">
       <header>
-        <Link to={`/passport/${encodeURIComponent(publicId)}#location-plan`}>Volver al pasaporte</Link>
-        <h1>Plano de ubicación</h1>
+        <Link className="passport-primary-action" to={passportUrl}>Volver al pasaporte</Link>
+        <h1 id="passport-view-title" tabIndex={-1}>Plano de ubicación</h1>
         <p>{text(instrument.location)} · {instrument.serial_number}</p>
       </header>
       {demoMedia ? <DemoLocationPlan media={demoMedia} /> : <p>No hay un plano asociado a este instrumento.</p>}
@@ -100,6 +116,7 @@ export default function Passport({ apiBaseUrl, planOnly = false }) {
   const actions = healthActions(score?.health_score_details, risk);
   const unit = context?.unit || "unidad no definida";
   const auditUrl = `/?tab=audit&entity=instrument&id=${instrument.id}&passport=${instrument.public_id}`;
+  if (detail === "events") return <Navigate to={auditUrl} replace />;
   const today = new Date().toLocaleDateString("sv-SE");
   const latest = calibrations?.reduce((current, item) => item.calibration_date <= today &&
     (!current || item.calibration_date > current.calibration_date ||
@@ -110,16 +127,21 @@ export default function Passport({ apiBaseUrl, planOnly = false }) {
   const count = (items) => items == null ? null : items.length;
   const dataThrough = score?.calibration_data_through || context?.calibration_data_through;
   const sections = [
-    ["summary", "Resumen", "#summary"], ["identity", "Datos técnicos", "#identity"],
-    ["calibrations", "Calibraciones", "#calibrations", count(calibrations)],
-    ["maintenance", "Mantenimiento", "#maintenance", count(maintenance)],
-    ["documents", "Documentos", "#documents", count(context?.documents)],
-    ["audit", "Historial de eventos", "#events"],
-    ["score", "Salud del instrumento", "#score", health == null ? null : number(health) + " / 100"],
+    ["identity", "Datos técnicos", detailUrl("identity")],
+    ["calibrations", "Calibraciones", detailUrl("calibrations"), count(calibrations)],
+    ["maintenance", "Mantenimiento", detailUrl("maintenance"), count(maintenance)],
+    ["documents", "Documentos", detailUrl("documents"), count(context?.documents)],
+    ["audit", "Historial de eventos", auditUrl],
+    ["score", "Salud del instrumento", detailUrl("score"), health == null ? null : number(health) + " / 100"],
   ];
   return <AppShell auditHref={auditUrl}>
-    <main className="passport passport-redesign" id="summary">
-      <div className="passport-overview">
+    <main className="passport passport-redesign" id="summary" data-detail={detail || undefined}>
+      {detail && <header>
+        <Link className="passport-primary-action" to={passportUrl}>Volver al pasaporte</Link>
+        <h1 id="passport-view-title" tabIndex={-1}>{detailTitles[detail]}</h1>
+        <p>{instrument.technical_name || instrument.model} · {instrument.plant_tag || instrument.serial_number}</p>
+      </header>}
+      {!detail && <div className="passport-overview">
         <header className="passport-identity-card">
           <div className="passport-identity-band">
             {demoMedia ? <figure className="passport-photo-placeholder passport-demo-photo">
@@ -127,7 +149,7 @@ export default function Passport({ apiBaseUrl, planOnly = false }) {
               <figcaption>Imagen sintética</figcaption>
             </figure> : <span className="passport-photo-placeholder" aria-label="Foto no disponible">Sin foto</span>}
             <div><p>Pasaporte del instrumento</p>
-              <h1>{instrument.technical_name || instrument.model || "Instrumento"}</h1>
+              <h1 id="passport-view-title" tabIndex={-1}>{instrument.technical_name || instrument.model || "Instrumento"}</h1>
               {instrument.plant_tag && <p>Etiqueta de planta · <strong>{instrument.plant_tag}</strong></p>}
               <p>Número de serie · <strong>{instrument.serial_number}</strong></p>
             </div>
@@ -146,7 +168,7 @@ export default function Passport({ apiBaseUrl, planOnly = false }) {
                   <path d={sectionIcons[icon]} />
                 </svg>
               </span><span>{label}</span>{badge != null && <small>{badge}</small>}<span aria-hidden="true">›</span></>;
-              return href.startsWith("#") ? <a key={href} href={href}>{content}</a> : <Link key={href} to={href}>{content}</Link>;
+              return <Link key={href} to={href}>{content}</Link>;
             })}
           </nav>
         </header>
@@ -177,6 +199,7 @@ export default function Passport({ apiBaseUrl, planOnly = false }) {
             </dl> : <p>{risk ? "No estimable" : "No disponible"}</p>}
             {risk?.as_of && <p className="passport-data-caption">Referencia del cálculo en el pasaporte: {calendarDate(risk.as_of)}</p>}
             <p className="passport-data-caption">Copia guardada para Metabase: <strong>{context ? statusLabel(context.saved_analytics.status) : "No disponible"}</strong></p>
+            <p><Link to={detailUrl("risk")}>Ver detalle del riesgo</Link></p>
           </div>
           <div className={`passport-summary-card passport-calibration-status${overdue ? " passport-overdue" : ""}`}>
             <h2>Estado de la calibración</h2>
@@ -184,13 +207,13 @@ export default function Passport({ apiBaseUrl, planOnly = false }) {
             {overdue && <p>Programa una nueva calibración y revisa el último certificado.</p>}
             <dl className="passport-calibration-dates"><div><dt>Última calibración</dt><dd>{calendarDate(latest?.calibration_date)}</dd></div>
               <div><dt>Próximo vencimiento</dt><dd>{calendarDate(latest?.next_due_date)}</dd></div></dl>
-            <a className="passport-primary-action" href={calibrations != null && !latest ? "#documents" : "#calibrations"}>
+            <Link className="passport-primary-action" to={detailUrl(calibrations != null && !latest ? "documents" : "calibrations")}>
               {calibrations != null && !latest ? "Ver documentación de calibración" : "Ver historial de calibraciones"}
-            </a>
+            </Link>
           </div>
         </div>
-      </div>
-    <section aria-labelledby="identity"><h2 id="identity">Datos técnicos</h2>
+      </div>}
+    {detail === "identity" && <section aria-labelledby="passport-view-title">
       <div className="passport-technical-grid">
         {[
           ["Identificación", [
@@ -215,8 +238,8 @@ export default function Passport({ apiBaseUrl, planOnly = false }) {
             <p className="passport-data-caption">No hay un plano asociado a este instrumento.</p>}
         </article>
       </div>
-    </section>
-    <section aria-labelledby="freshness"><h2 id="freshness">Actualización de la información</h2>
+    </section>}
+    {detail === "score" && <><section aria-labelledby="freshness"><h2 id="freshness">Actualización de la información</h2>
       <div className="passport-technical-grid">
         <article className="passport-summary-card"><h3>Cálculo del pasaporte</h3>
           <dl><div><dt>{health == null ? "Último intento de cálculo" : "Último cálculo en esta consulta"}</dt><dd>{dateTimeLabel(score?.calculated_at)}</dd></div>
@@ -229,7 +252,7 @@ export default function Passport({ apiBaseUrl, planOnly = false }) {
         </article>
       </div>
     </section>
-    <section aria-labelledby="score"><h2 id="score">Salud del instrumento</h2>
+    <section aria-labelledby="passport-view-title">
       <article className="passport-summary-card passport-detail-card">
       <h3>Detalle del Health Score</h3>
       {!score ? <p role="status">Indicador no disponible. El resto del pasaporte sigue accesible.</p> : <>
@@ -242,11 +265,11 @@ export default function Passport({ apiBaseUrl, planOnly = false }) {
               <dd>{component.penalty_points == null ? "No disponible" : `−${number(component.penalty_points)} puntos`} · Peso {number(component.weight)}</dd></div>)}</dl>
         </>}
       </>}
-      {actions.length > 0 && <aside><h3>Qué falta revisar</h3><ul>{actions.map(action => <li key={action}>{action}</li>)}</ul><a href="#documents">Abrir documentación vinculada</a></aside>}
-      <p><a href="#risk">Ver detalle del riesgo estimado</a></p>
+      {actions.length > 0 && <aside><h3>Qué falta revisar</h3><ul>{actions.map(action => <li key={action}>{action}</li>)}</ul><Link to={detailUrl("documents")}>Abrir documentación vinculada</Link></aside>}
+      <p><Link to={detailUrl("risk")}>Ver detalle del riesgo estimado</Link></p>
       </article>
-    </section>
-    <section aria-labelledby="risk"><h2 id="risk">Riesgo experimental de salida de tolerancia</h2>
+    </section></>}
+    {detail === "risk" && <section aria-labelledby="passport-view-title">
       <p>Estimación en cada fecha objetivo, no de cualquier cruce durante el intervalo. Este modelo aporta el componente de riesgo del Health Score de ciclo de vida.</p>
       {!risk ? <p role="status">Estimación no disponible.</p> : risk.status !== "ESTIMATED" ?
         <p>No estimable: {reasons[risk.reason] || "el historial requiere revisión"}. {riskAction(risk.reason)} No equivale a riesgo cero.</p> : <>
@@ -259,8 +282,8 @@ export default function Passport({ apiBaseUrl, planOnly = false }) {
             {value.probability_out_of_tolerance == null && <small>Sin dispersión residual suficiente para asignar probabilidad.</small>}
           </article>)}</div>
         </>}
-    </section>
-    <section aria-labelledby="calibrations"><h2 id="calibrations">Calibraciones</h2>
+    </section>}
+    {detail === "calibrations" && <section aria-labelledby="passport-view-title">
       {latest && <article className="passport-summary-card passport-latest-calibration">
         <h3>Última calibración registrada</h3>
         <dl>
@@ -280,8 +303,8 @@ export default function Passport({ apiBaseUrl, planOnly = false }) {
             </table>
           </div>
         </>}
-    </section>
-    <section aria-labelledby="maintenance"><h2 id="maintenance">Mantenimiento</h2>
+    </section>}
+    {detail === "maintenance" && <section aria-labelledby="passport-view-title">
       {maintenance?.length ? <>
         <article className="passport-summary-card passport-detail-card">
           <h3>Última intervención registrada</h3>
@@ -292,8 +315,8 @@ export default function Passport({ apiBaseUrl, planOnly = false }) {
           <strong>{calendarDate(event.event_date)}</strong><p>{event.description}</p>
         </li>)}</ul>
       </> : <div className="passport-summary-card"><p>{maintenance == null ? "No se ha podido cargar el mantenimiento." : "No hay intervenciones registradas."}</p></div>}
-    </section>
-    <section id="documents" aria-labelledby="documents-heading"><h2 id="documents-heading">Documentación vinculada</h2>
+    </section>}
+    {detail === "documents" && <section aria-labelledby="passport-view-title">
       {context?.documents.length ? <ul className="passport-records">{context.documents.map(document => <li key={document.id} className="passport-summary-card">
           <div className="passport-record-header"><strong>{document.original_filename}</strong><span className="passport-detail-status" data-status={String(document.processing_status).toLowerCase()}>{statusLabel(document.processing_status)}</span></div>
           <nav className="passport-links" aria-label={`Acciones de ${document.original_filename}`}>
@@ -301,14 +324,7 @@ export default function Passport({ apiBaseUrl, planOnly = false }) {
             <Link to={`/?tab=review&documentId=${document.id}&passport=${instrument.public_id}`}>Revisar campos</Link>
           </nav>
         </li>)}</ul> : <div className="passport-summary-card"><p>{context ? "No hay documentos vinculados." : "No se ha podido consultar la documentación."}</p></div>}
-    </section>
-    <section aria-labelledby="events"><h2 id="events">Historial de eventos</h2>
-      <article className="passport-summary-card passport-detail-card">
-        <h3>Auditoría del instrumento</h3>
-        <p>Consulta los eventos registrados del instrumento, sus documentos y sus calibraciones.</p>
-        <p><Link to={auditUrl}>Abrir historial de eventos</Link></p>
-      </article>
-    </section>
+    </section>}
     </main>
   </AppShell>;
 }
