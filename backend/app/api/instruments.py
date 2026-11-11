@@ -1,5 +1,6 @@
-from fastapi import APIRouter, Depends, HTTPException, status
+from fastapi import APIRouter, Depends, HTTPException, status, Query
 from sqlalchemy.orm import Session
+from sqlalchemy import func, or_
 from typing import List
 from app.database.session import get_db
 from app.models.instrument import InstrumentType, InstrumentUnit
@@ -8,6 +9,7 @@ from app.schemas.instrument import (
     InstrumentTypeCreate,
     InstrumentTypeResponse,
     InstrumentUnitCreate,
+    InstrumentUnitUpdate,
     InstrumentUnitResponse)
 from app.schemas.audit import (
     AuditLogEntryResponse,
@@ -15,6 +17,7 @@ from app.schemas.audit import (
 )
 from app.services.aas_builder import AASBuilder
 from app.services.audit_service import AuditService
+from app.services.serial_numbers import InvalidSerial, normalize_serial
 
 ##### LIBRERIAS qr code AND Metabase
 import io
@@ -22,6 +25,9 @@ import qrcode
 from fastapi import Response, status
 from fastapi.responses import RedirectResponse
 from uuid import UUID
+from reportlab.lib.units import mm
+from reportlab.lib.utils import ImageReader
+from reportlab.pdfgen import canvas as pdf_canvas
 
 ##### Librerias calibration and predictions
 from app.models.calibration import AuditLog, CalibrationEvent
@@ -60,7 +66,22 @@ router = APIRouter(prefix="/instruments", tags=["instruments"])
 def create_instrument_type(payload: InstrumentTypeCreate, db: Session = Depends(get_db)):
     existing = db.query(InstrumentType).filter(InstrumentType.name == payload.name).first()
     if existing:
-        raise HTTPException(status_code=400, detail="El tipo de instrumento ya existe.")
+        raise HTTPException(status_code=409, detail="El tipo de instrumento ya existe.")
+    # T9: dos tipos no pueden describir el mismo fabricante + modelo.
+    if payload.manufacturer and payload.model:
+        duplicate = (
+            db.query(InstrumentType)
+            .filter(
+                func.lower(InstrumentType.manufacturer) == payload.manufacturer.lower(),
+                func.lower(InstrumentType.model) == payload.model.lower(),
+            )
+            .first()
+        )
+        if duplicate:
+            raise HTTPException(
+                status_code=409,
+                detail=f"Ya existe el modelo {payload.manufacturer} {payload.model} (tipo {duplicate.id}).",
+            )
     new_type = InstrumentType(**payload.model_dump())
     db.add(new_type)
     db.commit()
@@ -68,13 +89,26 @@ def create_instrument_type(payload: InstrumentTypeCreate, db: Session = Depends(
     return new_type
 
 @router.get("/types", response_model=List[InstrumentTypeResponse])
-def list_instrument_types(db: Session = Depends(get_db)):
-    return db.query(InstrumentType).all()
+def list_instrument_types(q: str = Query("", max_length=120), db: Session = Depends(get_db)):
+    query = db.query(InstrumentType)
+    if q.strip():
+        pattern = f"%{q.strip()}%"
+        query = query.filter(or_(
+            InstrumentType.name.ilike(pattern),
+            InstrumentType.manufacturer.ilike(pattern),
+            InstrumentType.model.ilike(pattern),
+        ))
+    return query.order_by(InstrumentType.name).all()
 
 @router.post("", response_model=InstrumentUnitResponse, status_code=status.HTTP_201_CREATED)
 def register_instrument(payload: InstrumentUnitCreate, db: Session = Depends(get_db)):
-    # 1. Comprobar unicidad de serial
-    if db.query(InstrumentUnit).filter(InstrumentUnit.serial_number == payload.serial_number).first():
+    # 1. Comprobar unicidad de serial (normalizado a mayúsculas, T14)
+    try:
+        serial_number = normalize_serial(payload.serial_number)
+    except InvalidSerial as exc:
+        raise HTTPException(status_code=422, detail=str(exc))
+
+    if db.query(InstrumentUnit).filter(InstrumentUnit.serial_number == serial_number).first():
         raise HTTPException(status_code=400, detail="El número de serie ya está registrado.")
 
     # 2. Comprobar existencia de tipo
@@ -82,8 +116,23 @@ def register_instrument(payload: InstrumentUnitCreate, db: Session = Depends(get
     if not inst_type:
         raise HTTPException(status_code=404, detail="Tipo de instrumento no encontrado.")
 
+    # T9: si el formulario no trae fabricante/modelo, se heredan del tipo.
+    data = payload.model_dump()
+    data["serial_number"] = serial_number
+    data["manufacturer"] = data.get("manufacturer") or inst_type.manufacturer
+    data["model"] = data.get("model") or inst_type.model
+    missing = [name for name in ("manufacturer", "model") if not data.get(name)]
+    if missing:
+        raise HTTPException(
+            status_code=422,
+            detail=(
+                "Faltan datos del dispositivo: " + ", ".join(missing) +
+                ". Indícalos en el formulario o completa el modelo del tipo."
+            ),
+        )
+
     # 3. Persistencia Canónica Operacional
-    new_instrument = InstrumentUnit(**payload.model_dump())
+    new_instrument = InstrumentUnit(**data)
     db.add(new_instrument)
     db.commit()
     db.refresh(new_instrument)
@@ -151,11 +200,74 @@ def list_instruments(db: Session = Depends(get_db)):
         ))
     return instruments
 
+@router.get("/check-serial")
+def check_serial(serial: str = Query(..., min_length=1, max_length=120), db: Session = Depends(get_db)):
+    """Comprobación en vivo del número de serie para el formulario de alta (T9)."""
+    instrument = db.query(InstrumentUnit).filter(InstrumentUnit.serial_number == serial).first()
+    return {
+        "serial_number": serial,
+        "exists": instrument is not None,
+        "instrument_id": instrument.id if instrument else None,
+        "public_id": str(instrument.public_id) if instrument else None,
+    }
+
 @router.get("/{id}", response_model=InstrumentUnitResponse)
 def get_instrument_by_id(id: int, db: Session = Depends(get_db)):
     instrument = db.query(InstrumentUnit).filter(InstrumentUnit.id == id).first()
     if not instrument:
         raise HTTPException(status_code=404, detail="Instrumento no encontrado.")
+    return instrument
+
+@router.patch("/{id}", response_model=InstrumentUnitResponse)
+def update_instrument(id: int, payload: InstrumentUnitUpdate, db: Session = Depends(get_db)):
+    """Corrige datos de un dispositivo ya registrado (T9)."""
+    instrument = db.query(InstrumentUnit).filter(InstrumentUnit.id == id).first()
+    if not instrument:
+        raise HTTPException(status_code=404, detail="Instrumento no encontrado.")
+
+    data = payload.model_dump(exclude_unset=True)
+    if not data:
+        return instrument
+
+    if data.get("serial_number"):
+        try:
+            data["serial_number"] = normalize_serial(data["serial_number"])
+        except InvalidSerial as exc:
+            raise HTTPException(status_code=422, detail=str(exc))
+
+    if data.get("serial_number") and data["serial_number"] != instrument.serial_number:
+        clash = db.query(InstrumentUnit).filter(
+            InstrumentUnit.serial_number == data["serial_number"]
+        ).first()
+        if clash:
+            raise HTTPException(status_code=409, detail="El número de serie ya está registrado.")
+
+    if data.get("instrument_type_id"):
+        if not db.query(InstrumentType).filter(
+            InstrumentType.id == data["instrument_type_id"]
+        ).first():
+            raise HTTPException(status_code=404, detail="Tipo de instrumento no encontrado.")
+
+    before = {
+        "serial_number": instrument.serial_number,
+        "location": instrument.location,
+        "criticality": instrument.criticality,
+        "lifecycle_state": instrument.lifecycle_state,
+    }
+
+    for name, value in data.items():
+        setattr(instrument, name, value)
+
+    AuditService.log_event(
+        db=db, entity_name="instrument_unit", entity_id=instrument.id,
+        action="INSTRUMENT_UPDATED", source="api.instruments.update",
+        before=before,
+        after={name: data.get(name) for name in before if name in data},
+        details={"instrument_unit_id": instrument.id},
+    )
+
+    db.commit()
+    db.refresh(instrument)
     return instrument
 
 def _normalize_audit_timestamp(value):
@@ -370,6 +482,56 @@ def get_instrument_qr(public_id: UUID, db: Session = Depends(get_db)):
     buf.seek(0)
 
     return Response(content=buf.getvalue(), media_type="image/png")
+
+@router.get("/{public_id}/label.pdf", summary="Etiqueta imprimible 50x30 mm con QR")
+def get_instrument_label(public_id: UUID, db: Session = Depends(get_db)):
+    """Genera la etiqueta física del activo: QR, serial y modelo en 50 × 30 mm."""
+    instrument = db.query(InstrumentUnit).filter(InstrumentUnit.public_id == public_id).first()
+    if not instrument:
+        raise HTTPException(status_code=404, detail="Instrumento no encontrado.")
+
+    passport_url = f"{str(settings.public_api_base_url).rstrip('/')}/api/v1/instruments/passport/{public_id}"
+    qr = qrcode.QRCode(version=1, error_correction=qrcode.constants.ERROR_CORRECT_M, box_size=10, border=1)
+    qr.add_data(passport_url)
+    qr.make(fit=True)
+    image = qr.make_image(fill_color="black", back_color="white")
+
+    qr_buffer = io.BytesIO()
+    image.save(qr_buffer, format="PNG")
+    qr_buffer.seek(0)
+
+    width, height = 50 * mm, 30 * mm
+    label = io.BytesIO()
+    pdf = pdf_canvas.Canvas(label, pagesize=(width, height))
+
+    qr_size = 22 * mm
+    pdf.drawImage(ImageReader(qr_buffer), 3 * mm, 4 * mm, width=qr_size, height=qr_size, mask="auto")
+
+    text_x = 27 * mm
+    pdf.setFont("Helvetica-Bold", 7.2)
+    pdf.drawString(text_x, 22 * mm, instrument.serial_number[:16])
+
+    pdf.setFont("Helvetica", 6.6)
+    pdf.drawString(text_x, 18 * mm, str(instrument.model or "")[:18])
+
+    pdf.setFont("Helvetica", 5.2)
+    pdf.drawString(text_x, 14 * mm, str(instrument.manufacturer or "")[:22])
+
+    pdf.setFont("Helvetica", 5.2)
+    pdf.drawString(text_x, 10.5 * mm, str(instrument.location or "")[:22])
+
+    pdf.setFont("Helvetica", 4.8)
+    pdf.drawString(text_x, 7 * mm, "Pasaporte digital")
+
+    pdf.showPage()
+    pdf.save()
+    label.seek(0)
+
+    return Response(
+        content=label.getvalue(),
+        media_type="application/pdf",
+        headers={"Content-Disposition": f'inline; filename="etiqueta-{instrument.serial_number}.pdf"'},
+    )
 
 @router.get("/passport/{public_id}", tags=["passport"], summary="Punto de resolución canónica del QR")
 def resolve_passport(public_id: UUID, db: Session = Depends(get_db)):

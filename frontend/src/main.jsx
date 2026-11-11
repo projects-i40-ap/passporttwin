@@ -6,6 +6,9 @@ import AppShell from "./AppShell";
 import DocumentOriginal from "./DocumentOriginal";
 import InstrumentFinder from "./InstrumentFinder";
 import DocumentFinder from "./DocumentFinder";
+import DocumentLibrary from "./DocumentLibrary";
+import DocumentTypeLink from "./DocumentTypeLink";
+import NewInstrumentForm from "./NewInstrumentForm";
 import CertificateUpload from "./CertificateUpload";
 import "./workspace.css";
 import { documentFieldLabel, statusLabel } from "./presentation";
@@ -134,52 +137,16 @@ function getEventTone(log) {
 }
 
 
-const cellStyle = {
-  padding: "10px 12px",
-  borderBottom: "1px solid #e2e8f0",
-  verticalAlign: "top",
-  fontSize: "0.9rem",
-};
-
-const headerCellStyle = {
-  padding: "10px 12px",
-  borderBottom: "1px solid #cbd5e1",
-  textAlign: "left",
-  fontSize: "0.8rem",
-  textTransform: "uppercase",
-  letterSpacing: "0.04em",
-  color: "#475569",
-  whiteSpace: "nowrap",
-};
-
-
 function DiffCell({ before, after }) {
   if (before === null && after === null) {
-    return <span style={{ color: "#64748b" }}>—</span>;
+    return <span className="audit-cell-muted">—</span>;
   }
 
   return (
-    <div
-      style={{
-        display: "flex",
-        flexDirection: "column",
-        gap: "6px",
-        fontFamily: "monospace",
-        fontSize: "0.85rem",
-        maxWidth: "320px",
-      }}
-    >
-      <span style={{ color: "#b91c1c", wordBreak: "break-word" }}>
-        {formatDiffValue(before)}
-      </span>
-
-      <span style={{ color: "#64748b" }} aria-hidden="true">
-        ↓
-      </span>
-
-      <span style={{ color: "#15803d", wordBreak: "break-word" }}>
-        {formatDiffValue(after)}
-      </span>
+    <div className="audit-diff">
+      <span className="audit-diff-before">{formatDiffValue(before)}</span>
+      <span className="audit-diff-arrow" aria-hidden="true">→</span>
+      <span className="audit-diff-after">{formatDiffValue(after)}</span>
     </div>
   );
 }
@@ -191,53 +158,46 @@ function AuditSummary({ entityType, trace }) {
   }
 
   return (
-    <section
-      style={{
-        marginTop: "24px",
-        padding: "16px 20px",
-        border: "1px solid #cbd5e1",
-        borderRadius: "8px",
-        background: "#f8fafc",
-        display: "flex",
-        flexWrap: "wrap",
-        gap: "24px",
-      }}
-    >
+    <section className="audit-summary">
       {entityType === "instrument" ? (
         <>
           <div>
-            <strong>ID de instrumento:</strong> {trace.instrument_id}
+            <strong>ID de instrumento</strong>
+            {trace.instrument_id}
           </div>
 
           <div>
-            <strong>Número de serie:</strong>{" "}
+            <strong>Número de serie</strong>
             {trace.serial_number || "—"}
           </div>
         </>
       ) : (
         <>
           <div>
-            <strong>ID de documento:</strong> {trace.document_id}
+            <strong>ID de documento</strong>
+            {trace.document_id}
           </div>
 
           <div>
-            <strong>Archivo:</strong>{" "}
+            <strong>Archivo</strong>
             {trace.original_filename || "—"}
           </div>
 
           <div>
-            <strong>Estado de procesamiento:</strong>{" "}
+            <strong>Estado de procesamiento</strong>
             {statusLabel(trace.processing_status)}
           </div>
 
-          <div style={{ fontFamily: "monospace", wordBreak: "break-all" }}>
-            <strong>SHA-256:</strong> {trace.sha256_hash || "—"}
+          <div className="audit-mono">
+            <strong>SHA-256</strong>
+            {trace.sha256_hash || "—"}
           </div>
         </>
       )}
 
       <div>
-        <strong>Total de eventos:</strong> {trace.total_events}
+        <strong>Total de eventos</strong>
+        {trace.total_events}
       </div>
     </section>
   );
@@ -247,37 +207,24 @@ function AuditSummary({ entityType, trace }) {
 function AuditTrailTable({ events }) {
   if (!events || events.length === 0) {
     return (
-      <p style={{ marginTop: "24px", color: "#64748b" }}>
+      <p className="audit-empty">
         No hay eventos de auditoría registrados para esta entidad.
       </p>
     );
   }
 
   return (
-    <div
-      style={{
-        marginTop: "24px",
-        overflowX: "auto",
-        border: "1px solid #cbd5e1",
-        borderRadius: "8px",
-      }}
-    >
-      <table
-        style={{
-          borderCollapse: "collapse",
-          width: "100%",
-          minWidth: "980px",
-        }}
-      >
+    <div className="audit-table-wrap">
+      <table className="audit-table">
         <thead>
-          <tr style={{ background: "#f1f5f9" }}>
-            <th style={headerCellStyle}>Fecha y hora UTC</th>
-            <th style={headerCellStyle}>Acción</th>
-            <th style={headerCellStyle}>Entidad</th>
-            <th style={headerCellStyle}>Actor / proceso</th>
-            <th style={headerCellStyle}>Antes → Después</th>
-            <th style={headerCellStyle}>Reglas</th>
-            <th style={headerCellStyle}>Evidencia SHA-256</th>
+          <tr>
+            <th scope="col">Fecha y hora UTC</th>
+            <th scope="col">Acción</th>
+            <th scope="col">Entidad</th>
+            <th scope="col">Actor / proceso</th>
+            <th scope="col">Antes → Después</th>
+            <th scope="col">Reglas</th>
+            <th scope="col">Evidencia SHA-256</th>
           </tr>
         </thead>
 
@@ -288,78 +235,41 @@ function AuditTrailTable({ events }) {
             return (
               <tr
                 key={log.id}
-                style={{ background: tone.background }}
+                style={{
+                  "--tone-fill": tone.background,
+                  "--tone-text": tone.color,
+                  "--tone-border": tone.border,
+                }}
               >
-                <td
-                  style={{
-                    ...cellStyle,
-                    whiteSpace: "nowrap",
-                    fontFamily: "monospace",
-                    fontSize: "0.82rem",
-                  }}
-                >
+                <td className="audit-cell-time">
                   {formatTimestamp(log.created_at)}
                 </td>
 
-                <td style={cellStyle}>
-                  <span
-                    style={{
-                      display: "inline-block",
-                      padding: "2px 8px",
-                      borderRadius: "999px",
-                      border: `1px solid ${tone.border}`,
-                      color: tone.color,
-                      fontWeight: "bold",
-                      fontSize: "0.78rem",
-                      whiteSpace: "nowrap",
-                    }}
-                  >
-                    {log.action}
-                  </span>
+                <td>
+                  <span className="audit-badge">{log.action}</span>
 
-                  <div
-                    style={{
-                      marginTop: "4px",
-                      fontSize: "0.72rem",
-                      color: tone.color,
-                      textTransform: "uppercase",
-                    }}
-                  >
-                    {tone.label}
-                  </div>
+                  <div className="audit-badge-label">{tone.label}</div>
                 </td>
 
-                <td style={cellStyle}>
+                <td>
                   <div>{log.entity_name}</div>
-                  <div style={{ color: "#64748b" }}>
-                    #{log.entity_id}
+                  <div className="audit-cell-muted">#{log.entity_id}</div>
+                </td>
+
+                <td>
+                  {log.actor || log.details?.actor || "—"}
+                  <div className="audit-cell-muted">
+                    {log.source || log.details?.source || ""}
                   </div>
                 </td>
 
-                <td style={cellStyle}>
-                  {log.actor || log.details?.actor || "—"}
-                  <div style={{ color: "#64748b" }}>{log.source || log.details?.source || ""}</div>
-                </td>
-
-                <td style={cellStyle}>
+                <td>
                   <DiffCell before={log.before} after={log.after} />
                 </td>
 
-                <td style={{ ...cellStyle, maxWidth: "180px" }}>
-                  {getRulesLabel(log)}
-                </td>
+                <td className="audit-cell-rules">{getRulesLabel(log)}</td>
 
-                <td
-                  style={{
-                    ...cellStyle,
-                    fontFamily: "monospace",
-                    fontSize: "0.78rem",
-                    wordBreak: "break-all",
-                    maxWidth: "220px",
-                  }}
-                >
-                  {getEvidenceHash(log)}
-                </td>
+                <td className="audit-cell-mono">{getEvidenceHash(log)}</td>
               </tr>
             );
           })}
@@ -376,6 +286,7 @@ function App() {
   const [documentRefresh, setDocumentRefresh] = useState(0);
   const requestedTab = params.get("tab");
   const initialTab = requestedTab === "audit" ? "audit"
+    : requestedTab === "documents" ? "documents"
     : requestedTab === "review" || params.has("documentId") ? "review"
     : requestedTab === "inventory" || hash === "#inventory" ? "inventory"
     : "home";
@@ -410,6 +321,7 @@ function App() {
   const [loadedDocumentName, setLoadedDocumentName] = useState("");
   const [processingStatus, setProcessingStatus] = useState("");
   const [documentType, setDocumentType] = useState("");
+  const [linkedTypeId, setLinkedTypeId] = useState(null);
   const canProcessCertificate = documentType === "PDF_CERTIFICATE" &&
     ["RECEIVED", "FAILED_EXTRACTION"].includes(processingStatus);
   const [fields, setFields] = useState([]);
@@ -456,6 +368,7 @@ function App() {
     setProcessingStatus(data.processing_status);
     setDocumentType(data.source_type);
     setLoadedDocumentId(data.document_id);
+    setLinkedTypeId(data.instrument_type_id ?? null);
     setLoadedDocumentName(data.original_filename || "");
     setFields(data.fields);
     setSavedValues(Object.fromEntries(data.fields.map(field => [field.field_id, field.normalized_value])));
@@ -488,7 +401,7 @@ function App() {
 
     try {
       const response = await fetch(
-        `${API_BASE_URL}/api/v1/documents/${id}/process?extractor=deterministic`,
+        `${API_BASE_URL}/api/v1/documents/${id}/process?extractor=auto`,
         { method: "POST" },
       );
       // The API persists FAILED_EXTRACTION before returning 422.
@@ -669,7 +582,7 @@ function App() {
     <main className="passport workspace-page" data-view={activeTab}>
       <header className="workspace-heading">
       <p>Espacio de trabajo</p>
-      <h1 id="workspace-title" tabIndex={-1}>{auditingPassport ? "Historial de eventos" : { home: "Inicio", inventory: "Inventario", review: "Revisión documental", audit: "Auditoría y trazabilidad" }[activeTab]}</h1>
+      <h1 id="workspace-title" tabIndex={-1}>{auditingPassport ? "Historial de eventos" : { home: "Inicio", inventory: "Inventario", review: "Revisión documental", documents: "Biblioteca documental", audit: "Auditoría y trazabilidad" }[activeTab]}</h1>
       {activeTab === "home" && <p>Pasaportes digitales y trazabilidad de instrumentos.</p>}
       {(reviewingDocument || auditingDocument) && <p>
         <Link to={`/?tab=${activeTab}${passportQuery}`}>Volver a buscar documentos</Link>
@@ -695,7 +608,16 @@ function App() {
         <Link to="/?tab=audit"><strong>Auditoría</strong><span>Consulta eventos y correcciones.</span></Link>
       </nav>}
 
-      {activeTab === "inventory" && <div id="inventory"><InstrumentFinder apiBaseUrl={API_BASE_URL} /></div>}
+      {activeTab === "inventory" && <>
+        <div id="inventory"><InstrumentFinder apiBaseUrl={API_BASE_URL} /></div>
+        <NewInstrumentForm apiBaseUrl={API_BASE_URL} />
+      </>}
+
+      {activeTab === "documents" && (
+        <div id="document-library">
+          <DocumentLibrary apiBaseUrl={API_BASE_URL} />
+        </div>
+      )}
 
       {activeTab === "review" && (
         <section>
@@ -708,32 +630,12 @@ function App() {
           <DocumentFinder apiBaseUrl={API_BASE_URL} mode="review" refresh={documentRefresh} />
           <details className="workspace-advanced">
             <summary>Buscar por ID de documento (avanzado)</summary>
-          <section
-            style={{
-              marginTop: "32px",
-              padding: "20px",
-              border: "1px solid #ccc",
-              borderRadius: "8px",
-            }}
-          >
-            <label
-              htmlFor="document-id"
-              style={{
-                display: "block",
-                marginBottom: "8px",
-                fontWeight: "bold",
-              }}
-            >
+          <section className="workspace-inline-form">
+            <label htmlFor="document-id" className="workspace-form-label">
               ID de documento
             </label>
 
-            <div
-              style={{
-                display: "flex",
-                gap: "12px",
-                alignItems: "center",
-              }}
-            >
+            <div className="workspace-form-row">
               <input
                 id="document-id"
                 type="number"
@@ -742,10 +644,6 @@ function App() {
                 onChange={(event) =>
                   setDocumentId(event.target.value)
                 }
-                style={{
-                  padding: "8px",
-                  width: "140px",
-                }}
               />
 
               <button
@@ -771,26 +669,28 @@ function App() {
               <Link to={`/?tab=audit&entity=document&id=${loadedDocumentId}${passportQuery}`}>Ver auditoría del documento</Link>
             </nav>
             {canProcessCertificate && <button type="button" onClick={processCertificate} disabled={loading || hasUnsavedChanges}>
-              {processingStatus === "FAILED_EXTRACTION" ? "Reintentar extracción" : "Procesar certificado"}
+              {processingStatus === "FAILED_EXTRACTION" ? "Reintentar extracción" : "Procesar documento"}
             </button>}
             </section>
           )}
 
+          {loadedDocumentId && documentType === "PDF_DATASHEET" && (
+            <DocumentTypeLink
+              documentId={loadedDocumentId}
+              apiBaseUrl={API_BASE_URL}
+              linkedTypeId={linkedTypeId}
+              onLinked={() => refreshDocument(loadedDocumentId)}
+            />
+          )}
+
           {processingStatus && (
-            <section style={{ marginTop: "24px" }}>
+            <section className="workspace-status-line">
               <strong>Estado del documento:</strong>{" "}
               <span
-                style={{
-                  color:
-                    processingStatus === "ACCEPTED"
-                      ? "#15803d"
-                      : processingStatus === "REVIEW_REQUIRED"
-                        ? "#b45309"
-                        : "#334155",
-                  fontWeight: "bold",
-                }}
+                className="passport-detail-status"
+                data-status={String(processingStatus).toLowerCase()}
               >
-                {isMaterialized ? "Incorporado al historial" : processingStatus === "ACCEPTED" ? (needsFieldValidation ? "Pendiente de registrar comprobaciones" : "Validado para incorporación") : statusLabel(processingStatus)}
+                {isMaterialized ? "Incorporado al historial" : processingStatus === "ACCEPTED" ? (needsFieldValidation ? "Pendiente de registrar comprobaciones" : documentType === "PDF_DATASHEET" ? "Ficha revisada" : "Validado para incorporación") : statusLabel(processingStatus)}
               </span>
             </section>
           )}
@@ -823,13 +723,13 @@ function App() {
           }}>Descartar cambios sin guardar</button></p>}
 
           {message && (
-            <p role="status" style={{ marginTop: "20px" }}>
+            <p role="status">
               {message}
             </p>
           )}
 
           {rulesFailed.length > 0 && (
-            <section style={{ marginTop: "24px" }}>
+            <section className="workspace-panel">
               <h3>Reglas de validación pendientes</h3>
 
               <ul>
@@ -841,16 +741,11 @@ function App() {
           )}
 
           {fields.length > 0 && (
-            <section style={{ marginTop: "32px" }}>
+            <section>
               <h3 id="extracted-fields" tabIndex={-1}>Campos extraídos</h3>
               <p>Los estados reflejan las reglas documentales disponibles, no una certificación metrológica. Error y tolerancia no se comprueban en esta fase.</p>
 
-              <div
-                style={{
-                  display: "grid",
-                  gap: "16px",
-                }}
-              >
+              <div className="workspace-field-grid">
                 {fields.map((field) => (
                   field.field_name === "serial_candidates" ? (
                     <article key={field.field_id} className="workspace-panel">
@@ -862,16 +757,11 @@ function App() {
                     key={field.field_id}
                     className="workspace-panel"
                   >
-                    <div
-                      style={{
-                        marginBottom: "12px",
-                        fontWeight: "bold",
-                      }}
-                    >
+                    <div className="workspace-field-title">
                       {field.field_name === "serial_number" && serialCandidates.length > 1 ? "Serie para vincular" : documentFieldLabel(field.field_name)}
                     </div>
 
-                    <div style={{ marginBottom: "12px" }}>
+                    <div className="workspace-field-original">
                       <div>
                         <strong>Valor original:</strong>
                       </div>
@@ -881,27 +771,16 @@ function App() {
 
                     <label
                       htmlFor={`field-${field.field_id}`}
-                      style={{
-                        display: "block",
-                        marginBottom: "6px",
-                        fontWeight: "bold",
-                      }}
+                      className="workspace-form-label"
                     >
                       Valor revisado · {documentFieldLabel(field.field_name)}
                     </label>
 
-                    <div
-                      style={{
-                        display: "flex",
-                        gap: "12px",
-                        alignItems: "center",
-                        flexWrap: "wrap",
-                      }}
-                    >
+                    <div className="workspace-field-controls">
                       {field.field_name === "serial_number" && serialCandidates.length > 1 ? (
                         <select id={`field-${field.field_id}`} value={field.normalized_value ?? ""}
                           onChange={(event) => updateNormalizedValue(field.field_id, event.target.value)}
-                          disabled={loading || isMaterialized} style={{ flex: 1, padding: "8px", minWidth: 0 }}>
+                          disabled={loading || isMaterialized}>
                           <option value="">Selecciona una serie tras revisar el certificado</option>
                           {serialCandidates.map((serial) => <option key={serial} value={serial}>{serial}</option>)}
                         </select>
@@ -916,11 +795,6 @@ function App() {
                             event.target.value
                           )
                         }
-                        style={{
-                          flex: 1,
-                          minWidth: 0,
-                          padding: "8px",
-                        }}
                       />}
 
                       <button
@@ -932,12 +806,7 @@ function App() {
                       </button>
                     </div>
 
-                    <div
-                      style={{
-                        marginTop: "10px",
-                        fontSize: "0.9rem",
-                      }}
-                    >
+                    <div className="workspace-field-check">
                       Comprobación del campo:{" "}
                       {field.normalized_value !== savedValues[field.field_id] ? "Cambio sin guardar" : ({
                         STAGING: "Sin comprobación vigente registrada",
@@ -975,25 +844,12 @@ function App() {
             <summary>Consultar por ID (avanzado)</summary>
           <form
             onSubmit={queryAudit}
-            style={{
-              marginTop: "32px",
-              padding: "20px",
-              border: "1px solid #ccc",
-              borderRadius: "8px",
-              display: "flex",
-              gap: "12px",
-              alignItems: "flex-end",
-              flexWrap: "wrap",
-            }}
+            className="workspace-inline-form"
           >
-            <div>
+            <div className="workspace-form-field">
               <label
                 htmlFor="audit-entity-type"
-                style={{
-                  display: "block",
-                  marginBottom: "8px",
-                  fontWeight: "bold",
-                }}
+                className="workspace-form-label"
               >
                 Buscar por
               </label>
@@ -1004,21 +860,16 @@ function App() {
                 onChange={(event) =>
                   setAuditEntityType(event.target.value)
                 }
-                style={{ padding: "8px", minWidth: "170px" }}
               >
                 <option value="document">ID de documento</option>
                 <option value="instrument">ID de instrumento</option>
               </select>
             </div>
 
-            <div>
+            <div className="workspace-form-field">
               <label
                 htmlFor="audit-entity-id"
-                style={{
-                  display: "block",
-                  marginBottom: "8px",
-                  fontWeight: "bold",
-                }}
+                className="workspace-form-label"
               >
                 {auditEntityType === "instrument"
                   ? "ID de instrumento"
@@ -1033,7 +884,6 @@ function App() {
                 onChange={(event) =>
                   setAuditEntityId(event.target.value)
                 }
-                style={{ padding: "8px", width: "140px" }}
               />
             </div>
 
@@ -1049,7 +899,7 @@ function App() {
           </>}
 
           {auditMessage && (
-            <p style={{ marginTop: "20px" }}>{auditMessage}</p>
+            <p className="workspace-note">{auditMessage}</p>
           )}
           {(auditingDocument || auditingPassport) && auditLoading && <p role="status">Cargando auditoría…</p>}
 

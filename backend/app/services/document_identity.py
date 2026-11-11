@@ -5,14 +5,22 @@ import re
 SERIAL_CANDIDATES_FIELD = 'serial_candidates'
 # Prefer the complete label; never fall back to treating its word Number as a value.
 # Horizontal separators keep an empty field from consuming the next PDF text line.
+# Las etiquetas cualificadas ("Serial Number", "Número de Serie") admiten espacio
+# o separador; el "Serial" suelto exige separador para no capturar "Serial Interface"
+# de un datasheet como si fuera un número de serie (ruido en R-ID-AMBIGUOUS).
 _SERIAL_PATTERN = re.compile(
-    r'(?<!\w)(?:S/N|Serial[ \t]+Number\b|Serial(?![ \t]+Number)|Número[ \t]+de[ \t]+Serie)'
-    r'(?:[ \t]*:[ \t]*|[ \t]+)([A-Za-z0-9\-_]+)', re.IGNORECASE,
+    r'(?<!\w)(?:S/N|Serial[ \t]+Number\b|Número[ \t]+de[ \t]+Serie)[ \t]*[:=]?[ \t]*([A-Za-z0-9\-_]+)'
+    r'|(?<!\w)Serial(?![ \t]+Number)[ \t]*[:=]?[ \t]*([A-Za-z0-9\-_]+)',
+    re.IGNORECASE,
 )
 
 
 def serial_identity_fields(text):
-    candidates = sorted(set(match.group(1).strip() for match in _SERIAL_PATTERN.finditer(text)))
+    candidates = sorted({
+        match.group(1) or match.group(2)
+        for match in _SERIAL_PATTERN.finditer(text)
+        if (match.group(1) or match.group(2))
+    })
     if len(candidates) > 1:
         return {'serial_number': '', SERIAL_CANDIDATES_FIELD: json.dumps(candidates, ensure_ascii=False)}
     return {'serial_number': candidates[0]} if candidates else {}

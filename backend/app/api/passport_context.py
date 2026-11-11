@@ -3,6 +3,7 @@ from fastapi import APIRouter,Depends,HTTPException
 from sqlalchemy.orm import Session
 from app.database.session import get_db
 from app.models.instrument import InstrumentUnit,InstrumentType
+from app.models.document import Document
 from app.models.analytics_snapshot import AnalyticsSnapshot
 from app.services.health_context import load_context
 from app.services.analytics_snapshots import build_manifest
@@ -25,6 +26,11 @@ def passport_context(instrument_id:int,db:Session=Depends(get_db)):
         saved={'status':status,'computed_at':snapshot.computed_at,'as_of':snapshot.as_of,'snapshot_id':snapshot.id}
     return {'instrument_id':instrument.id,'family':family.name if family else None,
         'unit':family.unit if family else None,
+        'family_manufacturer':getattr(family,'manufacturer',None) if family else None,
+        'family_model':getattr(family,'model',None) if family else None,
         'calibration_data_through':max((c.calibration_date for c in context['calibrations']),default=None),
         'saved_analytics':saved,
-        'documents':[{'id':d.id,'original_filename':d.original_filename,'processing_status':d.processing_status} for d in context['documents']]}
+        'documents':[{'id':d.id,'original_filename':d.original_filename,'processing_status':d.processing_status} for d in context['documents']],
+        'type_documents':[{'id':d.id,'original_filename':d.original_filename,'processing_status':d.processing_status}
+            for d in (db.query(Document).filter(Document.instrument_type_id==instrument.instrument_type_id).order_by(Document.id).all()
+                      if instrument.instrument_type_id else [])]}

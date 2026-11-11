@@ -7,6 +7,7 @@ import requests
 
 from app.core.config import settings
 from app.services.document_identity import serial_identity_fields, guard_merged_identity
+from app.services.llm_health import llama_cpp_available
 
 logger = logging.getLogger("passporttwin.extractor")
 
@@ -175,7 +176,7 @@ class LLMOCRDocumentExtractor:
             return True
 
         if mode == "auto":
-            return bool(self.enabled)
+            return bool(self.enabled) or llama_cpp_available()
 
         return False
 

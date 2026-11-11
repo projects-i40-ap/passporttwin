@@ -7,6 +7,8 @@ CREATE TABLE IF NOT EXISTS instrument_type (
     name            TEXT NOT NULL UNIQUE,          -- e.g. 'pressure_transmitter', 'temperature_sensor'
     magnitude       TEXT NOT NULL,                 -- e.g. 'Pressure', 'Temperature', 'pH'
     unit            TEXT NOT NULL,                 -- e.g. 'bar', '°C', 'pH'
+    manufacturer    TEXT,                          -- identidad del modelo (T9)
+    model           TEXT,
     created_at      TIMESTAMPTZ DEFAULT now()
 );
 
@@ -30,6 +32,7 @@ CREATE TABLE IF NOT EXISTS instrument_unit (
 CREATE TABLE IF NOT EXISTS document (
     id                 SERIAL PRIMARY KEY,
     instrument_unit_id INTEGER REFERENCES instrument_unit(id) ON DELETE SET NULL,
+    instrument_type_id INTEGER REFERENCES instrument_type(id) ON DELETE SET NULL,
     original_filename  TEXT NOT NULL,
     file_path          TEXT NOT NULL,
     source_type        TEXT DEFAULT 'MANUAL_UPLOAD', -- PDF_CERTIFICATE | INVENTORY_CSV | MANUAL_UPLOAD

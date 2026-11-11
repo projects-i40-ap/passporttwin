@@ -3,6 +3,7 @@ const statuses = {
   BLOCKED: "Bloqueado", RETIRED: "Retirado", SYNCED: "Sincronizado", ERROR: "Error de sincronización",
   HIGH: "Alta", MEDIUM: "Media", LOW: "Baja", CRITICAL: "Crítica", PASS: "Conforme", FAIL: "No conforme",
   ACCEPTED: "Aceptado", RECEIVED: "Recibido", EXTRACTED: "Extraído", VALIDATED: "Validado",
+  QUEUED: "En cola", PROCESSING: "Procesando",
   REVIEW_REQUIRED: "Requiere revisión", FAILED_EXTRACTION: "Extracción fallida", STAGING: "Pendiente de validación",
   REJECTED: "Rechazado", CURRENT: "Vigente", MISSING: "Sin resultado guardado",
   STALE_DATE: "Desactualizado por fecha", STALE_INPUTS: "Desactualizado por cambios en los datos",

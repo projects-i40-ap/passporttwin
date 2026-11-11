@@ -35,6 +35,22 @@ class Settings(BaseSettings):
     # Tiempo máximo de espera antes de degradar al motor determinista.
     ai_timeout_seconds: float = 12.0
 
+    # Desactiva el bloque de razonamiento del modelo durante la extracción: un
+    # 4B con `--reasoning` puede consumir todo el presupuesto de tokens pensando
+    # y devolver contenido vacío. La gramática (JSON Schema) ya fija el formato.
+    ai_disable_thinking: bool = True
+
+    # Presupuesto de la normalización por documento: caracteres por trozo y
+    # número máximo de trozos procesados (una ficha de 92 páginas no cabe entera).
+    ai_normalizer_max_chars: int = 4000
+    ai_normalizer_max_chunks: int = 12
+
+    # Sonda de disponibilidad de `llama.cpp`: si responde, los bloques LEGO
+    # prefieren el modelo aunque `AI_LEGO_ENABLED` esté desactivado (T7).
+    ai_probe_enabled: bool = True
+    ai_probe_timeout_seconds: float = 1.5
+    ai_probe_cache_seconds: float = 30.0
+
     # JSON environment variable HEALTH_SCORE_WEIGHTS; invalid values fail startup.
     health_score_weights: HealthScoreWeights = Field(default_factory=HealthScoreWeights)
     lifecycle_health_weights: LifecycleHealthWeights = Field(default_factory=LifecycleHealthWeights)

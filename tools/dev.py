@@ -26,6 +26,7 @@ def main():
     if args.action=='start':
         compose('up','-d','--wait','postgres')
         sql((ROOT/'infra/postgres/instrument_identity.sql').read_text(encoding='utf-8'))
+        sql((ROOT/'infra/postgres/instrument_models.sql').read_text(encoding='utf-8'))
         sql("SELECT 'CREATE DATABASE metabase' WHERE NOT EXISTS (SELECT FROM pg_database WHERE datname='metabase')\\gexec\n")
         compose('up','-d','--build','backend','frontend','basyx-aas','metabase')
         print('Servicios iniciados. Usa las URLs de .env; revisa docker compose ps si alguno todavía está arrancando.')

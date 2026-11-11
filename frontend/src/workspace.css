@@ -71,3 +71,21 @@
 .document-review-controls { display: flex; align-items: center; flex-wrap: wrap; gap: 12px; }
 .document-review-controls button { padding: 8px 12px; }
 .document-review-controls :focus-visible { outline: 2px solid #1755a5; outline-offset: 3px; }
+
+/* Biblioteca documental y alta de dispositivos (T6, T9) */
+.workspace-page[data-view="documents"] { --workspace-accent: #3f5d8a; --workspace-tint: #edf1f7; }
+.workspace-search { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; margin: 16px 0; }
+.workspace-search input { flex: 1 1 260px; min-width: 0; }
+.document-library-table { overflow-x: auto; border: 1px solid #dce6f0; border-radius: 8px; }
+.document-library-table table { width: 100%; border-collapse: collapse; font-size: .92rem; }
+.document-library-table th { padding: 10px 12px; text-align: left; color: #475569; background: #f1f5f9; font-size: .78rem; letter-spacing: .04em; text-transform: uppercase; white-space: nowrap; }
+.document-library-table td { padding: 10px 12px; border-top: 1px solid #e2e8f0; vertical-align: top; }
+.document-library-table tr:hover td { background: #f8fafc; }
+.document-library-muted { color: #64748b; font-size: .9em; }
+.workspace-page .document-delete { color: #b91c1c; border-color: #fecaca; background: #fff; }
+.workspace-page .document-delete:hover { background: #fef2f2; }
+.instrument-form { display: grid; grid-template-columns: 180px minmax(0, 1fr); gap: 10px 14px; align-items: center; margin-top: 16px; }
+.instrument-form .instrument-form-actions { grid-column: 1 / -1; }
+.instrument-form p[role=alert], .instrument-form p[role=status] { grid-column: 1 / -1; margin: 0; }
+.workspace-hint { color: #475569; font-size: .9rem; }
+@media (max-width: 640px) { .instrument-form { grid-template-columns: 1fr; } }

@@ -170,6 +170,7 @@ def test_llm_extractor_parses_json_from_markdown_fence(monkeypatch):
 
 def test_llm_extractor_is_skipped_when_disabled_in_auto_mode(monkeypatch):
     patch_pdf_text(monkeypatch)
+    monkeypatch.setattr(pdf_extractor, "llama_cpp_available", lambda: False)
 
     def fake_post(*args, **kwargs):
         raise AssertionError("llama.cpp no debería invocarse si está desactivado")
@@ -181,6 +182,23 @@ def test_llm_extractor_is_skipped_when_disabled_in_auto_mode(monkeypatch):
 
     assert fields["extractor_used"] == "deterministic"
     assert fields["unit"] == "bar"
+
+
+def test_llm_extractor_uses_model_when_probe_reports_available(monkeypatch):
+    """T7: si llama.cpp responde, el modo auto lo prefiere aunque esté desactivado."""
+    patch_pdf_text(monkeypatch)
+    monkeypatch.setattr(pdf_extractor, "llama_cpp_available", lambda: True)
+    monkeypatch.setattr(
+        pdf_extractor.requests,
+        "post",
+        lambda *args, **kwargs: llama_cpp_response(LLM_JSON_CONTENT),
+    )
+
+    extractor = make_extractor(enabled=False)
+    fields = extractor.extract_and_parse("certificate.pdf", extractor_mode="auto")
+
+    assert fields["extractor_used"] == "llm"
+    assert fields["unit"] == "kPa"
 
 
 # --- Fallback resiliente (RF-LEGO-02) --------------------------------------

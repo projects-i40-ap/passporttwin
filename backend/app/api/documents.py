@@ -1,17 +1,21 @@
 import os
 import hashlib
-from fastapi import APIRouter, UploadFile, File, Depends, HTTPException, status, Query
+import logging
+import re
+from fastapi import APIRouter, UploadFile, File, Form, BackgroundTasks, Depends, HTTPException, status, Query, Response
 from sqlalchemy.orm import Session
-from sqlalchemy import or_
-from app.database.session import get_db
+from sqlalchemy import or_, func
+from app.database.session import get_db, SessionLocal
 from app.models.document import Document
 from datetime import date, datetime
 from app.models.document import ExtractedField
-from app.models.instrument import InstrumentUnit
+from app.models.instrument import InstrumentUnit, InstrumentType
 from app.services.pdf_extractor import (
     PDFDatasheetExtractor,
     HybridDocumentExtractor,
 )
+from app.services.document_normalizer import DocumentNormalizer
+from app.services.document_classifier import classify_document
 from app.models.calibration import CalibrationEvent, AuditLog
 from app.schemas.audit import (
     AuditLogEntryResponse,
@@ -21,6 +25,8 @@ from app.schemas.document import (
     ExtractedFieldCorrection,
     DocumentQueryRequest,
     DocumentQueryResponse,
+    InstrumentTypeFromDocument,
+    LinkInstrumentTypeRequest,
 )
 from app.services.document_validation import validate_document_fields, validation_reference_date
 from app.services.rag_service import DocumentRAGService
@@ -32,6 +38,8 @@ from app.services.document_materialization import ingestion_event, materializati
 from app.services.document_field_status import validate_field_states, invalidate_fields, field_states
 
 router = APIRouter(prefix="/documents", tags=["documents"])
+
+logger = logging.getLogger("passporttwin.documents")
 
 STORAGE_RAW_DIR = os.getenv("STORAGE_RAW_DIR", "/app/storage/raw")
 os.makedirs(STORAGE_RAW_DIR, exist_ok=True)
@@ -89,17 +97,116 @@ def list_documents(q: str = Query("", max_length=200), review_only: bool = False
     return {"items": [{"id": doc.id, "original_filename": doc.original_filename,
                        "processing_status": doc.processing_status, "source_type": doc.source_type,
                        "instrument_serial": serial, "location": location,
-                       "instrument_public_id": str(public_id) if public_id else None}
+                       "instrument_public_id": str(public_id) if public_id else None,
+                       "uploaded_at": doc.uploaded_at.isoformat() if doc.uploaded_at else None}
                       for doc, serial, location, public_id in rows[:limit]],
             "offset": offset, "limit": limit, "has_more": len(rows) > limit}
 
 
+def _remove_raw_file(file_path: str | None) -> None:
+    """Borra el RAW solo si está dentro del almacén; nunca propaga errores."""
+    if not file_path:
+        return
+
+    try:
+        absolute = os.path.realpath(file_path)
+        storage = os.path.realpath(STORAGE_RAW_DIR)
+
+        if os.path.commonpath([absolute, storage]) != storage:
+            logger.warning("Se omite el borrado de un RAW fuera del almacén: %s", file_path)
+            return
+
+        if os.path.exists(absolute):
+            os.remove(absolute)
+    except Exception as exc:  # Disco, permisos o ruta inválida.
+        logger.warning("No se pudo borrar el RAW %s: %s", file_path, exc)
+
+
+@router.delete("/{document_id}", status_code=status.HTTP_204_NO_CONTENT,
+               summary="Elimina un documento no materializado")
+def delete_document(document_id: int, db: Session = Depends(get_db)):
+    """Borra un documento de staging y su RAW.
+
+    Un documento materializado sostiene un `calibration_event` y forma parte del
+    pasaporte: se rechaza con 409. La decisión se registra en `audit_log` antes
+    del borrado, de modo que la traza sobrevive al documento.
+    """
+    doc = db.query(Document).filter(Document.id == document_id).first()
+    if not doc:
+        raise HTTPException(status_code=404, detail="Documento no encontrado.")
+
+    if ingestion_event(db, doc.id) is not None:
+        raise HTTPException(
+            status_code=409,
+            detail=(
+                "R-DUP-DELETE: El documento sostiene una calibración ya incorporada "
+                "al modelo canónico y no puede eliminarse."
+            ),
+        )
+
+    file_path = doc.file_path
+    AuditService.log_event(
+        db=db,
+        entity_name="document",
+        entity_id=doc.id,
+        action="DOCUMENT_DELETED",
+        source="api.documents.delete",
+        before={
+            "document_id": doc.id,
+            "original_filename": doc.original_filename,
+            "source_type": doc.source_type,
+            "processing_status": doc.processing_status,
+            "sha256_hash": doc.sha256_hash,
+        },
+        details={"sha256_hash": doc.sha256_hash, "reason": "user_request"},
+    )
+
+    db.query(ExtractedField).filter(ExtractedField.document_id == doc.id).delete()
+    db.delete(doc)
+    db.commit()
+
+    _remove_raw_file(file_path)
+
+    return Response(status_code=status.HTTP_204_NO_CONTENT)
+
+
+def _process_queued_document(document_id: int) -> None:
+    """Procesa un documento encolado en la subida, con sesión propia.
+
+    La tarea corre después de responder al cliente: una ficha de 92 páginas con
+    un modelo local tarda casi un minuto y no debe bloquear la subida.
+    """
+    db = SessionLocal()
+    try:
+        doc = db.query(Document).filter(Document.id == document_id).first()
+        if not doc or doc.processing_status != "QUEUED":
+            return
+
+        try:
+            _extract_and_store(db, doc, "auto", validation_reference_date())
+        except HTTPException as exc:
+            logger.warning("Proceso automático rechazado (%s): %s", document_id, exc.detail)
+        except Exception:
+            logger.exception("Falló el proceso automático del documento %s", document_id)
+            db.rollback()
+            doc = db.query(Document).filter(Document.id == document_id).first()
+            if doc:
+                doc.processing_status = "FAILED_EXTRACTION"
+                db.commit()
+    finally:
+        db.close()
+
+
 @router.post("/upload", status_code=status.HTTP_201_CREATED, summary="Ingesta de archivo RAW con hash SHA-256")
 async def upload_raw_document(
+    background: BackgroundTasks,
     file: UploadFile = File(...),
     doc_type: str = "AUTO",  # AUTO | CERTIFICATE | DATASHEET | CSV
+    doc_type_form: str | None = Form(None, alias="doc_type"),
     db: Session = Depends(get_db)
 ):
+    # El tipo puede venir por query (compatibilidad) o por formulario (UI).
+    doc_type = (doc_type_form or doc_type or "AUTO").strip().upper()
     contents = await file.read()
     if not contents:
         raise HTTPException(status_code=400, detail="El archivo subido está vacío.")
@@ -124,17 +231,21 @@ async def upload_raw_document(
     # 3. Clasificación de procedencia documental (Provenance)
     if file_extension == ".csv":
         source_type = "INVENTORY_CSV"
-    elif doc_type == "DATASHEET" or "datasheet" in file.filename.lower():
+    elif doc_type == "DATASHEET":
         source_type = "PDF_DATASHEET"
-    else:
+    elif doc_type == "CERTIFICATE":
         source_type = "PDF_CERTIFICATE"
+    else:
+        # T7: en modo automático manda el contenido, no el nombre del archivo.
+        source_type = classify_document(storage_path, file.filename or "")
 
     new_doc = Document(
         original_filename=file.filename,
         file_path=storage_path,
         sha256_hash=file_hash,
         source_type=source_type,
-        processing_status="RECEIVED"
+        # Los PDF se encolan: la extracción corre después de responder (T7).
+        processing_status="QUEUED" if source_type.startswith("PDF_") else "RECEIVED"
     )
     db.add(new_doc)
     db.commit()
@@ -157,6 +268,10 @@ async def upload_raw_document(
         metadata={"sha256": new_doc.sha256_hash},
     )
     db.commit()
+
+    # 5. Cola de extracción (T7): el PDF se procesa solo, sin segundo botón.
+    if new_doc.source_type.startswith("PDF_"):
+        background.add_task(_process_queued_document, new_doc.id)
 
     return {
         "document_id": new_doc.id,
@@ -210,6 +325,15 @@ def process_document(
     if not doc:
         raise HTTPException(status_code=404, detail="Documento no encontrado.")
 
+    return _extract_and_store(db, doc, extractor, reference_date)
+
+
+def _extract_and_store(db: Session, doc: Document, extractor: str, reference_date: date) -> dict:
+    """Extrae, valida y persiste un documento.
+
+    Lo comparten el endpoint manual y la cola automática de la subida (T7), de
+    modo que ambos caminos aplican exactamente las mismas reglas.
+    """
     # 1. Enrutamiento del extractor según la naturaleza documental.
     #    El extractor híbrido (bloque LEGO 1) degrada al determinista ante
     #    cualquier fallo de `llama.cpp` (RF-LEGO-02).
@@ -217,8 +341,13 @@ def process_document(
 
     if doc.source_type == "PDF_DATASHEET":
         # Un datasheet define especificaciones de tipo, no de activo individual.
-        extracted = PDFDatasheetExtractor.extract_technical_data(doc.file_path)
-        extractor_used = "datasheet_deterministic"
+        # Se normaliza a un esquema canónico declarado (RF-DOC-02): el LLM actúa
+        # como adaptador de formato con gramática y degrada al determinista.
+        normalizer = DocumentNormalizer()
+        normalized = normalizer.normalize(doc.file_path, extractor_mode=extractor)
+        extracted = normalized["fields"]
+        full_text = normalized["full_text"]
+        extractor_used = normalized["extractor_used"]
     else:
         hybrid_extractor = HybridDocumentExtractor()
         parsed = hybrid_extractor.extract_and_parse(
@@ -232,7 +361,9 @@ def process_document(
         # Reprocessing must discard any previous automatic link before matching again.
         doc.instrument_unit_id = None
 
-    if not extracted:
+    # RF-DOC-03: un documento legible nunca se descarta. Si no hay campos pero sí
+    # texto, queda en revisión con el texto indexado para el bloque RAG.
+    if not extracted and not full_text:
         doc.processing_status = "FAILED_EXTRACTION"
         db.commit()
         raise HTTPException(status_code=422, detail="No se pudieron extraer campos estructurados del PDF.")
@@ -268,9 +399,11 @@ def process_document(
     target_unit = None
     # 3. Reglas y Matching según el tipo de documento
     if doc.source_type == "PDF_DATASHEET":
-        # Un datasheet define especificaciones de tipo, no de activo individual
+        # Un datasheet define especificaciones de tipo, no de activo individual.
+        # Toda ficha va a la cola de revisión: el LLM propone, el humano confirma
+        # (RF-DOC-03). No se ejecutan reglas metrológicas de certificado.
         rules_failed = []
-        doc.processing_status = "ACCEPTED"
+        doc.processing_status = "REVIEW_REQUIRED"
     else:
         target_unit, rules_failed = validate_document_fields(
             db=db,
@@ -474,6 +607,7 @@ def get_extracted_fields(
         "processing_status": doc.processing_status,
         "source_type": doc.source_type,
         "matched_instrument_id": doc.instrument_unit_id,
+        "instrument_type_id": getattr(doc, "instrument_type_id", None),
         "materialization": materialization_state(db, doc),
         "fields": [
             {
@@ -620,6 +754,170 @@ def correct_extracted_field(
         "field_validation": field_states(related_fields)
     }
 
+def _slug(value: str) -> str:
+    cleaned = re.sub(r"[^a-z0-9]+", "_", (value or "").lower()).strip("_")
+    return cleaned or "modelo"
+
+
+@router.post("/{document_id}/create-type", summary="Crea un modelo a partir de una ficha revisada")
+def create_type_from_document(
+    document_id: int,
+    payload: InstrumentTypeFromDocument,
+    db: Session = Depends(get_db),
+):
+    """Convierte una ficha técnica en un `instrument_type` canónico (T9).
+
+    El modelo es el objeto que agrupa a todos los ejemplares: la ficha describe
+    el DS18B20, no el sensor con serial 001. Si el fabricante y el modelo ya
+    existen, se reutiliza el tipo en lugar de duplicarlo.
+    """
+    doc = db.query(Document).filter(Document.id == document_id).first()
+    if not doc:
+        raise HTTPException(status_code=404, detail="Documento no encontrado.")
+    if doc.source_type != "PDF_DATASHEET":
+        raise HTTPException(
+            status_code=400,
+            detail="Solo las fichas técnicas crean modelos de instrumento.",
+        )
+
+    fields = {
+        field.field_name: field.normalized_value or field.raw_value
+        for field in db.query(ExtractedField).filter(ExtractedField.document_id == doc.id).all()
+        if field.field_name != FULL_TEXT_FIELD
+    }
+
+    manufacturer = (payload.manufacturer or fields.get("manufacturer") or "").strip()
+    model = (payload.model or fields.get("model") or "").strip()
+    unit = (payload.unit or fields.get("range_unit") or fields.get("unit") or "").strip()
+    magnitude = (
+        payload.magnitude
+        or fields.get("measurement_variable")
+        or fields.get("measurement_principle")
+        or ""
+    ).strip()
+
+    if not model:
+        raise HTTPException(
+            status_code=422,
+            detail="La ficha no declara un modelo. Corrige el campo «model» antes de crear el tipo.",
+        )
+    if not unit:
+        raise HTTPException(
+            status_code=422,
+            detail="La ficha no declara unidad de medida. Corrige el campo «range_unit» o «unit».",
+        )
+
+    existing = None
+    if manufacturer:
+        existing = (
+            db.query(InstrumentType)
+            .filter(
+                func.lower(InstrumentType.manufacturer) == manufacturer.lower(),
+                func.lower(InstrumentType.model) == model.lower(),
+            )
+            .first()
+        )
+
+    if existing:
+        instrument_type, created = existing, False
+    else:
+        name = payload.name or _slug(f"{manufacturer} {model}")
+        base_name, suffix = name, 2
+        while db.query(InstrumentType).filter(InstrumentType.name == name).first():
+            name = f"{base_name}_{suffix}"
+            suffix += 1
+
+        instrument_type = InstrumentType(
+            name=name,
+            magnitude=magnitude or "Unknown",
+            unit=unit,
+            manufacturer=manufacturer or None,
+            model=model,
+        )
+        db.add(instrument_type)
+        db.commit()
+        db.refresh(instrument_type)
+        created = True
+
+    before_type = getattr(doc, "instrument_type_id", None)
+    doc.instrument_type_id = instrument_type.id
+    doc.processing_status = "ACCEPTED"
+
+    AuditService.log_event(
+        db=db,
+        entity_name="document",
+        entity_id=doc.id,
+        action="DOCUMENT_TYPE_LINKED",
+        source="api.documents.create_type",
+        before={"instrument_type_id": before_type},
+        after={"instrument_type_id": instrument_type.id, "created": created},
+        details={
+            "document_id": doc.id,
+            "instrument_type_name": instrument_type.name,
+            "manufacturer": instrument_type.manufacturer,
+            "model": instrument_type.model,
+        },
+    )
+    db.commit()
+
+    return {
+        "document_id": doc.id,
+        "created": created,
+        "instrument_type": {
+            "id": instrument_type.id,
+            "name": instrument_type.name,
+            "magnitude": instrument_type.magnitude,
+            "unit": instrument_type.unit,
+            "manufacturer": instrument_type.manufacturer,
+            "model": instrument_type.model,
+        },
+    }
+
+
+@router.patch("/{document_id}/link-type", summary="Asocia una ficha a un modelo existente")
+def link_document_type(
+    document_id: int,
+    payload: LinkInstrumentTypeRequest,
+    db: Session = Depends(get_db),
+):
+    doc = db.query(Document).filter(Document.id == document_id).first()
+    if not doc:
+        raise HTTPException(status_code=404, detail="Documento no encontrado.")
+    if doc.source_type != "PDF_DATASHEET":
+        raise HTTPException(
+            status_code=400,
+            detail="Solo las fichas técnicas se asocian a un modelo.",
+        )
+
+    instrument_type = (
+        db.query(InstrumentType).filter(InstrumentType.id == payload.instrument_type_id).first()
+    )
+    if not instrument_type:
+        raise HTTPException(status_code=404, detail="Tipo de instrumento no encontrado.")
+
+    before_type = getattr(doc, "instrument_type_id", None)
+    doc.instrument_type_id = instrument_type.id
+    doc.processing_status = "ACCEPTED"
+
+    AuditService.log_event(
+        db=db,
+        entity_name="document",
+        entity_id=doc.id,
+        action="DOCUMENT_TYPE_LINKED",
+        source="api.documents.link_type",
+        before={"instrument_type_id": before_type},
+        after={"instrument_type_id": instrument_type.id, "created": False},
+        details={"document_id": doc.id, "instrument_type_name": instrument_type.name},
+    )
+    db.commit()
+
+    return {
+        "document_id": doc.id,
+        "instrument_type_id": instrument_type.id,
+        "instrument_type_name": instrument_type.name,
+    }
+
+
 @router.post("/{document_id}/revalidate", summary="Revalida un documento después de la revisión humana")
 def revalidate_document(
     document_id: int,
@@ -648,13 +946,8 @@ def revalidate_document(
         for field in fields
     }
 
-    target_unit, rules_failed = validate_document_fields(
-        db=db,
-        fields=normalized_fields,
-        reference_date=reference_date,
-    )
-
-    # Estado previo a la revalidación (RF-AUDIT-03).
+    # Estado previo a la revalidación (RF-AUDIT-03). Se captura antes de mutar
+    # el documento para que la auditoría refleje el cambio real.
     before_state = {
         "processing_status": doc.processing_status,
         "matched_instrument_id": doc.instrument_unit_id,
@@ -662,13 +955,27 @@ def revalidate_document(
         "field_validation": field_states(fields),
     }
 
-    # Evita conservar un matching anterior si deja de ser válido.
-    doc.instrument_unit_id = target_unit.id if target_unit else None
-
-    if len(rules_failed) == 0:
+    if doc.source_type == "PDF_DATASHEET":
+        # Una ficha técnica no tiene reglas metrológicas: no hay serial de activo
+        # ni fecha de calibración que exigir (RF-DOC-12). La revisión humana
+        # confirma los campos y el documento sale de la cola sin matching.
+        target_unit, rules_failed = None, []
+        doc.instrument_unit_id = None
         doc.processing_status = "ACCEPTED"
     else:
-        doc.processing_status = "REVIEW_REQUIRED"
+        target_unit, rules_failed = validate_document_fields(
+            db=db,
+            fields=normalized_fields,
+            reference_date=reference_date,
+        )
+
+        # Evita conservar un matching anterior si deja de ser válido.
+        doc.instrument_unit_id = target_unit.id if target_unit else None
+
+        if len(rules_failed) == 0:
+            doc.processing_status = "ACCEPTED"
+        else:
+            doc.processing_status = "REVIEW_REQUIRED"
 
     validate_field_states(db, doc, fields, rules_failed, target_unit)
 

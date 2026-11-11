@@ -41,3 +41,19 @@ backend/storage/raw/
 *.aasx
 # Local experiment runs (curated reports may be committed under experiments/results)
 experiments/runs/
+
+# Reglas locales de agentes (no versionar)
+AGENTS.md
+CLAUDE.md
+opencode.json
+.opencode/
+
+# Material de construccion y evidencias locales de diagramas
+.archify/
+docs/architecture/*.finalize.json
+docs/architecture/*.finalize-summary.json
+docs/architecture/*.delivery.json
+docs/architecture/*.browser-check.json
+
+# Fichas de fabricante: material de demo, no se redistribuye
+experiments/fixtures/datasheets/*.pdf

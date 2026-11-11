@@ -17,6 +17,8 @@ class InstrumentType(Base):
     name = Column(String, nullable=False, unique=True) # e.g., 'pressure_transmitter'
     magnitude = Column(String, nullable=False)         # e.g., 'Pressure'
     unit = Column(String, nullable=False)              # e.g., 'bar'
+    manufacturer = Column(String, nullable=True)       # identidad del modelo (T9)
+    model = Column(String, nullable=True)
     created_at = Column(DateTime, default=datetime.utcnow)
 
     units = relationship("InstrumentUnit", back_populates="instrument_type")

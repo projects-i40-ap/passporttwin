@@ -11,6 +11,8 @@ class InstrumentTypeBase(BaseModel):
     name: str
     magnitude: str
     unit: str
+    manufacturer: Optional[str] = None
+    model: Optional[str] = None
 
 class InstrumentTypeCreate(InstrumentTypeBase):
     pass
@@ -24,15 +26,28 @@ class InstrumentUnitCreate(BaseModel):
     serial_number: str
     technical_name: Optional[str] = None
     plant_tag: Optional[str] = None
-    manufacturer: str
-    model: str
+    manufacturer: Optional[str] = None
+    model: Optional[str] = None
     location: Optional[str] = "Plant-A/Area-1"
     criticality: Optional[str] = "MEDIUM"
     installed_at: Optional[date] = None
 
+class InstrumentUnitUpdate(BaseModel):
+    instrument_type_id: Optional[int] = None
+    serial_number: Optional[str] = None
+    technical_name: Optional[str] = None
+    plant_tag: Optional[str] = None
+    manufacturer: Optional[str] = None
+    model: Optional[str] = None
+    location: Optional[str] = None
+    criticality: Optional[str] = None
+    installed_at: Optional[date] = None
+    lifecycle_state: Optional[str] = None
+
 class InstrumentUnitResponse(BaseModel):
     id: int
     public_id: UUID
+    instrument_type_id: Optional[int] = None
     serial_number: str
     technical_name: Optional[str] = None
     plant_tag: Optional[str] = None

@@ -18,6 +18,7 @@ import pytest
 import requests
 from fastapi.testclient import TestClient
 
+from app.core.config import settings
 from app.database.session import get_db
 from app.main import app
 from app.models.calibration import AuditLog, CalibrationEvent
@@ -288,7 +289,7 @@ def test_rag_query_online_generates_answer_with_llama_cpp(monkeypatch):
 
     assert data["llm_status"] == "ONLINE_GENERATED"
     assert data["answer"] == "El serial PT-001 corresponde al certificado.pdf."
-    assert data["model_used"] == "gemma-4-e4b"
+    assert data["model_used"] == settings.ai_model_name
     assert captured["url"].endswith("/chat/completions")
 
     assert len(data["sources"]) >= 1

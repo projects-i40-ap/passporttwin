@@ -43,3 +43,19 @@ class DocumentQueryResponse(BaseModel):
     model_used: Optional[str] = None
     sources: list[DocumentSourceEvidence] = []
     context_chunks: list[str] = []
+
+
+class InstrumentTypeFromDocument(BaseModel):
+    """Datos para crear un modelo (tipo) desde una ficha revisada (T9)."""
+
+    name: Optional[str] = None
+    magnitude: Optional[str] = None
+    unit: Optional[str] = None
+    manufacturer: Optional[str] = None
+    model: Optional[str] = None
+
+
+class LinkInstrumentTypeRequest(BaseModel):
+    """Asocia una ficha existente a un modelo canónico."""
+
+    instrument_type_id: int

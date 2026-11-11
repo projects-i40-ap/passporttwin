@@ -8,6 +8,7 @@ class Document(Base):
 
     id = Column(Integer, primary_key=True, index=True)
     instrument_unit_id = Column(Integer, ForeignKey("instrument_unit.id"), nullable=True)
+    instrument_type_id = Column(Integer, ForeignKey("instrument_type.id"), nullable=True)
     original_filename = Column(String, nullable=False)
     file_path = Column(String, nullable=False)
     source_type = Column(String, default="MANUAL_UPLOAD")
