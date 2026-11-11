@@ -84,6 +84,15 @@ export default function Passport({ apiBaseUrl, planOnly = false }) {
   if (state.loading) return <main className="passport"><p role="status">Cargando pasaporte…</p></main>;
   if (state.error) return <main className="passport"><h1>Pasaporte digital</h1><p role="alert">{state.error}</p><Link to="/">Volver a PassportTwin</Link></main>;
   const { instrument, calibrations, score, risk, context, maintenance } = state;
+  const fleetAnalytics = context?.saved_analytics;
+  const fleetNotice = {
+    STALE_DATE: "El cálculo guardado corresponde a una fecha anterior.",
+    STALE_INPUTS: "Los datos del instrumento han cambiado desde el último cálculo guardado.",
+  }[fleetAnalytics?.status];
+  const fleetStatus = fleetNotice ? "Pendiente de actualizar"
+    : fleetAnalytics?.status === "CURRENT" ? "Al día"
+    : fleetAnalytics?.status === "MISSING" ? "Sin cálculo guardado"
+    : "Estado no disponible";
   const calibrationHistory = calibrations?.slice().sort((a, b) =>
     b.calibration_date.localeCompare(a.calibration_date) || b.id - a.id);
   const demoMedia = demoInstrumentMedia(instrument);
@@ -175,8 +184,15 @@ export default function Passport({ apiBaseUrl, planOnly = false }) {
               {[30, 60, 90].map(days => <div key={days}><dt>{days} días</dt>
                 <dd>{probability(risk.horizons?.[`${days}_days`]?.probability_out_of_tolerance)}</dd></div>)}
             </dl> : <p>{risk ? "No estimable" : "No disponible"}</p>}
-            {risk?.as_of && <p className="passport-data-caption">Referencia del cálculo en el pasaporte: {calendarDate(risk.as_of)}</p>}
-            <p className="passport-data-caption">Copia guardada para Metabase: <strong>{context ? statusLabel(context.saved_analytics.status) : "No disponible"}</strong></p>
+            {risk?.as_of && <p className="passport-data-caption">Fecha del cálculo en este pasaporte · {calendarDate(risk.as_of)}</p>}
+            <div className="passport-fleet-status">
+              <p><strong>Datos del panel de flota</strong></p>
+              <p className="passport-data-caption">
+                <strong data-pending={Boolean(fleetNotice)}>{fleetStatus}</strong>
+                {fleetAnalytics?.as_of && ` · Cálculo del ${calendarDate(fleetAnalytics.as_of)}`}
+              </p>
+              {fleetNotice && <p className="passport-data-caption">{fleetNotice}</p>}
+            </div>
           </div>
           <div className={`passport-summary-card passport-calibration-status${overdue ? " passport-overdue" : ""}`}>
             <h2>Estado de la calibración</h2>
@@ -222,10 +238,10 @@ export default function Passport({ apiBaseUrl, planOnly = false }) {
           <dl><div><dt>{health == null ? "Último intento de cálculo" : "Último cálculo en esta consulta"}</dt><dd>{dateTimeLabel(score?.calculated_at)}</dd></div>
             <div><dt>Datos de calibración hasta</dt><dd>{calendarDate(dataThrough)}</dd></div></dl>
         </article>
-        <article className="passport-summary-card"><h3>Copia guardada para Metabase</h3>
-          {context ? <dl><div><dt>Último guardado</dt><dd>{dateTimeLabel(context.saved_analytics.computed_at)}</dd></div>
-            <div><dt>Estado de la copia</dt><dd>{statusLabel(context.saved_analytics.status)}</dd></div></dl> :
-            <p>No se ha podido consultar el estado de la copia guardada.</p>}
+        <article className="passport-summary-card"><h3>Datos del panel de flota</h3>
+          <p><strong>{fleetStatus}</strong></p>
+          {fleetAnalytics?.computed_at && <p>Última actualización · {dateTimeLabel(fleetAnalytics.computed_at)}</p>}
+          {fleetNotice && <p>{fleetNotice}</p>}
         </article>
       </div>
     </section>

@@ -96,6 +96,8 @@
 .passport-summary-card h2 { margin: 0 0 10px; padding-bottom: 8px; border-bottom: 1px solid #e2e8f0; font-size: 1rem; font-weight: 700; color: #18334c; }
 .passport-summary-card p { margin: 6px 0 0; }
 .passport-data-caption { color: #526579; font-size: .82rem; }
+.passport-fleet-status { margin-top: 10px; border-top: 1px solid #e2e8f0; }
+.passport-fleet-status [data-pending=true] { color: #784e00; }
 .passport-score-summary { display: grid; gap: 14px; margin: 14px 0; --band-fill: #fff1cf; --band-text: #784e00; }
 .passport-score-summary[data-band=Bajo] { --band-fill: #fce7e9; --band-text: #96262d; }
 .passport-score-summary[data-band=Alto] { --band-fill: #e1f3e8; --band-text: #166437; }
