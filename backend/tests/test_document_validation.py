@@ -3,6 +3,8 @@ from types import SimpleNamespace
 from app.core.config import Settings
 from app.models.instrument import InstrumentType, InstrumentUnit
 from app.services.document_validation import (
+    missing_document_fields,
+    missing_required_fields,
     validate_document_fields,
     validate_operating_range,
     validate_unit_compatibility,
@@ -267,6 +269,41 @@ def test_validate_document_fields_flags_missing_calibration_date():
         "R-MISSING-01: Faltan campos obligatorios en el documento."
         in rules_failed
     )
+
+
+# --- Huecos de extracción (campos no recuperados) --------------------------
+
+
+def test_missing_required_fields_reports_only_missing_names():
+    assert missing_required_fields({}) == ["serial_number", "calibration_date"]
+    assert missing_required_fields({"serial_number": "PT-001"}) == [
+        "calibration_date"
+    ]
+    assert missing_required_fields(
+        {"serial_number": "  ", "calibration_date": "2026-01-15"}
+    ) == ["serial_number"]
+    assert missing_required_fields(
+        {"serial_number": "PT-001", "calibration_date": "2026-01-15"}
+    ) == []
+
+
+def test_missing_document_fields_includes_optional_gaps():
+    fields = {
+        "serial_number": "PT-001",
+        "calibration_date": "2026-01-15",
+        "unit": "bar",
+        "tolerance": 0.5,
+    }
+
+    assert missing_document_fields(fields) == [
+        "next_due_date",
+        "error_value",
+        "operating_range",
+    ]
+
+
+def test_missing_document_fields_treats_zero_as_extracted_value():
+    assert "error_value" not in missing_document_fields({"error_value": 0.0})
 
 
 # --- Configuración LEGO (app/core/config.py) -------------------------------

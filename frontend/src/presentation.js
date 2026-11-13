@@ -16,9 +16,36 @@ const documentFields = new Map([
   ["error_value", "Error máximo"],
   ["tolerance", "Tolerancia"],
   ["unit", "Unidad de medida"],
+  ["operating_range", "Rango operativo"],
 ]);
 
 export const documentFieldLabel = (name) => documentFields.get(name) ?? name;
+
+const auditKeys = new Map([
+  ["location", "Ubicación"],
+  ["criticality", "Criticidad"],
+  ["serial_number", "Número de serie"],
+  ["lifecycle_state", "Estado operativo"],
+  ["aas_sync_status", "Sincronización AAS"],
+  ["instrument_type_id", "Modelo de instrumento"],
+  ["instrument_unit_id", "Instrumento"],
+  ["processing_status", "Estado de procesamiento"],
+  ["rules_failed", "Reglas incumplidas"],
+  ["field_validation", "Comprobaciones por campo"],
+  ["field_name", "Campo"],
+  ["normalized_value", "Valor revisado"],
+  ["raw_value", "Valor original"],
+  ["document_id", "Documento"],
+  ["matched_instrument_id", "Instrumento vinculado"],
+  ["created", "Creado"],
+  ["calibration_event_id", "Calibración"],
+  ["sha256", "SHA-256"],
+  ["metadata", "Metadatos"],
+  ["source", "Origen"],
+  ["actor", "Actor"],
+]);
+
+export const auditKeyLabel = (name) => auditKeys.get(name) ?? name;
 
 export const dateTimeLabel = (value) => {
   if (!value) return "Sin registro";

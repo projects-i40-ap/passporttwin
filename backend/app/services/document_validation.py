@@ -16,6 +16,18 @@ UNIT_COMPATIBILITY_MAP: dict[str, set[str]] = {
 # R-MISSING-01: campos obligatorios para materializar una calibración.
 REQUIRED_FIELDS: tuple[str, ...] = ("serial_number", "calibration_date")
 
+# Campos canónicos que el extractor de certificados intenta recuperar. Permiten
+# explicar al revisor qué datos no ha localizado el extractor, distinguiendo los
+# obligatorios (bloquean la validación) de los opcionales.
+EXPECTED_FIELDS: tuple[str, ...] = (
+    *REQUIRED_FIELDS,
+    "next_due_date",
+    "error_value",
+    "tolerance",
+    "unit",
+    "operating_range",
+)
+
 # R-RANGE-01: "0-10 bar", "1,5 - 2,5 kPa", "10 to 20 MPa".
 _RANGE_PATTERN = re.compile(
     r"(-?\d+(?:[.,]\d+)?)\s*(?:-|–|—|\ba\b|\bto\b)\s*(-?\d+(?:[.,]\d+)?)",
@@ -43,6 +55,25 @@ def _unit_family(unit: str | None) -> str | None:
             return family
 
     return None
+
+
+def _has_value(value) -> bool:
+    """Considera ausente un valor nulo, vacío o compuesto solo por espacios."""
+    return value is not None and str(value).strip() != ""
+
+
+def missing_required_fields(fields: dict) -> list[str]:
+    """R-MISSING-01: campos obligatorios que no tienen valor en staging."""
+    fields = fields or {}
+
+    return [name for name in REQUIRED_FIELDS if not _has_value(fields.get(name))]
+
+
+def missing_document_fields(fields: dict) -> list[str]:
+    """Campos canónicos esperados que el extractor no ha recuperado."""
+    fields = fields or {}
+
+    return [name for name in EXPECTED_FIELDS if not _has_value(fields.get(name))]
 
 
 def validate_unit_compatibility(doc_unit: str, canonical_unit: str) -> bool:
@@ -151,9 +182,7 @@ def validate_document_fields(
     rules_failed = []
 
     # R-MISSING-01: campos obligatorios presentes.
-    missing_fields = [
-        name for name in REQUIRED_FIELDS if not fields.get(name)
-    ]
+    missing_fields = missing_required_fields(fields)
 
     if missing_fields:
         rules_failed.append(

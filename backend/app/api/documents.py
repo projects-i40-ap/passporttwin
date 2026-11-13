@@ -29,6 +29,7 @@ from app.schemas.document import (
     LinkInstrumentTypeRequest,
 )
 from app.services.document_validation import validate_document_fields, validation_reference_date
+from app.services.document_validation import REQUIRED_FIELDS, missing_document_fields
 from app.services.rag_service import DocumentRAGService
 from app.services.aas_builder import AASBuilder
 from app.services.audit_service import AuditService
@@ -601,6 +602,17 @@ def get_extracted_fields(
     # El texto limpio para RAG (`__full_text__`) nunca se expone en la edición.
     visible_fields = [field for field in fields if field.field_name != FULL_TEXT_FIELD]
 
+    # Huecos de extracción: campos canónicos que el extractor no ha recuperado.
+    # Solo aplica a certificados; una ficha declara especificaciones de tipo.
+    field_values = {
+        field.field_name: field.normalized_value for field in visible_fields
+    }
+    missing_fields = (
+        missing_document_fields(field_values)
+        if doc.source_type == "PDF_CERTIFICATE"
+        else []
+    )
+
     return {
         "document_id": doc.id,
         "original_filename": getattr(doc, "original_filename", None),
@@ -609,6 +621,10 @@ def get_extracted_fields(
         "matched_instrument_id": doc.instrument_unit_id,
         "instrument_type_id": getattr(doc, "instrument_type_id", None),
         "materialization": materialization_state(db, doc),
+        "missing_fields": [
+            {"field_name": name, "required": name in REQUIRED_FIELDS}
+            for name in missing_fields
+        ],
         "fields": [
             {
                 "field_id": field.id,

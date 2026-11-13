@@ -168,6 +168,35 @@ def test_get_extracted_fields():
     assert field["validation_status"] == "STAGING"
 
 
+def test_get_extracted_fields_reports_missing_certificate_fields():
+    fake_db.reset()
+    fake_db.fields = [
+        field
+        for field in fake_db.fields
+        if field.field_name not in ("serial_number", "tolerance")
+    ]
+
+    response = client.get(
+        "/api/v1/documents/1/fields"
+    )
+
+    assert response.status_code == 200
+
+    data = response.json()
+
+    missing = {
+        item["field_name"]: item["required"] for item in data["missing_fields"]
+    }
+
+    assert missing == {
+        "serial_number": True,
+        "error_value": False,
+        "tolerance": False,
+        "unit": False,
+        "operating_range": False,
+    }
+
+
 def test_correct_extracted_field_preserves_raw_value():
     fake_db.reset()
 

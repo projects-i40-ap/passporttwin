@@ -51,6 +51,7 @@ export default function Passport({ apiBaseUrl, planOnly = false }) {
   const { publicId } = useParams();
   const { hash } = useLocation();
   const [params] = useSearchParams();
+  const apiBase = apiBaseUrl.replace(/\/$/, "");
   const requestedView = params.get("vista") || hash.slice(1);
   const detail = requestedView === "location-plan" ? "identity"
     : requestedView === "freshness" ? "score"
@@ -59,6 +60,44 @@ export default function Passport({ apiBaseUrl, planOnly = false }) {
   const detailUrl = view => `${passportUrl}?vista=${view}`;
   const [state, setState] = useState({ loading: true });
   const [refreshing, setRefreshing] = useState(false);
+  const [photoVersion, setPhotoVersion] = useState(0);
+  const [photoMissing, setPhotoMissing] = useState(false);
+  const [photoBusy, setPhotoBusy] = useState(false);
+  const [photoMessage, setPhotoMessage] = useState("");
+
+  useEffect(() => {
+    // Al cambiar de instrumento se reintenta la foto real y se limpia el aviso.
+    setPhotoMissing(false);
+    setPhotoVersion(0);
+    setPhotoMessage("");
+  }, [publicId]);
+
+  async function uploadInstrumentPhoto(event) {
+    const file = event.target.files?.[0];
+    event.target.value = "";
+    if (!file || !state.instrument?.id) return;
+
+    setPhotoBusy(true);
+    setPhotoMessage("");
+
+    try {
+      const body = new FormData();
+      body.append("file", file);
+      const response = await fetch(`${apiBase}/api/v1/instruments/${state.instrument.id}/image`, {
+        method: "POST",
+        body,
+      });
+      const data = await response.json().catch(() => ({}));
+      if (!response.ok) throw new Error(data.detail || "No se ha podido subir la foto del instrumento.");
+      setPhotoMissing(false);
+      setPhotoVersion(Date.now());
+      setPhotoMessage("Foto del instrumento actualizada.");
+    } catch (error) {
+      setPhotoMessage(error.message);
+    } finally {
+      setPhotoBusy(false);
+    }
+  }
 
   async function refreshAnalytics() {
     if (!state.instrument?.id) return;
@@ -181,13 +220,48 @@ export default function Passport({ apiBaseUrl, planOnly = false }) {
       {!detail && <div className="passport-overview">
         <header className="passport-identity-card">
           <div className="passport-identity-band">
-            {demoMedia ? <figure className="passport-photo-placeholder passport-demo-photo">
-              <img src={demoMedia.photo} alt={`Imagen de referencia · ${instrument.technical_name || instrument.model}`} />
+            {(!photoMissing || demoMedia) ? <figure className="passport-photo-placeholder passport-demo-photo">
+              <img
+                src={photoMissing ? demoMedia.photo : `${apiBase}/api/v1/instruments/${instrument.public_id}/image?v=${photoVersion}`}
+                alt={photoMissing
+                  ? `Imagen de referencia · ${instrument.technical_name || instrument.model}`
+                  : `Fotografía · ${instrument.technical_name || instrument.model}`}
+                onError={photoMissing ? undefined : () => setPhotoMissing(true)}
+              />
             </figure> : <span className="passport-photo-placeholder" aria-label="Foto no disponible">Sin foto</span>}
             <div><p>Pasaporte del instrumento</p>
               <h1 id="passport-view-title" tabIndex={-1}>{instrument.technical_name || instrument.model || "Instrumento"}</h1>
               {instrument.plant_tag && <p>Etiqueta de planta · <strong>{instrument.plant_tag}</strong></p>}
               <p>Número de serie · <strong>{instrument.serial_number}</strong></p>
+            </div>
+          </div>
+          <div className="passport-passport-tools">
+            <figure className="passport-qr">
+              <img
+                src={`${apiBase}/api/v1/instruments/${instrument.public_id}/qr`}
+                alt={`Código QR del pasaporte de ${instrument.serial_number}`}
+                width="96"
+                height="96"
+              />
+              <figcaption>QR del pasaporte</figcaption>
+            </figure>
+            <div className="passport-passport-links">
+              <a className="passport-plan-link" href={`${apiBase}/api/v1/instruments/${instrument.public_id}/qr?download=true`}>
+                Descargar QR (PNG)
+              </a>
+              <a className="passport-plan-link" href={`${apiBase}/api/v1/instruments/${instrument.public_id}/label.pdf`}>
+                Descargar etiqueta 50 × 30 mm (PDF)
+              </a>
+              <label className="passport-photo-upload">
+                {photoBusy ? "Subiendo foto…" : photoMissing ? "Añadir foto del instrumento" : "Cambiar foto del instrumento"}
+                <input
+                  type="file"
+                  accept="image/jpeg,image/png,image/webp"
+                  onChange={uploadInstrumentPhoto}
+                  disabled={photoBusy}
+                />
+              </label>
+              {photoMessage && <span className="passport-photo-status" role="status">{photoMessage}</span>}
             </div>
           </div>
           <dl className="passport-id-summary">
@@ -207,16 +281,6 @@ export default function Passport({ apiBaseUrl, planOnly = false }) {
               return <Link key={href} to={href}>{content}</Link>;
             })}
           </nav>
-          <p className="passport-label-actions">
-            <a
-              className="passport-plan-link"
-              href={`${apiBaseUrl.replace(/\/$/, "")}/api/v1/instruments/${instrument.public_id}/label.pdf`}
-              target="_blank"
-              rel="noreferrer"
-            >
-              Descargar etiqueta 50 × 30 mm
-            </a>
-          </p>
         </header>
         <div className="passport-decision">
           <div className="passport-summary-card">
@@ -402,6 +466,7 @@ export default function Passport({ apiBaseUrl, planOnly = false }) {
         </li>)}</ul>
       </> : null}
       {!context?.documents?.length && !context?.type_documents?.length && <div className="passport-summary-card"><p>{context ? "No hay documentos vinculados." : "No se ha podido consultar la documentación."}</p></div>}
+      <p><Link to={`/?tab=chat&serial=${encodeURIComponent(instrument.serial_number)}`}>Preguntar sobre la documentación de este instrumento</Link></p>
     </section>}
     </main>
   </AppShell>;

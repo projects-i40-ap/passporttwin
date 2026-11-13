@@ -7,11 +7,12 @@ import DocumentOriginal from "./DocumentOriginal";
 import InstrumentFinder from "./InstrumentFinder";
 import DocumentFinder from "./DocumentFinder";
 import DocumentLibrary from "./DocumentLibrary";
+import DocumentChat from "./DocumentChat";
 import DocumentTypeLink from "./DocumentTypeLink";
 import NewInstrumentForm from "./NewInstrumentForm";
 import CertificateUpload from "./CertificateUpload";
 import "./workspace.css";
-import { documentFieldLabel, statusLabel } from "./presentation";
+import { auditKeyLabel, documentFieldLabel, statusLabel } from "./presentation";
 
 
 const API_BASE_URL =
@@ -54,11 +55,58 @@ function formatDiffValue(value) {
     return "—";
   }
 
+  if (Array.isArray(value)) {
+    return value.length
+      ? value.map((item) => (typeof item === "string" ? item : JSON.stringify(item))).join(" · ")
+      : "—";
+  }
+
   if (typeof value === "object") {
     return JSON.stringify(value);
   }
 
-  return String(value);
+  return value === "" ? "«vacío»" : String(value);
+}
+
+
+/** Convierte `before`/`after` en filas legibles por clave, sin JSON en una línea. */
+function diffRows(before, after) {
+  const asObject = (value) =>
+    value && typeof value === "object" && !Array.isArray(value) ? value : null;
+
+  const beforeObject = asObject(before);
+  const afterObject = asObject(after);
+
+  if (!beforeObject && !afterObject) {
+    return JSON.stringify(before) === JSON.stringify(after)
+      ? []
+      : [{ key: "valor", before, after }];
+  }
+
+  const keys = [
+    ...new Set([...Object.keys(beforeObject || {}), ...Object.keys(afterObject || {})]),
+  ];
+
+  return keys
+    .map((key) => ({ key, before: beforeObject?.[key], after: afterObject?.[key] }))
+    .filter(({ before: oldValue, after: newValue }) =>
+      JSON.stringify(oldValue) !== JSON.stringify(newValue));
+}
+
+
+function DiffValue({ value }) {
+  const text = formatDiffValue(value);
+
+  if (text.length <= 80) {
+    return <span className="audit-diff-value">{text}</span>;
+  }
+
+  return (
+    <details className="audit-diff-value audit-diff-long">
+      <summary>{text.slice(0, 60)}…</summary>
+      <pre>{text}</pre>
+    </details>
+  );
 }
 
 
@@ -138,15 +186,24 @@ function getEventTone(log) {
 
 
 function DiffCell({ before, after }) {
-  if (before === null && after === null) {
+  const rows = diffRows(before, after);
+
+  if (rows.length === 0) {
     return <span className="audit-cell-muted">—</span>;
   }
 
   return (
     <div className="audit-diff">
-      <span className="audit-diff-before">{formatDiffValue(before)}</span>
-      <span className="audit-diff-arrow" aria-hidden="true">→</span>
-      <span className="audit-diff-after">{formatDiffValue(after)}</span>
+      {rows.map(({ key, before: oldValue, after: newValue }) => (
+        <div className="audit-diff-row" key={key}>
+          <span className="audit-diff-key">{auditKeyLabel(key)}</span>
+          <div className="audit-diff-values">
+            <DiffValue value={oldValue} />
+            <span className="audit-diff-arrow" aria-hidden="true">→</span>
+            <DiffValue value={newValue} />
+          </div>
+        </div>
+      ))}
     </div>
   );
 }
@@ -287,6 +344,7 @@ function App() {
   const requestedTab = params.get("tab");
   const initialTab = requestedTab === "audit" ? "audit"
     : requestedTab === "documents" ? "documents"
+    : requestedTab === "chat" ? "chat"
     : requestedTab === "review" || params.has("documentId") ? "review"
     : requestedTab === "inventory" || hash === "#inventory" ? "inventory"
     : "home";
@@ -325,6 +383,7 @@ function App() {
   const canProcessCertificate = documentType === "PDF_CERTIFICATE" &&
     ["RECEIVED", "FAILED_EXTRACTION"].includes(processingStatus);
   const [fields, setFields] = useState([]);
+  const [missingFields, setMissingFields] = useState([]);
   const serialCandidates = candidateSerials(fields.find((field) => field.field_name === "serial_candidates")?.raw_value);
   const [materialization, setMaterialization] = useState(null);
   const [savedValues, setSavedValues] = useState({});
@@ -371,6 +430,7 @@ function App() {
     setLinkedTypeId(data.instrument_type_id ?? null);
     setLoadedDocumentName(data.original_filename || "");
     setFields(data.fields);
+    setMissingFields(data.missing_fields || []);
     setSavedValues(Object.fromEntries(data.fields.map(field => [field.field_id, field.normalized_value])));
     setMaterialization(data.materialization);
     return data;
@@ -386,7 +446,7 @@ function App() {
       await refreshDocument(documentId);
       setMessage("Documento cargado.");
     } catch (error) {
-      setProcessingStatus(""); setLoadedDocumentId(null); setLoadedDocumentName(""); setFields([]); setMaterialization(null);
+      setProcessingStatus(""); setLoadedDocumentId(null); setLoadedDocumentName(""); setFields([]); setMissingFields([]); setMaterialization(null);
       setMessage(error.message);
     } finally { setLoading(false); }
   }
@@ -582,7 +642,7 @@ function App() {
     <main className="passport workspace-page" data-view={activeTab}>
       <header className="workspace-heading">
       <p>Espacio de trabajo</p>
-      <h1 id="workspace-title" tabIndex={-1}>{auditingPassport ? "Historial de eventos" : { home: "Inicio", inventory: "Inventario", review: "Revisión documental", documents: "Biblioteca documental", audit: "Auditoría y trazabilidad" }[activeTab]}</h1>
+      <h1 id="workspace-title" tabIndex={-1}>{auditingPassport ? "Historial de eventos" : { home: "Inicio", inventory: "Inventario", review: "Revisión documental", documents: "Biblioteca documental", chat: "Consulta documental", audit: "Auditoría y trazabilidad" }[activeTab]}</h1>
       {activeTab === "home" && <p>Pasaportes digitales y trazabilidad de instrumentos.</p>}
       {(reviewingDocument || auditingDocument) && <p>
         <Link to={`/?tab=${activeTab}${passportQuery}`}>Volver a buscar documentos</Link>
@@ -605,6 +665,7 @@ function App() {
           <strong>Inventario</strong><span>Busca un instrumento por nombre, etiqueta, número de serie o ubicación.</span>
         </Link>
         <Link to="/?tab=review"><strong>Revisión documental</strong><span>Sube un certificado o revisa sus campos.</span></Link>
+        <Link to="/?tab=chat"><strong>Consulta documental</strong><span>Pregunta en lenguaje natural y comprueba las referencias citadas.</span></Link>
         <Link to="/?tab=audit"><strong>Auditoría</strong><span>Consulta eventos y correcciones.</span></Link>
       </nav>}
 
@@ -616,6 +677,12 @@ function App() {
       {activeTab === "documents" && (
         <div id="document-library">
           <DocumentLibrary apiBaseUrl={API_BASE_URL} />
+        </div>
+      )}
+
+      {activeTab === "chat" && (
+        <div id="document-chat">
+          <DocumentChat apiBaseUrl={API_BASE_URL} />
         </div>
       )}
 
@@ -737,6 +804,34 @@ function App() {
                   <li key={rule}>{rule}</li>
                 ))}
               </ul>
+            </section>
+          )}
+
+          {missingFields.length > 0 && (
+            <section className="workspace-panel" aria-labelledby="missing-fields">
+              <h3 id="missing-fields" tabIndex={-1}>Campos no encontrados en el documento</h3>
+
+              <p>
+                El extractor no ha localizado estos datos en el texto del PDF: puede que el certificado no los incluya
+                o que la etiqueta no esté reconocida. Compáralo con el original antes de continuar.
+              </p>
+
+              <ul>
+                {missingFields.map(({ field_name, required }) => (
+                  <li key={field_name}>
+                    <strong>{documentFieldLabel(field_name)}</strong>
+                    {": "}
+                    {required
+                      ? "obligatorio, bloquea la validación (R-MISSING-01)."
+                      : "opcional, no bloquea la validación."}
+                  </li>
+                ))}
+              </ul>
+
+              <p>
+                Esta pantalla solo permite corregir los campos ya extraídos. Si el dato sí aparece en el original,
+                el fallo está en la extracción y debe resolverse antes de incorporar la calibración.
+              </p>
             </section>
           )}
 

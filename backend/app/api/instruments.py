@@ -18,12 +18,19 @@ from app.schemas.audit import (
 from app.services.aas_builder import AASBuilder
 from app.services.audit_service import AuditService
 from app.services.serial_numbers import InvalidSerial, normalize_serial
+from app.services.instrument_image import (
+    MAX_IMAGE_BYTES,
+    image_extension,
+    image_path,
+    media_type_for,
+    save_instrument_image,
+)
 
 ##### LIBRERIAS qr code AND Metabase
 import io
 import qrcode
 from fastapi import Response, status
-from fastapi.responses import RedirectResponse
+from fastapi.responses import FileResponse, RedirectResponse
 from uuid import UUID
 from reportlab.lib.units import mm
 from reportlab.lib.utils import ImageReader
@@ -37,6 +44,7 @@ from app.core.config import settings
 #### Ingestion masiva de sensores
 import io
 import os
+import re
 import hashlib
 import pandas as pd
 from datetime import date, datetime, timedelta
@@ -457,8 +465,14 @@ def force_sync_aas(id: int, db: Session = Depends(get_db)):
     return instrument
 
 ######## QR y Metabase endpoints
+def _attachment_filename(prefix: str, serial_number: str | None, suffix: str) -> str:
+    """Nombre de descarga seguro (solo ASCII) para etiquetas y QR."""
+    safe_serial = re.sub(r"[^A-Za-z0-9._-]+", "_", str(serial_number or "instrumento")).strip("_")
+    return f"{prefix}-{safe_serial or 'instrumento'}.{suffix}"
+
+
 @router.get("/{public_id}/qr", summary="Genera la imagen QR física del pasaporte")
-def get_instrument_qr(public_id: UUID, db: Session = Depends(get_db)):
+def get_instrument_qr(public_id: UUID, download: bool = False, db: Session = Depends(get_db)):
     instrument = db.query(InstrumentUnit).filter(InstrumentUnit.public_id == public_id).first()
     if not instrument:
         raise HTTPException(status_code=404, detail="Instrumento no encontrado.")
@@ -481,10 +495,16 @@ def get_instrument_qr(public_id: UUID, db: Session = Depends(get_db)):
     img.save(buf, format="PNG")
     buf.seek(0)
 
-    return Response(content=buf.getvalue(), media_type="image/png")
+    headers = {"Cache-Control": "no-store"}
+
+    if download:
+        filename = _attachment_filename("qr", instrument.serial_number, "png")
+        headers["Content-Disposition"] = f'attachment; filename="{filename}"'
+
+    return Response(content=buf.getvalue(), media_type="image/png", headers=headers)
 
 @router.get("/{public_id}/label.pdf", summary="Etiqueta imprimible 50x30 mm con QR")
-def get_instrument_label(public_id: UUID, db: Session = Depends(get_db)):
+def get_instrument_label(public_id: UUID, download: bool = True, db: Session = Depends(get_db)):
     """Genera la etiqueta física del activo: QR, serial y modelo en 50 × 30 mm."""
     instrument = db.query(InstrumentUnit).filter(InstrumentUnit.public_id == public_id).first()
     if not instrument:
@@ -527,11 +547,87 @@ def get_instrument_label(public_id: UUID, db: Session = Depends(get_db)):
     pdf.save()
     label.seek(0)
 
+    disposition = "attachment" if download else "inline"
+    filename = _attachment_filename("etiqueta", instrument.serial_number, "pdf")
+
     return Response(
         content=label.getvalue(),
         media_type="application/pdf",
-        headers={"Content-Disposition": f'inline; filename="etiqueta-{instrument.serial_number}.pdf"'},
+        headers={
+            "Content-Disposition": f'{disposition}; filename="{filename}"',
+            "Cache-Control": "no-store",
+        },
     )
+
+######## Fotografía del pasaporte (evidencia visual del activo)
+@router.post("/{id}/image", summary="Carga o reemplaza la fotografía del instrumento")
+async def upload_instrument_image(
+    id: int,
+    file: UploadFile = File(...),
+    db: Session = Depends(get_db),
+):
+    """Guarda la foto del activo físico para el pasaporte digital.
+
+    La imagen no altera el modelo canónico ni requiere migración: se almacena en
+    el volumen de ficheros con el `public_id` como nombre.
+    """
+    instrument = db.query(InstrumentUnit).filter(InstrumentUnit.id == id).first()
+    if not instrument:
+        raise HTTPException(status_code=404, detail="Instrumento no encontrado.")
+
+    extension = image_extension(file.content_type)
+    if extension is None:
+        raise HTTPException(
+            status_code=415,
+            detail="Formato de imagen no soportado. Usa JPEG, PNG o WebP.",
+        )
+
+    data = await file.read()
+    if not data:
+        raise HTTPException(status_code=400, detail="El archivo de imagen está vacío.")
+    if len(data) > MAX_IMAGE_BYTES:
+        raise HTTPException(
+            status_code=413,
+            detail=f"La imagen supera el tamaño máximo permitido ({MAX_IMAGE_BYTES // (1024 * 1024)} MB).",
+        )
+
+    save_instrument_image(instrument.public_id, data, extension)
+
+    AuditService.log_event(
+        db=db,
+        entity_name="instrument_unit",
+        entity_id=instrument.id,
+        action="INSTRUMENT_IMAGE_UPDATED",
+        source="api.instruments.upload_image",
+        details={"instrument_unit_id": instrument.id},
+        metadata={"size_bytes": len(data), "content_type": file.content_type},
+    )
+    db.commit()
+
+    return {
+        "public_id": str(instrument.public_id),
+        "image_url": f"/api/v1/instruments/{instrument.public_id}/image",
+        "size_bytes": len(data),
+        "updated_at": datetime.utcnow().isoformat() + "Z",
+    }
+
+
+@router.get("/{public_id}/image", summary="Devuelve la fotografía del instrumento")
+def get_instrument_image(public_id: UUID, db: Session = Depends(get_db)):
+    instrument = db.query(InstrumentUnit).filter(InstrumentUnit.public_id == public_id).first()
+    if not instrument:
+        raise HTTPException(status_code=404, detail="Instrumento no encontrado.")
+
+    path = image_path(instrument.public_id)
+    if path is None:
+        raise HTTPException(status_code=404, detail="El instrumento no tiene fotografía cargada.")
+
+    return FileResponse(
+        path,
+        media_type=media_type_for(path),
+        headers={"Cache-Control": "no-cache"},
+    )
+
 
 @router.get("/passport/{public_id}", tags=["passport"], summary="Punto de resolución canónica del QR")
 def resolve_passport(public_id: UUID, db: Session = Depends(get_db)):

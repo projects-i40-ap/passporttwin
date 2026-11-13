@@ -27,4 +27,14 @@ UI-04/05, [PR #34](https://github.com/projects-i40-ap/passporttwin/pull/34): ini
 
 P0 bloquea tareas o interpreta incorrectamente el estado. P1 mejora la operación y su comprensión; P2 prepara la presentación. No hace falta implementar cada extensión del backlog para cerrar el TFM: acordar qué tareas se defenderán y validar su recorrido completo.
 
+Seguimiento al 13/11/2026 (cambios locales, todavía sin PR):
+
+- **Pasaporte (UI-05):** foto real del activo con carga y reemplazo desde la cabecera (`POST /instruments/{id}/image`, JPEG/PNG/WebP ≤ 5 MB, evento `INSTRUMENT_IMAGE_UPDATED`), manteniendo la imagen de referencia como respaldo cuando el activo no tiene foto. La cabecera incluye ahora el QR y descargas reales: `qr?download=true` (PNG) y `label.pdf` como `attachment` con nombre legible. La imagen no se proyecta a la AAS ni forma parte del modelo canónico; es evidencia visual en el volumen de ficheros.
+- **Auditoría e historial:** las clases `.audit-*` no tenían estilos, por lo que la tabla de eventos se desbordaba. Se añade resumen tipado, contenedor con scroll propio y diff por clave con valores largos plegables, en lugar de un JSON en una línea. Queda pendiente la comprobación a 390 px y por teclado (UI-07/REV-03).
+- **Revisión documental:** nuevo panel «Campos no encontrados en el documento» con los huecos obligatorios (R-MISSING-01) y opcionales, para distinguir «no está en el documento» de «el extractor no lo reconoce».
+- **Nueva pestaña «Consultas» (UI-04/05):** chat RAG sobre PostgreSQL con alcance por documento o número de serie, modo recuperación sin LLM y referencias enlazadas al original y a la revisión de campos. Límites actuales: recuperación léxica sin reordenación semántica y sin memoria entre turnos.
+- **Fuera del producto:** `generators/generate_sample_certificates.py` genera un certificado de ejemplo por activo cargado (y variantes NO CONFORME) con las etiquetas que reconoce el extractor. Verificado: los PDFs se extraen completos y enlazan por serie.
+
+Comprobación local: 376 tests backend (5 nuevos de imagen y descargas) y build del frontend correctos. No sustituye a la revisión con usuarios ni cierra UI-06/UI-07.
+
 La comprobación integrada no prueba que la UI permita hacer todo lo que existe en la API. Tampoco sustituye a sesiones con usuarios; las métricas humanas solo se recogerán después del piloto y congelación.
