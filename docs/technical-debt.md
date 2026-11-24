@@ -1,5 +1,7 @@
 # Registro de deuda técnica de PassportTwin
 
+> Nota de lectura, 24/11/2026: este registro conserva el estado histórico de noviembre. El [README actual](../README.md) y el [cierre de evaluación](experiments/mvp-final-results.md) describen el MVP terminado. No se han revalidado aquí todos los hallazgos ni se declaran resueltas las deudas de robustez industrial por cerrar el MVP.
+
 Actualizado: **02/11/2026**. Inventario técnico central; incluye defectos confirmados, deuda de robustez/mantenimiento y revisiones pendientes, indicando la diferencia. No equivale al estado oficial de tarjetas de Notion ni declara tareas asignadas. Fuente: `main` `823a4bb`, [comprobación integrada](verification/integrated-2026-11-02.md) e inspección del código/configuración. Crear este registro no corrige hallazgos: consultar el estado y los commits de cada fila. Integraciones verificadas después en `main` `602b659`: #33 ha propagado #30/#31 a main.
 
 ## Cómo usarlo
@@ -64,3 +66,4 @@ Las notas siguientes conservan los checkpoints anteriores. Estado actual: TD-01�
 ## Mantenimiento del registro
 
 Por cada fila conservar ID, prioridad, estado, responsable, evidencia y criterio. Añadir enlace a PR al iniciar y commit integrado al cerrar; fecha y resultado de comprobación obligatorios. Si cambia una hipótesis tras inspección, corregirla y preservar qué evidencia motivó el cambio. Vincular desde Notion cuando se actualice, sin afirmar que el plan externo se ha sincronizado por editar este archivo.
+
