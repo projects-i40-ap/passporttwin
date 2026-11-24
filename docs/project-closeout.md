@@ -1,5 +1,7 @@
 # Plan operativo de cierre · 02/11/2026
 
+> Estado histórico de planificación. El alcance completado y los límites del MVP a 24/11/2026 se describen en el [README](../README.md) y en el [cierre de evaluación](experiments/mvp-final-results.md).
+
 Encargo de Pau: comenzar la comprobación integrada y preparación del cierre; incluir mejoras de frontend/usabilidad, experimentos, memoria, metodología y defensa. **Los datos reales son opcionales y no bloquean**. Por defecto se trabaja con sintéticos identificados como tales. Encontrar datos reales no los convierte automáticamente en una muestra suficiente para todos los EXP.
 
 Este es un plan de trabajo derivado de la conversación; no sustituye estados oficiales de Notion. Fuente histórica: exportación del backlog indicada por Pau. No se ha editado Notion. Las PR #19–27 están integradas en `main` `823a4bb`; la evidencia técnica actual se registra en [comprobación integrada](verification/integrated-2026-11-02.md).
@@ -35,3 +37,4 @@ No impide comenzar los pasos 1–4: fecha de entrega/defensa, duración de prese
 ## Próxima entrega funcional recomendada
 
 Una PR acotada para cerrar consulta de documentos originales y transición validación → materialización, con sus estados y evidencias. Separar la ampliación de etiquetas del extractor (`Serial Number:`) de la renovación visual general para revisar y medir sus efectos. El aspecto visual definitivo debe revisarse con Pau/Alexander antes de congelar EXP-07.
+
