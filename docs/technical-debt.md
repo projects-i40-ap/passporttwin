@@ -66,4 +66,3 @@ Las notas siguientes conservan los checkpoints anteriores. Estado actual: TD-01�
 ## Mantenimiento del registro
 
 Por cada fila conservar ID, prioridad, estado, responsable, evidencia y criterio. Añadir enlace a PR al iniciar y commit integrado al cerrar; fecha y resultado de comprobación obligatorios. Si cambia una hipótesis tras inspección, corregirla y preservar qué evidencia motivó el cambio. Vincular desde Notion cuando se actualice, sin afirmar que el plan externo se ha sincronizado por editar este archivo.
-
