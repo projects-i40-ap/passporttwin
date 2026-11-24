@@ -1,551 +1,173 @@
 # PassportTwin
 
-### Instrument Reliability & Circularity Digital Twin
+**Pasaporte digital para la trazabilidad y el seguimiento del estado de instrumentos.**
 
-> An Industry 4.0 platform for building traceable digital passports for laboratory instruments by combining a canonical lifecycle data model, Asset Administration Shell interoperability, reliability analytics and decision-support capabilities.
+Trabajo de Fin de Máster en Industria 4.0 · Universitat Politècnica de Catalunya (UPC) · 2026
 
-**Master's Final Project — Industry 4.0**  
-Universitat Politècnica de Catalunya (UPC) · 2026
+Desarrollado por **[Alexander Castillo](https://github.com/alexanderj-castillo)** y **[Pau Modolell](https://github.com/paumr90)**.
 
-Developed by **[Alexander Castillo](https://github.com/alexanderj-castillo)** and **[Pau Modolell](https://github.com/paumr90)**.
+**Estado a 24 de noviembre de 2026: MVP académico completado.** La plataforma integra inventario, pasaportes, revisión de certificados, historial de calibración, auditoría, proyección AAS e indicadores de estado. La evaluación acordada EXP-01–07 está cerrada con el alcance y las limitaciones descritos abajo. La memoria del TFM ha sido entregada. Este cierre no supone certificación metrológica, validación industrial ni disponibilidad de un servicio comercial.
 
-**MVP status — 27 October 2026:** instrument passports, document review, explainable lifecycle Health Score, experimental tolerance-risk forecasts and a Metabase fleet dashboard are implemented. A reproducible local demo is available. Synthetic evaluation supports technical acceptance; final academic and real-world validation remain pending.
+[Puesta en marcha](#puesta-en-marcha) · [Resultados](docs/experiments/mvp-final-results.md) · [Operación y entornos](docs/mvp-operation.md) · [Dashboard](bi/README.md) · [Próximos pasos](#límites-y-próximos-pasos)
 
-[Run the local demo](#-quick-start) · [Demo walkthrough](docs/demo-usability.md) · [Install the fleet dashboard](bi/README.md) · [Synthetic risk evaluation](experiments/acceptance/README.md)
+## Qué resuelve
 
----
+La identidad de un instrumento, sus certificados y su historial suelen quedar repartidos entre archivos y aplicaciones. PassportTwin reúne esa información en un pasaporte consultable y conserva la relación entre el documento original, los datos revisados y el estado del activo.
 
-## 🎯 The Challenge
+Un recorrido completo permite localizar un instrumento con calibración vencida, incorporar un certificado, detectar una discrepancia de identidad, corregir el dato mediante revisión humana y registrar la nueva calibración. El pasaporte refleja el historial actualizado; la auditoría permite reconstruir la corrección y la incorporación sin modificar el PDF original.
 
-Laboratory instruments generate technical, operational, calibration and documentary information throughout their lifecycle, but this information is often fragmented across different systems, formats and processes.
+El piloto contiene **16 instrumentos sintéticos**: ocho transmisores de presión (PT-101–108), cuatro sondas de temperatura (TT-201–204) y cuatro electrodos de pH (PH-301–304). Incluye vencimiento, revisión documental, historial insuficiente, mantenimiento, incidencias y retirada. Son casos de demostración, no una flota industrial validada.
 
-This fragmentation makes it difficult to answer questions such as:
+## Funcionalidades implementadas
 
-- How reliable is an instrument today?
-- Is its calibration behaviour starting to drift?
-- Which calibration and source documents support its current state?
-- What is its estimated risk of intervention?
-- How can technical and lifecycle information be consolidated into a traceable digital passport?
-- How could this information support future reuse, refurbishment or reassignment decisions?
+| Área | Funcionalidad disponible |
+| --- | --- |
+| Inicio e inventario | Búsqueda por nombre, etiqueta, serie o ubicación; agrupación por ubicación, filtros y prioridad por estado de calibración. |
+| Pasaporte | Identificación, fabricante, ubicación, estado operativo, calibración, Health Score y riesgo; vistas separadas para los historiales y regreso al resumen. |
+| Documentos | Carga y procesamiento, visor y descarga del original, extracción, revisión, corrección, revalidación e incorporación explícita al historial. |
+| Trazabilidad | SHA-256, valores extraídos y revisados, eventos de auditoría y consulta de cambios. El hash permite comprobar integridad; no acredita por sí solo la autenticidad del emisor. |
+| Ciclo de vida | Calibraciones, mantenimiento e incidencias. La vigencia se distingue del estado operativo y del resultado metrológico. |
+| Interoperabilidad | Cuatro submodelos AAS en Eclipse BaSyx y reconstrucción desde el estado canónico; herramienta experimental de intercambio AASX. |
+| Acceso | UUID público estable y descarga de QR/etiqueta. Soporte de fotografía; la última revisión simplifica la cabecera del pasaporte. |
+| Analítica | Health Score explicable, riesgo experimental a 30/60/90 días y métodos de referencia para evaluar deriva. |
+| Panel de flota | Metabase con indicadores, prioridades, vencimientos, filtros, enlaces al pasaporte y control de vigencia de resultados guardados. |
+| IA documental | Extracción asistida y consulta con recuperación de evidencias; integración opcional con un servidor local compatible con `llama.cpp`. |
 
-**PassportTwin** explores how Digital Twin concepts, lifecycle data, analytics and Asset Administration Shell interoperability can be combined to address these challenges.
+Superar las reglas documentales y **añadir una calibración al historial son pasos distintos**. La validación documental no certifica metrológicamente el instrumento. Los documentos incorporados se consultan en modo de solo lectura en el flujo de revisión.
 
----
+## Arquitectura y enfoque RAMI 4.0
 
-## 💡 The Solution
-
-PassportTwin builds a digital representation of each laboratory instrument around a **canonical lifecycle model in PostgreSQL**.
-
-The current MVP uses PostgreSQL as the **Source of Truth** and projects interoperable passport information toward **Eclipse BaSyx** through Asset Administration Shell submodels.
-
-The platform is being developed incrementally around:
-
-- canonical instrument and lifecycle data;
-- document ingestion, validation and human review;
-- calibration history and traceability;
-- Asset Administration Shell interoperability;
-- reliability, drift and risk analytics;
-- QR-based passport access;
-- BI and visualization;
-- future circularity decision support.
-
-Not all target capabilities are complete. The repository explicitly distinguishes implemented MVP functionality from planned analytical, circularity and experimental-validation work.
-
----
-
-## 🏗️ MVP Architecture
+RAMI 4.0 se utilizó como marco para ordenar la relación entre activo físico, integración, comunicación, información, funciones y uso operativo. La organización por capas es una decisión de diseño inspirada en ese marco; no constituye certificación de conformidad.
 
 ```mermaid
 flowchart LR
-
-    Sources[Instrument, CSV & Document Sources]
-        --> Ingestion[Ingestion & Human Review]
-
-    Ingestion --> Backend[FastAPI Backend]
-
-    Backend --> DB[(PostgreSQL<br/>Canonical Source of Truth)]
-
-    DB --> AASBuilder[AASBuilder]
-    AASBuilder --> BaSyx[Eclipse BaSyx<br/>AAS Projection]
-
-    DB --> Analytics[Analytics Services]
-    Analytics --> Risk[Drift / Risk / Health Indicators]
-
-    Backend --> QR[QR / Passport Resolution]
-
-    DB --> BI[BI & Visualization]
-    Risk --> BI
-
-    BaSyx --> Interop[Industry 4.0<br/>Interoperability]
-    BI --> Users[Technical & Business Users]
+    Input[Instrumentos, CSV y documentos] --> API[FastAPI: extracción, reglas y revisión]
+    UI[React: inventario y pasaporte] <--> API
+    API <--> DB[(PostgreSQL: estado canónico)]
+    API --> AAS[Proyección AAS en Eclipse BaSyx]
+    DB --> Models[Health Score y riesgo experimental]
+    Models --> UI
+    Models --> Snapshots[Snapshots analíticos]
+    DB --> BI[Metabase: flota]
+    Snapshots --> BI
+    DB --> Retrieval[Recuperación de evidencias]
+    Retrieval --> LLM[LLM local opcional]
 ```
 
-### Architectural principle
+**PostgreSQL es la fuente de verdad.** BaSyx representa una proyección reconstruible. `POST /api/v1/instruments/{id}/sync` reconstruye `Nameplate`, `OperationalState`, `CalibrationHistory` y `DocumentProvenance`; `SYNCED` exige completar las cuatro proyecciones.
 
-**PostgreSQL is the canonical system of record.**
+`Nameplate` utiliza una referencia semántica externa. Los otros tres submodelos emplean identificadores propios del MVP: no son plantillas IDTA normalizadas. El intercambio evaluado usa AAS v2 y un perfil crítico explícito.
 
-The AAS layer is an interoperable projection of the canonical state rather than an independent source of truth.
+La implementación combina **Python/FastAPI, PostgreSQL, React/Vite, Eclipse BaSyx, Metabase y Docker Compose**. No incluye adquisición continua de sensores ni control automático del instrumento físico.
 
-This separation allows the AAS representation to be rebuilt from PostgreSQL when required.
+## Cómo interpretar los indicadores
 
----
+### Calibración y Health Score
 
-## 🧩 Current MVP Capabilities
+El pasaporte distingue calibración vencida, próxima a vencer, en plazo y ausencia de historial. El Health Score de ciclo de vida combina penalizaciones configurables: estado de calibración (30 %), riesgo estimado (30 %), incidencias recientes (20 %) y calidad de datos (20 %). Son los pesos por defecto, no una norma metrológica. Si falta un componente requerido, el resultado se declara no calculable.
 
-### 🪪 Asset Administration Shell Passport
+El contrato del pasaporte es `GET /api/v1/instruments/{id}/health-score`. El endpoint histórico de predicciones conserva otro contrato analítico y no debe confundirse con este Health Score.
 
-The current MVP integrates four AAS submodels:
+### Riesgo experimental
 
-| Submodel | Purpose | Current state |
-| --- | --- | --- |
-| `Nameplate` | Instrument identity and technical characteristics | Integrated |
-| `OperationalState` | Lifecycle state, criticality, location and installation information | Integrated |
-| `CalibrationHistory` | Complete multi-event calibration history | Integrated |
-| `DocumentProvenance` | Accepted source documents, hashes and provenance metadata | Integrated |
+El modelo ajusta una tendencia lineal del error y una aproximación gaussiana de la incertidumbre predictiva. Estima la probabilidad de superar la tolerancia **en las fechas objetivo** a 30, 60 y 90 días, no la probabilidad acumulada de cualquier fallo durante el intervalo. Tras mantenimiento utiliza el historial posterior y puede abstenerse por datos insuficientes.
 
-`Nameplate` uses an external AAS semantic reference.
+Un instrumento puede estar vencido y tener riesgo estimado bajo. Una nueva calibración puede mejorar el Health Score sin cambiar el riesgo redondeado en pantalla. Un 0,0 % mostrado no garantiza ausencia de riesgo.
 
-`OperationalState`, `CalibrationHistory` and `DocumentProvenance` currently use **PassportTwin-specific semantic identifiers for the MVP**. They must not be interpreted as standardized IDTA submodel templates.
+### Pasaporte y Metabase
 
-### 🔄 Full AAS Reconstruction
+El pasaporte calcula con los datos disponibles en la consulta. Metabase utiliza también snapshots persistidos: cambiar los datos canónicos no renueva automáticamente todos los resultados analíticos guardados. Los estados de vigencia distinguen resultados actuales, ausentes y desactualizados.
 
-The endpoint:
+Contratos: [Health Score](docs/architecture/lifecycle-health-v2.md), [riesgo](docs/architecture/tolerance-risk.md) y [snapshots](docs/architecture/analytics-snapshots.md).
 
-```text
-POST /api/v1/instruments/{id}/sync
-```
+## Evaluación del MVP
 
-rebuilds the complete AAS projection for an instrument from the canonical PostgreSQL state.
+Los siete experimentos se cerraron con datos sintéticos y una comprobación práctica de trazabilidad. El cierre describe el trabajo realizado; no significa que todos los modelos superasen todos los criterios comparativos.
 
-The synchronization currently covers:
+| Experimento | Resultado y límite principal |
+| --- | --- |
+| EXP-01 · Extracción | 168/168 coincidencias en 24 PDF de tres diseños sintéticos, incluidas seis ausencias esperadas. Evalúa el extractor determinista, no el rendimiento general de OCR/LLM. |
+| EXP-02 · Vinculación | 18 vínculos y nueve abstenciones correctos en 27 casos; identidades ambiguas enviadas a revisión. |
+| EXP-03 · Reglas | Reglas esperadas en los 24 PDF y dos comprobaciones complementarias superadas: duplicado por hash y aceptación fuera de tolerancia. |
+| EXP-04 · Deriva | MAE normalizado global 0,285 frente a 0,329 de las referencias. Mejoró a 60/90 días y empeoró a 30 días. |
+| EXP-05 · Riesgo | Brier pareado 0,108 frente a 0,154; cobertura de estimación 87,5 %. Los intervalos nominales del 95 % cubrieron el 77,7 % de las observaciones puntuadas. |
+| EXP-06 · AASX | Preservadas 129/129 y 43/43 entradas críticas en los dos casos y cada frontera evaluada. No certifica interoperabilidad universal. |
+| EXP-07 · Trazabilidad | CERT y TRACE completadas según el registro del participante. Tiempos estimados inferiores a 3 y 5 minutos; sin cronometraje exacto ni comparación formal de usabilidad. |
 
-- Nameplate;
-- OperationalState;
-- complete CalibrationHistory;
-- complete accepted DocumentProvenance.
+El [informe de cierre](docs/experiments/mvp-final-results.md) identifica procedencia, alcance y límites. Son resultados de las revisiones registradas durante la evaluación, no una nueva ejecución sobre el último commit. Las funciones de IA añadidas posteriormente no heredan automáticamente esa validación.
 
-The instrument is marked as `SYNCED` only when all four projections complete successfully.
+## Puesta en marcha
 
-### 📄 Document Review & Traceability
-
-PassportTwin includes a human-in-the-loop document workflow for calibration information.
-
-The implemented flow supports document extraction and review, field correction, revalidation, canonical acceptance and projection of accepted information toward the AAS layer.
-
-Document provenance includes:
-
-- document identifier;
-- original filename;
-- source type;
-- SHA-256 hash;
-- processing status;
-- upload timestamp.
-
-Internal infrastructure paths are intentionally not exposed through the AAS passport.
-
-### 📊 Calibration History
-
-Calibration events are persisted canonically in PostgreSQL.
-
-The AAS `CalibrationHistory` submodel represents the complete ordered event history rather than only the latest calibration.
-
-Each projected event can contain:
-
-- calibration event identifier;
-- calibration date;
-- next due date;
-- measured error;
-- tolerance;
-- calibration result;
-- creation timestamp.
-
-### 🏭 Instrument Management & Ingestion
-
-The backend currently supports instrument registration and instrument synchronization through FastAPI.
-
-CSV-based fleet ingestion is also available for creating canonical instrument records and projecting their initial AAS identity and operational state.
-
-### 🔗 QR & Passport Resolution
-
-QR codes resolve to a React instrument passport using a stable public UUID. The frontend supports search by serial number or location, identity and operational state, calibration history, measurement units, linked document review and instrument audit navigation.
-
-The passport distinguishes live calculations from saved BI results and shows when the saved result is missing or stale after data changes.
-
-### 📈 Explainable Health Score & Experimental Risk
-
-The lifecycle Health Score combines four configurable components with default weights: calibration status (30%), predicted risk (30%), recent incidents (20%) and data quality (20%). It displays each contribution and actions for missing information. If a required component cannot be estimated, the score is **not calculated**.
-
-The tolerance-risk model estimates the probability of exceeding tolerance at target dates 30, 60 and 90 days ahead, using a linear calibration-error trend and Gaussian predictive uncertainty. It checks history sufficiency and uses calibration history after the latest maintenance when applicable. These probabilities are experimental and are not experimentally calibrated guarantees.
-
-- [Lifecycle Health Score contract](docs/architecture/lifecycle-health-v2.md)
-- [Tolerance-risk model and limitations](docs/architecture/tolerance-risk.md)
-- [Frozen synthetic evaluation protocol and results](experiments/acceptance/README.md)
-
-### 📊 Fleet Dashboard & Saved Analytics
-
-The Metabase provisioner creates ten cards covering fleet KPIs, status, intervention priorities, upcoming calibration deadlines, snapshot freshness, Health Score and experimental risk. Family/location filters and links back to instrument passports are included.
-
-Analytical snapshots retain calculation dates, model versions, weights and an input manifest. Refresh is explicit; stale or unavailable results are not presented as current numerical values. Dashboard setup requires a Metabase administrator, a database connection and a target collection; starting the containers alone does not install it.
-
-See [dashboard setup](bi/README.md) and the [snapshot contract](docs/architecture/analytics-snapshots.md).
-
----
-
-## 🔬 Digital Twin Scope
-
-PassportTwin is intended to go beyond a static dashboard.
-
-The current technical foundation includes:
-
-- a physical asset represented by an instrument;
-- a canonical digital state;
-- lifecycle and calibration history;
-- document provenance;
-- an interoperable AAS representation;
-- mechanisms to update and reconstruct that representation;
-- explainable lifecycle indicators, experimental risk forecasts and versioned BI snapshots.
-
-The following areas remain necessary to complete and academically validate the Digital Twin proposition:
-
-- experimental validation of analytical models;
-- extension of the existing synthetic evaluation to the final experimental protocol;
-- validation of temporal evolution and risk under real operating conditions;
-- final decision-support workflows;
-- validation of the complete demonstrator against the TFM objectives.
-
----
-
-## 🚧 Current Technical Status
-
-The integrated MVP includes the canonical PostgreSQL lifecycle model, FastAPI, React/Vite passports, document review and provenance, CSV ingestion, four AAS projections, QR navigation, lifecycle Health Score, experimental tolerance risk, BI snapshots and Metabase provisioning.
-
-The [27 October usability checkpoint](docs/demo-usability.md#evidencia-de-esta-entrega--27102026) records 164 passing backend/BI tests, a successful frontend build, browser checks and queries against a disposable Metabase instance. These are dated technical checks, not a claim of academic validation or a permanent test count.
-
-Four synthetic scenarios support local rehearsal: healthy, expired calibration, document review and insufficient history. The demo preserves manual corrections and refreshes its saved analytics when rerun. It does not exercise ingestion or AAS synchronization.
-
-**Final end-to-end rehearsal, shared deployment and academic validation remain pending.**
-
----
-
-## ⚠️ Current Limitations
-
-The current MVP has known limitations that are intentionally kept visible:
-
-- Eclipse BaSyx currently uses in-memory persistence in the development environment;
-- Sequential repeat materialization is rejected by `R-DUP-ACCEPT` (HTTP 409); concurrent acceptance and a retry-safe response contract have not been verified;
-- AAS synchronization does not yet implement robust retry and recovery policies;
-- synchronization error reporting can be improved;
-- some AAS semantics are PassportTwin-specific rather than standardized templates;
-- synthetic risk evaluation is available, but analytical outputs still require final experimental and real-world validation;
-- the implemented BI and passport workflows still need final end-to-end rehearsal and shared-environment configuration.
-
-The [technical debt register](docs/technical-debt.md) tracks confirmed defects, maintenance work and checks still to perform, with priorities, evidence and closure criteria. Experimental validation and future product scope are tracked separately; these limitations are not presented as validated capabilities.
-
----
-
-## 🛠️ Technology Stack
-
-### Backend & Data
-
-`Python` · `FastAPI` · `PostgreSQL` · `SQLAlchemy` · `Pydantic`
-
-### Digital Twin & Interoperability
-
-`Asset Administration Shell (AAS)` · `Eclipse BaSyx` · `Digital Product Passport` · `Industry 4.0`
-
-### Analytics & AI
-
-`Python` · `Data Analytics` · `Drift Analysis` · `Risk & Health Indicators`
-
-### Visualization
-
-`React` · `Vite` · `Metabase`
-
-### Infrastructure & Development
-
-`Docker` · `Docker Compose` · `Git` · `GitHub`
-
----
-
-## 📁 Repository Structure
-
-```text
-passporttwin/
-│
-├── ai/                    # Analytics, datasets and model development
-│
-├── backend/
-│   ├── app/
-│   │   ├── api/           # FastAPI endpoints
-│   │   ├── core/          # Application configuration
-│   │   ├── database/      # Database connection and sessions
-│   │   ├── models/        # Domain / database models
-│   │   ├── schemas/       # Data validation and API schemas
-│   │   └── services/      # Business logic, analytics and AAS services
-│   └── tests/             # Automated backend tests
-│
-├── frontend/              # Visualization / application frontend
-├── bi/                    # Fleet SQL views and Metabase provisioning
-├── experiments/           # Synthetic evaluation protocols and results
-├── tools/                 # Cross-platform local start/demo launcher
-├── generators/            # Data and utility generators
-├── docs/                  # Architecture and project documentation
-├── infra/                 # Infrastructure configuration
-│   └── postgres/
-│
-├── .github/               # GitHub workflows and collaboration templates
-├── .env.example           # Environment configuration template
-├── docker-compose.yml     # Local multi-service environment
-├── CONTRIBUTING.md        # Collaboration workflow
-├── CHANGELOG.md           # Project evolution
-├── LICENSE                # Copyright and reuse terms
-└── README.md
-```
-
----
-
-## 🚀 Quick Start
-
-### 1. Clone the repository
-
-```bash
-git clone https://github.com/projects-i40-ap/passporttwin.git
-cd passporttwin
-```
-
-### 2. Start services and prepare the demo
-
-Requirements: Docker running with Compose v2 supporting `up --wait`, and Python 3.10+ for the launcher. Application dependencies run inside containers.
-
-On **Windows PowerShell**, from the repository root:
+Requisitos: Git, Docker con Compose v2 compatible con `up --wait` y Python 3.10+ para el lanzador. Las dependencias de aplicación se ejecutan en contenedores.
 
 ```powershell
+git clone https://github.com/projects-i40-ap/passporttwin.git
+cd passporttwin
 py tools/dev.py start
-py tools/dev.py demo
 ```
 
-On **Linux/macOS**, use `python3` instead of `py`.
+En Linux/macOS, sustituir `py` por `python3`. `start` crea `.env` desde `.env.example` solo si no existe, arranca PostgreSQL, aplica las migraciones de identidad/modelo, prepara la base interna de Metabase y construye/inicia los servicios. Las vistas BI se instalan por separado siguiendo su guía.
 
-`start` creates `.env` from `.env.example` only if absent, waits for PostgreSQL, ensures the internal Metabase database exists and starts the services. Review local configuration before starting if you need different values. Keep `.env` out of Git.
-
-`demo` applies the analytics migration and BI views, prepares four synthetic instruments and refreshes their snapshots. It preserves existing fixtures and manual corrections; it is not a reset command. It does not execute document ingestion or AAS synchronization.
-
-| Demo serial | Initial scenario |
+| Servicio | URL local por defecto |
 | --- | --- |
-| `PTWIN-DEMO-SANO` | No calibration or document alerts |
-| `PTWIN-DEMO-VENCIDO` | Expired calibration |
-| `PTWIN-DEMO-REVISION` | Document serial requiring human correction |
-| `PTWIN-DEMO-SIN-HISTORIAL` | Insufficient history; score/risk unavailable |
-
-The command prints passport URLs. You can also find these instruments from the application home page. Existing fixture dates do not move forward when the command is repeated.
-
-### 3. Open the local services
-
-| Service | Default URL |
-| --- | --- |
-| PassportTwin application | http://localhost:5173 |
-| FastAPI documentation | http://localhost:8000/docs |
+| Aplicación | http://localhost:5173 |
+| API / OpenAPI | http://localhost:8000/docs |
 | Metabase | http://localhost:3003 |
 
-If a service is still starting, check `docker compose ps`. Follow the [demo walkthrough](docs/demo-usability.md) to review documents, inspect score changes and refresh saved results.
+Revisar `.env` antes de arrancar si se necesitan otros puertos o URLs. No publicar credenciales. Comprobar el arranque con `docker compose ps`.
 
-**Metabase requires initial setup:** create your administrator, connect the application database and select a collection, then run the [dashboard provisioner](bi/README.md). `demo` prepares the SQL views and data, not the dashboard itself. Optionally set `VITE_METABASE_DASHBOARD_URL` to the installed dashboard URL and recreate/rebuild the frontend.
+### Elegir los datos de demostración
 
-### 4. Run checks separately
+- **Piloto de 16 instrumentos:** seguir [operación del MVP](docs/mvp-operation.md), instalar las vistas y ejecutar el generador del piloto únicamente en un entorno aislado con fecha explícita.
+- **Demo mínima de cuatro instrumentos:** `py tools/dev.py demo` prepara vistas, genera `PTWIN-DEMO-*` y sus snapshots. Es una alternativa; no es necesaria para el piloto de 16. Ejecutarla sobre el piloto añade los cuatro casos al inventario.
 
-Run tests only against a disposable test database; tests may create or modify records. See the [backend test notes](backend/tests/README.md), [BI checks](bi/README.md#pruebas) and CI workflows in `.github/workflows/` for configuration. Local rehearsal is separate from the synthetic acceptance experiments and final TFM validation.
+Los generadores conservan registros existentes y no son comandos de restauración. No avanzan automáticamente las fechas de los casos ya creados.
 
----
+### Dashboard e IA opcional
 
-## ✅ Development Principles
+Metabase necesita configuración inicial, conexión de datos y provisión de tarjetas: [instrucciones](bi/README.md). Arrancar contenedores no instala por sí solo el dashboard. Su ID depende de cada instancia.
 
-PassportTwin is developed incrementally around several principles:
+La IA local es opcional y está desactivada por defecto mediante `AI_LEGO_ENABLED`. Requiere configurar el servidor/modelo en `.env`. La consulta recupera evidencias y, si el modelo no está disponible, puede devolverlas sin respuesta generada (`OFFLINE_RETRIEVAL_ONLY`). Ver [.env.example](.env.example), [configuración](backend/app/core/config.py) y [servicio de consulta](backend/app/services/rag_service.py). No se garantiza compatibilidad con cualquier modelo ni interpretación correcta de cualquier PDF.
 
-1. **PostgreSQL as canonical Source of Truth**
-2. **End-to-end value before unnecessary complexity**
-3. **Reproducible Docker-based development**
-4. **Traceability between source documents, canonical data and AAS projection**
-5. **Human review where automated extraction is uncertain**
-6. **Clear separation between implementation, testing, integration and validation**
-7. **Documentation alongside implementation**
-8. **Collaborative development through Git and GitHub**
+### Comprobaciones
 
-A feature is not considered academically validated merely because it has been implemented or technically tested.
+Ejecutar pruebas contra una base desechable, nunca sobre los datos de una demostración que se quiera conservar. Ver [pruebas backend](backend/tests/README.md), [BI](bi/README.md) y [.github/workflows](.github/workflows). Los informes históricos describen ejecuciones concretas, no un contador permanente de pruebas aprobadas.
 
----
+## Límites y próximos pasos
 
-## 🤝 Human–AI Development Methodology
+El MVP queda cerrado en su alcance académico. La evolución industrial requiere:
 
-PassportTwin is developed using a controlled **human–AI collaborative workflow**.
+- Evaluación con certificados e historiales reales, diversidad de formatos, OCR y modelos locales; calibración de probabilidades y estudio formal de usabilidad.
+- Autenticación, autorización, secretos, despliegue seguro y observabilidad adecuados al entorno de destino.
+- Persistencia y recuperación AAS verificadas: BaSyx usa memoria en desarrollo; PostgreSQL conserva el estado canónico.
+- Reintentos de sincronización, restauración conjunta de base y originales, y pruebas de concurrencia en la incorporación documental.
+- Mayor alineación con plantillas semánticas estandarizadas y mantenimiento del entorno experimental AASX heredado.
+- Validación de criterios de reutilización y reacondicionamiento. El motor de recomendaciones de circularidad es una línea futura, no una función terminada.
 
-Generative AI is used as a technical copilot for architecture, implementation, testing, debugging, documentation, project coordination and academic review. However, AI-generated proposals are not treated as evidence and are not accepted automatically.
+El [registro histórico de deuda técnica](docs/technical-debt.md) conserva hallazgos de desarrollo. Sus estados no deben confundirse con un inventario de defectos actuales revalidado íntegramente.
 
-The project follows an evidence-driven development cycle:
+## Desarrollo colaborativo y uso de IA
 
-```text
-STATUS → inspect → minimal change → test → evidence → Git → checkpoint
-```
+Ambos autores han trabajado mediante Git/PR y revisión de cambios, con asistencia de IA para diseño, implementación y comprobaciones. Las propuestas se contrastan con código, pruebas e informes: una respuesta generada no es evidencia de validación.
 
-Technical work is tracked using explicit evidence states:
+Se distinguen la **IA incorporada al producto**, como asistencia documental y modelos analíticos, y la **IA utilizada durante el desarrollo**, bajo decisión y revisión humana. La metodología y sus aprendizajes forman parte del TFM. [Guía de contribución](CONTRIBUTING.md).
 
-```text
-PROPOSED → IMPLEMENTED → TESTED → INTEGRATED → VALIDATED
-```
+## Estructura del repositorio
 
-These states are intentionally different. Implementing a feature does not mean that it has been tested, integrating it does not mean that it has been experimentally validated, and AI-generated output is not considered validation evidence by itself.
+| Directorio | Contenido |
+| --- | --- |
+| `backend/` | API, modelos canónicos, servicios, scripts y pruebas. |
+| `frontend/` | Aplicación React/Vite. |
+| `bi/` | Vistas SQL y provisión de Metabase. |
+| `experiments/` | Protocolos, evaluadores, fixtures y resultados seleccionados. |
+| `ai/` | Desarrollo analítico y recursos de modelos. |
+| `infra/` | Esquema y migraciones PostgreSQL. |
+| `tools/` | Arranque local. |
+| `docs/` | Arquitectura, operación, evaluación y checkpoints históricos. |
 
-The workflow combines:
+## Autores y licencia
 
-- human supervision and final decision-making;
-- incremental changes;
-- inspection before modification;
-- automated testing;
-- RED → GREEN development when appropriate;
-- Git status and diff review before commits;
-- controlled branch integration;
-- explicit technical checkpoints;
-- traceability between code, tests, documentation and project decisions;
-- canonical sources for different types of project information.
+**Alexander Castillo** y **Pau Modolell Rodríguez** · TFM del Máster en Industria 4.0, UPC.
 
-The approach incorporates elements associated with emerging **vibe coding** practices, while adding software-engineering controls intended to improve traceability, reproducibility and quality.
+Copyright © 2026. **Todos los derechos reservados.** Se comparte para revisión académica, demostración y portfolio. Reutilización, modificación, redistribución o comercialización requieren permiso escrito de ambos autores conforme a [LICENSE](LICENSE). Publicar el código no implica licencia de software libre ni acredita una patente concedida.
 
-For this reason, PassportTwin treats vibe coding as a context for AI-assisted software development rather than as a replacement for engineering methodology.
-
-The methodology itself is being documented and evaluated as part of the Master's Final Project. Its academic analysis will consider benefits, limitations, reproducibility, error control, human supervision and the evidence generated during the development of PassportTwin.
-
----
-
-## 🗺️ Roadmap
-
-### Foundation
-
-- [x] Repository and collaboration structure
-- [x] Docker development environment
-- [x] FastAPI backend architecture
-- [x] PostgreSQL integration
-- [x] Instrument domain and API
-- [x] Eclipse BaSyx integration
-
-### Digital Twin & Data
-
-- [x] Core instrument lifecycle model
-- [x] CSV inventory ingestion
-- [x] Document review and human-in-the-loop workflow
-- [x] Calibration-history persistence
-- [x] AAS Nameplate
-- [x] AAS OperationalState
-- [x] AAS CalibrationHistory
-- [x] AAS DocumentProvenance
-- [x] Full AAS reconstruction from PostgreSQL
-- [ ] Persistent / production-grade AAS storage
-- [ ] Complete synthetic and experimental datasets
-
-### Analytics
-
-- [x] Initial drift / risk / health analytics service
-- [x] Synthetic tolerance-risk protocol and baseline definition
-- [x] Frozen synthetic evaluation with held-out forecasts
-- [x] Synthetic metric reporting, including adverse stress-test results
-- [ ] Real-world and final experimental validation
-- [x] Explainable lifecycle Health Score and versioned analytics snapshots
-- [ ] Final explainability and reproducibility analysis
-- [ ] Final analytical conclusions
-
-### Circularity
-
-- [ ] Circularity criteria
-- [ ] Reuse / refurbishment logic
-- [ ] Recommendation engine
-- [ ] Validation of circularity recommendations
-
-### Decision Support
-
-- [x] QR generation and passport resolution endpoints
-- [x] MVP BI views and explicit snapshot freshness
-- [x] Metabase fleet overview and intervention priorities
-- [x] React instrument passport visualization
-- [x] Health Score and experimental risk dashboard cards
-- [x] Reproducible four-scenario local demo
-- [ ] Shared-environment setup and final end-to-end rehearsal
-- [ ] Circularity decision-support views
-
-### Validation & TFM Delivery
-
-- [x] Technical PostgreSQL → AAS integration
-- [x] Automated backend test suite
-- [ ] Experimental validation
-- [ ] Final end-to-end demonstrator
-- [ ] Reproducible experiment package
-- [ ] Final Master's thesis documentation
-
-### Development Methodology
-
-- [x] Human–AI collaborative workflow defined and applied
-- [x] Evidence states defined
-- [x] Git / testing / checkpoint workflow applied
-- [ ] Systematic methodology evidence collection
-- [ ] Methodology analysis in the Master's thesis
-- [ ] Evaluation of benefits, limitations and threats to validity
-
----
-
-## 👥 Authors
-
-PassportTwin is a **joint Master's Final Project** developed by:
-
-### Alexander Castillo
-
-[GitHub](https://github.com/alexanderj-castillo)
-
-Electromechanical Engineer · Industrial Automation · OT/IT Integration · Industry 4.0
-
-### Pau Modolell
-
-[GitHub](https://github.com/paumr90)
-
-Chemical Engineer · Business & Digital Transformation Consultant · Project Manager · Industry 4.0
-
-The project is collaboratively developed. Individual technical contributions and project evolution are traceable through the repository's Git history.
-
----
-
-## 🎓 Academic Context
-
-PassportTwin is developed as the **Master's Final Project of the Master's Degree in Industry 4.0 at Universitat Politècnica de Catalunya (UPC)**.
-
-The project explores the practical integration of:
-
-**Digital Twins · Asset Administration Shell · Data Analytics · Artificial Intelligence · Business Intelligence · Circular Economy**
-
-within an Industry 4.0 use case.
-
-The academic objective is not only to implement the platform, but also to evaluate its architecture, analytical capabilities, interoperability and usefulness through reproducible evidence.
-
-The project additionally documents and analyses the use of a controlled human–AI collaborative development methodology as part of its engineering process.
-
----
-
-## 🔐 Data & Privacy
-
-The public repository is intended to contain the software architecture, source code, documentation and examples required to understand and demonstrate the project.
-
-Credentials, local environment configuration, private datasets and confidential information must remain outside version control.
-
-Environment-specific values are managed through `.env` files and other local resources excluded through `.gitignore`.
-
----
-
-## 📄 License
-
-Copyright © 2026 Alexander Castillo and Pau Modolell Rodríguez.  
-**All rights reserved.**
-
-PassportTwin is currently shared publicly for **academic review, demonstration and portfolio purposes**.
-
-Reuse, modification, redistribution, commercialization or creation of derivative works from the original project materials is not permitted without prior written permission from both authors.
-
-See the [`LICENSE`](LICENSE) file for full terms.
-
----
-
-**PassportTwin · UPC · 2026**
