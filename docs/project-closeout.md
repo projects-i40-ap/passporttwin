@@ -37,4 +37,3 @@ No impide comenzar los pasos 1–4: fecha de entrega/defensa, duración de prese
 ## Próxima entrega funcional recomendada
 
 Una PR acotada para cerrar consulta de documentos originales y transición validación → materialización, con sus estados y evidencias. Separar la ampliación de etiquetas del extractor (`Serial Number:`) de la renovación visual general para revisar y medir sus efectos. El aspecto visual definitivo debe revisarse con Pau/Alexander antes de congelar EXP-07.
-
