@@ -1,5 +1,7 @@
 # Preparación del ensayo final · 02/11/2026
 
+> Documento histórico de preparación. Para los resultados y el alcance final acordado, consultar el [cierre de evaluación del MVP](mvp-final-results.md), actualizado el 24/11/2026. Las tareas pendientes descritas abajo corresponden a este checkpoint.
+
 Política confirmada por Pau: **sintéticos como ruta de trabajo; reales si se consiguen, sin bloquear**. Los reales se presentan como una cohorte separada con alcance explícito. Datos reales sin historial suficiente no validan deriva ni probabilidad futura. Esta entrega prepara decisiones y condiciones; no declara un nuevo dataset congelado, nuevos umbrales aprobados ni experimentos finales completados.
 
 La [matriz histórica](final-experiments-matrix.md) es una auditoría previa a PR #20–27. Sus carencias de runners ya tienen herramientas integradas; conservarla como antecedente, no como estado actual de implementación.
@@ -41,3 +43,4 @@ Este baseline se prepara después de cerrar los accesos y estados pendientes, an
 - Incorporar informe, limitaciones y trazabilidad objetivo→evidencia a memoria/defensa. No cerrar la tarjeta global con solo runners verdes.
 
 Los comandos concretos por EXP están en las guías `exp01-runner.md` a `exp07-traceability-study.md` de esta carpeta. Adaptar nombres de directorio y entorno; no ejecutar sin revisar sus guardas de aislamiento. No se han ejecutado nuevos ensayos finales en esta entrega.
+
