@@ -43,4 +43,3 @@ Este baseline se prepara después de cerrar los accesos y estados pendientes, an
 - Incorporar informe, limitaciones y trazabilidad objetivo→evidencia a memoria/defensa. No cerrar la tarjeta global con solo runners verdes.
 
 Los comandos concretos por EXP están en las guías `exp01-runner.md` a `exp07-traceability-study.md` de esta carpeta. Adaptar nombres de directorio y entorno; no ejecutar sin revisar sus guardas de aislamiento. No se han ejecutado nuevos ensayos finales en esta entrega.
-
