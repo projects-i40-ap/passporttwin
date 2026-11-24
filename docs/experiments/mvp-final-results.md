@@ -33,4 +33,3 @@ Los runners y sus guías permanecen disponibles para nuevas evaluaciones. Una nu
 ## Qué queda fuera del cierre
 
 La validación con flotas industriales, certificación metrológica, calibración de probabilidades en datos reales, evaluación completa de IA/OCR/RAG, concurrencia, restauración productiva y estudio formal de usabilidad quedan fuera de las conclusiones del MVP. El cierre académico tampoco acredita una patente ni un producto industrial certificado.
-
