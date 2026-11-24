@@ -170,4 +170,3 @@ Se distinguen la **IA incorporada al producto**, como asistencia documental y mo
 **Alexander Castillo** y **Pau Modolell Rodríguez** · TFM del Máster en Industria 4.0, UPC.
 
 Copyright © 2026. **Todos los derechos reservados.** Se comparte para revisión académica, demostración y portfolio. Reutilización, modificación, redistribución o comercialización requieren permiso escrito de ambos autores conforme a [LICENSE](LICENSE). Publicar el código no implica licencia de software libre ni acredita una patente concedida.
-
