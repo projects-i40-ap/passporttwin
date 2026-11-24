@@ -95,4 +95,3 @@ Una prueba completa modifica el estado del caso. Para repetirla, usar una copia 
 Respaldar la base PostgreSQL junto con los archivos originales y la configuración necesaria para restaurarlos. Una exportación de tablas por sí sola no contiene los PDFs ni la configuración de Metabase. Conservar el commit y las versiones de las imágenes de cada entrega.
 
 Los ensayos históricos y sus resultados no se regeneran por arrancar la aplicación. Las pruebas automatizadas se ejecutan en bases desechables. No se debe reinicializar un volumen ni regenerar casos como parte de una actualización ordinaria del código.
-
