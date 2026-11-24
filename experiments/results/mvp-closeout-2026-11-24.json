@@ -1,0 +1,3633 @@
+{
+  "publication_date": "2026-11-24",
+  "scope": "Selected historical report fields, not a new run or a complete reproducibility package. Source hashes refer to archived original bytes.",
+  "experiments": {
+    "EXP-01": {
+      "source_filename": "exp01.json",
+      "source_sha256": "758e36b77cc2f6e7d17ab49b4ce9ac7c5cd8af598e49b40ecf1547ca667f1316",
+      "selected_report_fields": {
+        "execution_status": "COMPLETE",
+        "experiment": "EXP-01",
+        "scope": "Synthetic deterministic PDF extraction preparation; not final acceptance",
+        "metrics": {
+          "per_field": {
+            "serial_number": {
+              "annotated_slots": 24,
+              "expected_present": 21,
+              "exact_matches": 24,
+              "tp": 21,
+              "fp": 0,
+              "fn": 0,
+              "tn": 3,
+              "accuracy": 1.0,
+              "precision": 1.0,
+              "recall": 1.0,
+              "f1": 1.0,
+              "potential_review_fraction": 0.0
+            },
+            "calibration_date": {
+              "annotated_slots": 24,
+              "expected_present": 21,
+              "exact_matches": 24,
+              "tp": 21,
+              "fp": 0,
+              "fn": 0,
+              "tn": 3,
+              "accuracy": 1.0,
+              "precision": 1.0,
+              "recall": 1.0,
+              "f1": 1.0,
+              "potential_review_fraction": 0.0
+            },
+            "next_due_date": {
+              "annotated_slots": 24,
+              "expected_present": 24,
+              "exact_matches": 24,
+              "tp": 24,
+              "fp": 0,
+              "fn": 0,
+              "tn": 0,
+              "accuracy": 1.0,
+              "precision": 1.0,
+              "recall": 1.0,
+              "f1": 1.0,
+              "potential_review_fraction": 0.0
+            },
+            "error_value": {
+              "annotated_slots": 24,
+              "expected_present": 24,
+              "exact_matches": 24,
+              "tp": 24,
+              "fp": 0,
+              "fn": 0,
+              "tn": 0,
+              "accuracy": 1.0,
+              "precision": 1.0,
+              "recall": 1.0,
+              "f1": 1.0,
+              "potential_review_fraction": 0.0
+            },
+            "tolerance": {
+              "annotated_slots": 24,
+              "expected_present": 24,
+              "exact_matches": 24,
+              "tp": 24,
+              "fp": 0,
+              "fn": 0,
+              "tn": 0,
+              "accuracy": 1.0,
+              "precision": 1.0,
+              "recall": 1.0,
+              "f1": 1.0,
+              "potential_review_fraction": 0.0
+            },
+            "unit": {
+              "annotated_slots": 24,
+              "expected_present": 24,
+              "exact_matches": 24,
+              "tp": 24,
+              "fp": 0,
+              "fn": 0,
+              "tn": 0,
+              "accuracy": 1.0,
+              "precision": 1.0,
+              "recall": 1.0,
+              "f1": 1.0,
+              "potential_review_fraction": 0.0
+            },
+            "operating_range": {
+              "annotated_slots": 24,
+              "expected_present": 24,
+              "exact_matches": 24,
+              "tp": 24,
+              "fp": 0,
+              "fn": 0,
+              "tn": 0,
+              "accuracy": 1.0,
+              "precision": 1.0,
+              "recall": 1.0,
+              "f1": 1.0,
+              "potential_review_fraction": 0.0
+            }
+          },
+          "micro": {
+            "annotated_slots": 168,
+            "expected_present": 162,
+            "exact_matches": 168,
+            "tp": 162,
+            "fp": 0,
+            "fn": 0,
+            "tn": 6,
+            "accuracy": 1.0,
+            "precision": 1.0,
+            "recall": 1.0,
+            "f1": 1.0,
+            "potential_review_fraction": 0.0
+          },
+          "documents_all_annotated_fields_correct": 24,
+          "human_corrections_measured": null
+        },
+        "git": {
+          "commit": "f0978fbc77dfc346de79eeedd67c2afc094386ec",
+          "working_tree_dirty": null,
+          "source": "caller_supplied_not_verified"
+        },
+        "python": "3.11.18",
+        "planned_documents": 24,
+        "evaluated_documents": 24,
+        "errors": 0
+      }
+    },
+    "EXP-02": {
+      "source_filename": "exp02.json",
+      "source_sha256": "69342858c00f6ed28443e1aa8394c98a66cb8febe5c069f1c66a8cfbfee54aa8",
+      "selected_report_fields": {
+        "execution_status": "COMPLETE",
+        "experiment": "EXP-02",
+        "scope": "Known synthetic preparation, not final acceptance",
+        "metrics": {
+          "system": {
+            "evaluated": 27,
+            "expected_links": 18,
+            "assigned_links": 18,
+            "correct_links": 18,
+            "false_links": 0,
+            "correct_abstentions": 9,
+            "link_or_abstention_accuracy": 1.0,
+            "link_precision": 1.0,
+            "link_recall": 1.0,
+            "false_link_fraction_of_assignments": 0.0,
+            "abstention_rate": 0.3333333333333333
+          },
+          "exact_serial_baseline": {
+            "evaluated": 27,
+            "expected_links": 18,
+            "assigned_links": 18,
+            "correct_links": 18,
+            "false_links": 0,
+            "correct_abstentions": 9,
+            "link_or_abstention_accuracy": 1.0,
+            "link_precision": 1.0,
+            "link_recall": 1.0,
+            "false_link_fraction_of_assignments": 0.0,
+            "abstention_rate": 0.3333333333333333
+          },
+          "baseline_same_policy_as_system": true,
+          "improvement_claim": null,
+          "baseline_agrees_with_system": true,
+          "matching_review_rate": 0.3333333333333333,
+          "document_review_rate_all_rules": 0.8888888888888888,
+          "matching_review_misses": 0,
+          "by_scenario": {
+            "ambiguous": {
+              "evaluated": 3,
+              "expected_links": 0,
+              "assigned_links": 0,
+              "correct_links": 0,
+              "false_links": 0,
+              "correct_abstentions": 3,
+              "link_or_abstention_accuracy": 1.0,
+              "link_precision": null,
+              "link_recall": null,
+              "false_link_fraction_of_assignments": null,
+              "abstention_rate": 1.0
+            },
+            "known": {
+              "evaluated": 18,
+              "expected_links": 18,
+              "assigned_links": 18,
+              "correct_links": 18,
+              "false_links": 0,
+              "correct_abstentions": 0,
+              "link_or_abstention_accuracy": 1.0,
+              "link_precision": 1.0,
+              "link_recall": 1.0,
+              "false_link_fraction_of_assignments": 0.0,
+              "abstention_rate": 0.0
+            },
+            "missing": {
+              "evaluated": 3,
+              "expected_links": 0,
+              "assigned_links": 0,
+              "correct_links": 0,
+              "false_links": 0,
+              "correct_abstentions": 3,
+              "link_or_abstention_accuracy": 1.0,
+              "link_precision": null,
+              "link_recall": null,
+              "false_link_fraction_of_assignments": null,
+              "abstention_rate": 1.0
+            },
+            "unknown": {
+              "evaluated": 3,
+              "expected_links": 0,
+              "assigned_links": 0,
+              "correct_links": 0,
+              "false_links": 0,
+              "correct_abstentions": 3,
+              "link_or_abstention_accuracy": 1.0,
+              "link_precision": null,
+              "link_recall": null,
+              "false_link_fraction_of_assignments": null,
+              "abstention_rate": 1.0
+            }
+          }
+        },
+        "git": {
+          "commit": "f0978fbc77dfc346de79eeedd67c2afc094386ec",
+          "working_tree_dirty": null,
+          "source": "caller_supplied_not_verified"
+        },
+        "python": "3.11.18",
+        "errors": 0
+      }
+    },
+    "EXP-03": {
+      "source_filename": "exp03.json",
+      "source_sha256": "28bb30da72fc01f1d9a4c70e79b6f5ec3e9f548c3350fa63133c9cdf356d02dd",
+      "selected_report_fields": {
+        "execution_status": "COMPLETE",
+        "experiment": "EXP-03",
+        "scope": "Synthetic document detection via isolated upload/process routes; preparation run, not final acceptance",
+        "metrics": {
+          "document_detection": {
+            "tp": 21,
+            "fp": 0,
+            "fn": 0,
+            "tn": 3,
+            "evaluated": 24,
+            "positive_support": 21,
+            "accuracy": 1.0,
+            "precision": 1.0,
+            "recall": 1.0,
+            "f1": 1.0
+          },
+          "status_exact_match": 1.0,
+          "rule_set_exact_match": 1.0,
+          "per_rule": {
+            "R-DATE-01": {
+              "tp": 3,
+              "fp": 0,
+              "fn": 0,
+              "tn": 21,
+              "evaluated": 24,
+              "positive_support": 3,
+              "accuracy": 1.0,
+              "precision": 1.0,
+              "recall": 1.0,
+              "f1": 1.0
+            },
+            "R-DATE-02": {
+              "tp": 3,
+              "fp": 0,
+              "fn": 0,
+              "tn": 21,
+              "evaluated": 24,
+              "positive_support": 3,
+              "accuracy": 1.0,
+              "precision": 1.0,
+              "recall": 1.0,
+              "f1": 1.0
+            },
+            "R-ID-01": {
+              "tp": 6,
+              "fp": 0,
+              "fn": 0,
+              "tn": 18,
+              "evaluated": 24,
+              "positive_support": 6,
+              "accuracy": 1.0,
+              "precision": 1.0,
+              "recall": 1.0,
+              "f1": 1.0
+            },
+            "R-MISSING-01": {
+              "tp": 6,
+              "fp": 0,
+              "fn": 0,
+              "tn": 18,
+              "evaluated": 24,
+              "positive_support": 6,
+              "accuracy": 1.0,
+              "precision": 1.0,
+              "recall": 1.0,
+              "f1": 1.0
+            },
+            "R-RANGE-01": {
+              "tp": 3,
+              "fp": 0,
+              "fn": 0,
+              "tn": 21,
+              "evaluated": 24,
+              "positive_support": 3,
+              "accuracy": 1.0,
+              "precision": 1.0,
+              "recall": 1.0,
+              "f1": 1.0
+            },
+            "R-UNIT-01": {
+              "tp": 3,
+              "fp": 0,
+              "fn": 0,
+              "tn": 21,
+              "evaluated": 24,
+              "positive_support": 3,
+              "accuracy": 1.0,
+              "precision": 1.0,
+              "recall": 1.0,
+              "f1": 1.0
+            }
+          }
+        },
+        "git": {
+          "commit": "f0978fbc77dfc346de79eeedd67c2afc094386ec",
+          "working_tree_dirty": null,
+          "identity_source": "caller_supplied_not_verified; executed sources hashed separately"
+        },
+        "python": "3.11.18",
+        "errors": 0
+      }
+    },
+    "EXP-04": {
+      "source_filename": "exp04-report.json",
+      "source_sha256": "c4527a10bd76a8d7d9648b1bc3c976bfdb2f996b9157b8740219c2a3875917b4",
+      "selected_report_fields": {
+        "experiment": "04",
+        "scope": "Synthetic evaluation of production numerical kernels; no application startup",
+        "metrics": {
+          "by_family_and_horizon": [
+            {
+              "family": "ph_sensor",
+              "unit": "pH",
+              "horizon_days": 30,
+              "raw": {
+                "B0": {
+                  "n": 192,
+                  "mae": 0.033899651041666666,
+                  "rmse": 0.04931736934075771
+                },
+                "B1": {
+                  "n": 192,
+                  "mae": 0.033867869791666665,
+                  "rmse": 0.049266285568253555
+                },
+                "M1": {
+                  "n": 192,
+                  "mae": 0.038879296875000004,
+                  "rmse": 0.05747927844871032
+                }
+              },
+              "normalized": {
+                "B0": {
+                  "n": 192,
+                  "mae": 0.1694982552083333,
+                  "rmse": 0.24658684670378853
+                },
+                "B1": {
+                  "n": 192,
+                  "mae": 0.16933934895833333,
+                  "rmse": 0.24633142784126777
+                },
+                "M1": {
+                  "n": 192,
+                  "mae": 0.19439648437499998,
+                  "rmse": 0.2873963922435516
+                }
+              }
+            },
+            {
+              "family": "ph_sensor",
+              "unit": "pH",
+              "horizon_days": 60,
+              "raw": {
+                "B0": {
+                  "n": 192,
+                  "mae": 0.07632331770833334,
+                  "rmse": 0.10428076925068985
+                },
+                "B1": {
+                  "n": 192,
+                  "mae": 0.07627859895833333,
+                  "rmse": 0.10390200288360162
+                },
+                "M1": {
+                  "n": 192,
+                  "mae": 0.057564651041666665,
+                  "rmse": 0.0850737461405728
+                }
+              },
+              "normalized": {
+                "B0": {
+                  "n": 192,
+                  "mae": 0.38161658854166663,
+                  "rmse": 0.5214038462534493
+                },
+                "B1": {
+                  "n": 192,
+                  "mae": 0.3813929947916666,
+                  "rmse": 0.519510014418008
+                },
+                "M1": {
+                  "n": 192,
+                  "mae": 0.28782325520833335,
+                  "rmse": 0.42536873070286396
+                }
+              }
+            },
+            {
+              "family": "ph_sensor",
+              "unit": "pH",
+              "horizon_days": 90,
+              "raw": {
+                "B0": {
+                  "n": 192,
+                  "mae": 0.09681091666666668,
+                  "rmse": 0.12779009153091317
+                },
+                "B1": {
+                  "n": 192,
+                  "mae": 0.09693843749999999,
+                  "rmse": 0.12717147792097158
+                },
+                "M1": {
+                  "n": 192,
+                  "mae": 0.0649041875,
+                  "rmse": 0.09335792730322459
+                }
+              },
+              "normalized": {
+                "B0": {
+                  "n": 192,
+                  "mae": 0.48405458333333334,
+                  "rmse": 0.6389504576545658
+                },
+                "B1": {
+                  "n": 192,
+                  "mae": 0.4846921874999999,
+                  "rmse": 0.6358573896048579
+                },
+                "M1": {
+                  "n": 192,
+                  "mae": 0.3245209375,
+                  "rmse": 0.4667896365161229
+                }
+              }
+            },
+            {
+              "family": "pressure_transmitter",
+              "unit": "bar",
+              "horizon_days": 30,
+              "raw": {
+                "B0": {
+                  "n": 192,
+                  "mae": 0.016045005208333334,
+                  "rmse": 0.02223007190288173
+                },
+                "B1": {
+                  "n": 192,
+                  "mae": 0.016035161458333332,
+                  "rmse": 0.022096713814289785
+                },
+                "M1": {
+                  "n": 192,
+                  "mae": 0.019459421875,
+                  "rmse": 0.029282119543029866
+                }
+              },
+              "normalized": {
+                "B0": {
+                  "n": 192,
+                  "mae": 0.16045005208333332,
+                  "rmse": 0.22230071902881726
+                },
+                "B1": {
+                  "n": 192,
+                  "mae": 0.16035161458333333,
+                  "rmse": 0.22096713814289784
+                },
+                "M1": {
+                  "n": 192,
+                  "mae": 0.19459421874999996,
+                  "rmse": 0.29282119543029866
+                }
+              }
+            },
+            {
+              "family": "pressure_transmitter",
+              "unit": "bar",
+              "horizon_days": 60,
+              "raw": {
+                "B0": {
+                  "n": 192,
+                  "mae": 0.035560572916666665,
+                  "rmse": 0.049999854518225854
+                },
+                "B1": {
+                  "n": 192,
+                  "mae": 0.03540067708333333,
+                  "rmse": 0.05001585603554887
+                },
+                "M1": {
+                  "n": 192,
+                  "mae": 0.03275632291666667,
+                  "rmse": 0.04652942359601162
+                }
+              },
+              "normalized": {
+                "B0": {
+                  "n": 192,
+                  "mae": 0.3556057291666666,
+                  "rmse": 0.49999854518225845
+                },
+                "B1": {
+                  "n": 192,
+                  "mae": 0.35400677083333326,
+                  "rmse": 0.5001585603554887
+                },
+                "M1": {
+                  "n": 192,
+                  "mae": 0.32756322916666664,
+                  "rmse": 0.4652942359601162
+                }
+              }
+            },
+            {
+              "family": "pressure_transmitter",
+              "unit": "bar",
+              "horizon_days": 90,
+              "raw": {
+                "B0": {
+                  "n": 192,
+                  "mae": 0.045633005208333334,
+                  "rmse": 0.059734710599632736
+                },
+                "B1": {
+                  "n": 192,
+                  "mae": 0.045486796875000006,
+                  "rmse": 0.05979826582112178
+                },
+                "M1": {
+                  "n": 192,
+                  "mae": 0.033334880208333334,
+                  "rmse": 0.04805616447628623
+                }
+              },
+              "normalized": {
+                "B0": {
+                  "n": 192,
+                  "mae": 0.4563300520833333,
+                  "rmse": 0.5973471059963272
+                },
+                "B1": {
+                  "n": 192,
+                  "mae": 0.45486796874999996,
+                  "rmse": 0.5979826582112179
+                },
+                "M1": {
+                  "n": 192,
+                  "mae": 0.3333488020833333,
+                  "rmse": 0.48056164476286234
+                }
+              }
+            },
+            {
+              "family": "temperature_sensor",
+              "unit": "°C",
+              "horizon_days": 30,
+              "raw": {
+                "B0": {
+                  "n": 192,
+                  "mae": 0.07573455729166667,
+                  "rmse": 0.09863116222645166
+                },
+                "B1": {
+                  "n": 192,
+                  "mae": 0.07555850520833333,
+                  "rmse": 0.09846834435627333
+                },
+                "M1": {
+                  "n": 192,
+                  "mae": 0.10190552604166668,
+                  "rmse": 0.1565829337884793
+                }
+              },
+              "normalized": {
+                "B0": {
+                  "n": 192,
+                  "mae": 0.15146911458333334,
+                  "rmse": 0.19726232445290331
+                },
+                "B1": {
+                  "n": 192,
+                  "mae": 0.15111701041666667,
+                  "rmse": 0.19693668871254666
+                },
+                "M1": {
+                  "n": 192,
+                  "mae": 0.20381105208333336,
+                  "rmse": 0.3131658675769586
+                }
+              }
+            },
+            {
+              "family": "temperature_sensor",
+              "unit": "°C",
+              "horizon_days": 60,
+              "raw": {
+                "B0": {
+                  "n": 192,
+                  "mae": 0.176102140625,
+                  "rmse": 0.2512385450759915
+                },
+                "B1": {
+                  "n": 192,
+                  "mae": 0.17697431770833336,
+                  "rmse": 0.24921083962811696
+                },
+                "M1": {
+                  "n": 192,
+                  "mae": 0.16954700520833332,
+                  "rmse": 0.24099243639934576
+                }
+              },
+              "normalized": {
+                "B0": {
+                  "n": 192,
+                  "mae": 0.35220428125,
+                  "rmse": 0.502477090151983
+                },
+                "B1": {
+                  "n": 192,
+                  "mae": 0.3539486354166667,
+                  "rmse": 0.49842167925623393
+                },
+                "M1": {
+                  "n": 192,
+                  "mae": 0.33909401041666665,
+                  "rmse": 0.4819848727986915
+                }
+              }
+            },
+            {
+              "family": "temperature_sensor",
+              "unit": "°C",
+              "horizon_days": 90,
+              "raw": {
+                "B0": {
+                  "n": 192,
+                  "mae": 0.22395861979166667,
+                  "rmse": 0.29975778717101154
+                },
+                "B1": {
+                  "n": 192,
+                  "mae": 0.225648609375,
+                  "rmse": 0.2974905579819492
+                },
+                "M1": {
+                  "n": 192,
+                  "mae": 0.179129359375,
+                  "rmse": 0.24842396992900354
+                }
+              },
+              "normalized": {
+                "B0": {
+                  "n": 192,
+                  "mae": 0.44791723958333335,
+                  "rmse": 0.5995155743420231
+                },
+                "B1": {
+                  "n": 192,
+                  "mae": 0.45129721875,
+                  "rmse": 0.5949811159638984
+                },
+                "M1": {
+                  "n": 192,
+                  "mae": 0.35825871875,
+                  "rmse": 0.49684793985800707
+                }
+              }
+            }
+          ],
+          "normalized_overall": {
+            "B0": {
+              "n": 1728,
+              "mae": 0.32879398842592594,
+              "rmse": 0.47702539249374365
+            },
+            "B1": {
+              "n": 1728,
+              "mae": 0.32900152777777775,
+              "rmse": 0.4752383643514092
+            },
+            "M1": {
+              "n": 1728,
+              "mae": 0.28482341203703704,
+              "rmse": 0.4205618509914908
+            }
+          },
+          "normalized_by_horizon": [
+            {
+              "horizon_days": 30,
+              "models": {
+                "B0": {
+                  "n": 576,
+                  "mae": 0.1604724739583333,
+                  "rmse": 0.22296121284251016
+                },
+                "B1": {
+                  "n": 576,
+                  "mae": 0.16026932465277777,
+                  "rmse": 0.22232836664300748
+                },
+                "M1": {
+                  "n": 576,
+                  "mae": 0.19760058506944445,
+                  "rmse": 0.2980010063646697
+                }
+              }
+            },
+            {
+              "horizon_days": 60,
+              "models": {
+                "B0": {
+                  "n": 576,
+                  "mae": 0.3631421996527778,
+                  "rmse": 0.5080497817471138
+                },
+                "B1": {
+                  "n": 576,
+                  "mae": 0.3631161336805555,
+                  "rmse": 0.5061203450201931
+                },
+                "M1": {
+                  "n": 576,
+                  "mae": 0.31816016493055554,
+                  "rmse": 0.4581654361633451
+                }
+              }
+            },
+            {
+              "horizon_days": 90,
+              "models": {
+                "B0": {
+                  "n": 576,
+                  "mae": 0.4627672916666667,
+                  "rmse": 0.6122363857906009
+                },
+                "B1": {
+                  "n": 576,
+                  "mae": 0.4636191249999999,
+                  "rmse": 0.609890812028433
+                },
+                "M1": {
+                  "n": 576,
+                  "mae": 0.3387094861111111,
+                  "rmse": 0.48155648146303925
+                }
+              }
+            }
+          ],
+          "normalized_by_scenario": {
+            "stable_correlated": {
+              "B0": {
+                "n": 216,
+                "mae": 0.10526969444444445,
+                "rmse": 0.13343846871973808
+              },
+              "B1": {
+                "n": 216,
+                "mae": 0.11463444444444446,
+                "rmse": 0.14267291587108397
+              },
+              "M1": {
+                "n": 216,
+                "mae": 0.12240814814814814,
+                "rmse": 0.15514152537104212
+              }
+            },
+            "linear": {
+              "B0": {
+                "n": 216,
+                "mae": 0.24362925,
+                "rmse": 0.2984546427003111
+              },
+              "B1": {
+                "n": 216,
+                "mae": 0.2443505185185185,
+                "rmse": 0.29734479578260653
+              },
+              "M1": {
+                "n": 216,
+                "mae": 0.09470163888888888,
+                "rmse": 0.11788581117429792
+              }
+            },
+            "saturation": {
+              "B0": {
+                "n": 216,
+                "mae": 0.17864613888888886,
+                "rmse": 0.22202737077775225
+              },
+              "B1": {
+                "n": 216,
+                "mae": 0.17879451851851852,
+                "rmse": 0.22348842452301143
+              },
+              "M1": {
+                "n": 216,
+                "mae": 0.11503665740740741,
+                "rmse": 0.14513206757103836
+              }
+            },
+            "cyclic": {
+              "B0": {
+                "n": 216,
+                "mae": 0.4894090462962963,
+                "rmse": 0.5992782961726639
+              },
+              "B1": {
+                "n": 216,
+                "mae": 0.4919680185185185,
+                "rmse": 0.6028721462628183
+              },
+              "M1": {
+                "n": 216,
+                "mae": 0.6660804537037037,
+                "rmse": 0.7667019918780191
+              }
+            },
+            "step": {
+              "B0": {
+                "n": 216,
+                "mae": 0.8306927361111112,
+                "rmse": 0.9786080469961199
+              },
+              "B1": {
+                "n": 216,
+                "mae": 0.8236098657407408,
+                "rmse": 0.9706705484069423
+              },
+              "M1": {
+                "n": 216,
+                "mae": 0.6028797731481481,
+                "rmse": 0.7141322265494578
+              }
+            },
+            "heavy_tail": {
+              "B0": {
+                "n": 216,
+                "mae": 0.29269438425925925,
+                "rmse": 0.399276510650485
+              },
+              "B1": {
+                "n": 216,
+                "mae": 0.29085788425925924,
+                "rmse": 0.39540968139574695
+              },
+              "M1": {
+                "n": 216,
+                "mae": 0.1899784398148148,
+                "rmse": 0.27436565158427517
+              }
+            },
+            "maintenance_recent": {
+              "B0": {
+                "n": 216,
+                "mae": 0.24725962037037036,
+                "rmse": 0.30739044022849893
+              },
+              "B1": {
+                "n": 216,
+                "mae": 0.24548625925925924,
+                "rmse": 0.3029910741494553
+              },
+              "M1": {
+                "n": 216,
+                "mae": 0.2912281666666667,
+                "rmse": 0.3446614480791528
+              }
+            },
+            "maintenance_recovered": {
+              "B0": {
+                "n": 216,
+                "mae": 0.24275103703703704,
+                "rmse": 0.30582649983625126
+              },
+              "B1": {
+                "n": 216,
+                "mae": 0.24231071296296294,
+                "rmse": 0.3070617426078815
+              },
+              "M1": {
+                "n": 216,
+                "mae": 0.1962740185185185,
+                "rmse": 0.2531088377743851
+              }
+            }
+          }
+        },
+        "python": "3.14.4",
+        "manifest_sha256": "108b3eafbd145385c9d05c4acb02d9382a2d979c819518060019e4895b734cb1"
+      }
+    },
+    "EXP-05": {
+      "source_filename": "exp05-report.json",
+      "source_sha256": "757ddba5b24866e3d28a2e92a161637c3b73ffa65043200568c10e2c935a87cd",
+      "selected_report_fields": {
+        "experiment": "05",
+        "scope": "Synthetic evaluation of production numerical kernels; no application startup",
+        "metrics": {
+          "core_ols": {
+            "overall": {
+              "planned": 1728,
+              "scored": 1728,
+              "abstentions": 0,
+              "positives_all": 246,
+              "positives_scored": 246,
+              "coverage_fraction": 1.0,
+              "abstention_reasons": {},
+              "brier": 0.09809938670371453,
+              "classification": {
+                "n": 1728,
+                "tp": 126,
+                "fp": 113,
+                "fn": 120,
+                "tn": 1369,
+                "precision": 0.5271966527196653,
+                "recall": 0.5121951219512195,
+                "f1": 0.5195876288659794
+              },
+              "paired": {
+                "n": 1728,
+                "model_brier": 0.09809938670371453,
+                "baseline_brier": 0.13541666666666666
+              },
+              "gaussian_persistence_shared_sigma": {
+                "n": 1728,
+                "model_brier": 0.09809938670371453,
+                "baseline_brier": 0.11014009958858567
+              },
+              "baseline_own_subset": {
+                "n": 1728,
+                "abstentions": 0,
+                "brier": 0.13541666666666666,
+                "classification": {
+                  "n": 1728,
+                  "tp": 75,
+                  "fp": 63,
+                  "fn": 171,
+                  "tn": 1419,
+                  "precision": 0.5434782608695652,
+                  "recall": 0.3048780487804878,
+                  "f1": 0.390625
+                }
+              },
+              "ece_10_bins": 0.07399516088725605,
+              "reliability_bins": [
+                {
+                  "bin": 0,
+                  "n": 1089,
+                  "mean_probability": 0.011542259971967051,
+                  "observed_rate": 0.047750229568411386
+                },
+                {
+                  "bin": 1,
+                  "n": 179,
+                  "mean_probability": 0.1461525397548763,
+                  "observed_rate": 0.12290502793296089
+                },
+                {
+                  "bin": 2,
+                  "n": 101,
+                  "mean_probability": 0.2442058269488389,
+                  "observed_rate": 0.16831683168316833
+                },
+                {
+                  "bin": 3,
+                  "n": 71,
+                  "mean_probability": 0.3511271561613294,
+                  "observed_rate": 0.22535211267605634
+                },
+                {
+                  "bin": 4,
+                  "n": 49,
+                  "mean_probability": 0.4476353268869459,
+                  "observed_rate": 0.2653061224489796
+                },
+                {
+                  "bin": 5,
+                  "n": 55,
+                  "mean_probability": 0.5452007477023423,
+                  "observed_rate": 0.2727272727272727
+                },
+                {
+                  "bin": 6,
+                  "n": 34,
+                  "mean_probability": 0.6585099241349783,
+                  "observed_rate": 0.2647058823529412
+                },
+                {
+                  "bin": 7,
+                  "n": 44,
+                  "mean_probability": 0.7422479072525796,
+                  "observed_rate": 0.4090909090909091
+                },
+                {
+                  "bin": 8,
+                  "n": 34,
+                  "mean_probability": 0.8591542423511649,
+                  "observed_rate": 0.5294117647058824
+                },
+                {
+                  "bin": 9,
+                  "n": 72,
+                  "mean_probability": 0.9791302246737368,
+                  "observed_rate": 0.9166666666666666
+                }
+              ],
+              "coverage_95_on_scored": 0.8258101851851852,
+              "mae_in_tolerance_units_on_scored": 0.2848260769095251
+            },
+            "by_horizon": {
+              "30": {
+                "planned": 576,
+                "scored": 576,
+                "abstentions": 0,
+                "positives_all": 49,
+                "positives_scored": 49,
+                "coverage_fraction": 1.0,
+                "abstention_reasons": {},
+                "brier": 0.055628464173764734,
+                "classification": {
+                  "n": 576,
+                  "tp": 27,
+                  "fp": 22,
+                  "fn": 22,
+                  "tn": 505,
+                  "precision": 0.5510204081632653,
+                  "recall": 0.5510204081632653,
+                  "f1": 0.5510204081632653
+                },
+                "paired": {
+                  "n": 576,
+                  "model_brier": 0.055628464173764734,
+                  "baseline_brier": 0.06076388888888889
+                },
+                "gaussian_persistence_shared_sigma": {
+                  "n": 576,
+                  "model_brier": 0.055628464173764734,
+                  "baseline_brier": 0.04971841901714184
+                },
+                "baseline_own_subset": {
+                  "n": 576,
+                  "abstentions": 0,
+                  "brier": 0.06076388888888889,
+                  "classification": {
+                    "n": 576,
+                    "tp": 30,
+                    "fp": 16,
+                    "fn": 19,
+                    "tn": 511,
+                    "precision": 0.6521739130434783,
+                    "recall": 0.6122448979591837,
+                    "f1": 0.631578947368421
+                  }
+                },
+                "ece_10_bins": 0.04166620195886043,
+                "reliability_bins": [
+                  {
+                    "bin": 0,
+                    "n": 396,
+                    "mean_probability": 0.011609226082364386,
+                    "observed_rate": 0.005050505050505051
+                  },
+                  {
+                    "bin": 1,
+                    "n": 58,
+                    "mean_probability": 0.15090328278236492,
+                    "observed_rate": 0.06896551724137931
+                  },
+                  {
+                    "bin": 2,
+                    "n": 36,
+                    "mean_probability": 0.23938719828753655,
+                    "observed_rate": 0.19444444444444445
+                  },
+                  {
+                    "bin": 3,
+                    "n": 24,
+                    "mean_probability": 0.352935260225536,
+                    "observed_rate": 0.20833333333333334
+                  },
+                  {
+                    "bin": 4,
+                    "n": 13,
+                    "mean_probability": 0.44334122080497246,
+                    "observed_rate": 0.3076923076923077
+                  },
+                  {
+                    "bin": 5,
+                    "n": 12,
+                    "mean_probability": 0.5452202433068826,
+                    "observed_rate": 0.4166666666666667
+                  },
+                  {
+                    "bin": 6,
+                    "n": 9,
+                    "mean_probability": 0.6554952524008318,
+                    "observed_rate": 0.2222222222222222
+                  },
+                  {
+                    "bin": 7,
+                    "n": 10,
+                    "mean_probability": 0.7479250506302787,
+                    "observed_rate": 0.6
+                  },
+                  {
+                    "bin": 8,
+                    "n": 7,
+                    "mean_probability": 0.8762777144976299,
+                    "observed_rate": 0.5714285714285714
+                  },
+                  {
+                    "bin": 9,
+                    "n": 11,
+                    "mean_probability": 0.9766338586368228,
+                    "observed_rate": 0.9090909090909091
+                  }
+                ],
+                "coverage_95_on_scored": 0.9201388888888888,
+                "mae_in_tolerance_units_on_scored": 0.19759897617086414
+              },
+              "60": {
+                "planned": 576,
+                "scored": 576,
+                "abstentions": 0,
+                "positives_all": 88,
+                "positives_scored": 88,
+                "coverage_fraction": 1.0,
+                "abstention_reasons": {},
+                "brier": 0.10961772889259001,
+                "classification": {
+                  "n": 576,
+                  "tp": 42,
+                  "fp": 38,
+                  "fn": 46,
+                  "tn": 450,
+                  "precision": 0.525,
+                  "recall": 0.4772727272727273,
+                  "f1": 0.5
+                },
+                "paired": {
+                  "n": 576,
+                  "model_brier": 0.10961772889259001,
+                  "baseline_brier": 0.1527777777777778
+                },
+                "gaussian_persistence_shared_sigma": {
+                  "n": 576,
+                  "model_brier": 0.10961772889259001,
+                  "baseline_brier": 0.12343298261220254
+                },
+                "baseline_own_subset": {
+                  "n": 576,
+                  "abstentions": 0,
+                  "brier": 0.1527777777777778,
+                  "classification": {
+                    "n": 576,
+                    "tp": 23,
+                    "fp": 23,
+                    "fn": 65,
+                    "tn": 465,
+                    "precision": 0.5,
+                    "recall": 0.26136363636363635,
+                    "f1": 0.34328358208955223
+                  }
+                },
+                "ece_10_bins": 0.08822903897583162,
+                "reliability_bins": [
+                  {
+                    "bin": 0,
+                    "n": 366,
+                    "mean_probability": 0.011541456944468781,
+                    "observed_rate": 0.06830601092896176
+                  },
+                  {
+                    "bin": 1,
+                    "n": 58,
+                    "mean_probability": 0.14404726330811812,
+                    "observed_rate": 0.10344827586206896
+                  },
+                  {
+                    "bin": 2,
+                    "n": 32,
+                    "mean_probability": 0.2474999143914628,
+                    "observed_rate": 0.1875
+                  },
+                  {
+                    "bin": 3,
+                    "n": 21,
+                    "mean_probability": 0.3555641393101435,
+                    "observed_rate": 0.23809523809523808
+                  },
+                  {
+                    "bin": 4,
+                    "n": 19,
+                    "mean_probability": 0.4447769390392003,
+                    "observed_rate": 0.21052631578947367
+                  },
+                  {
+                    "bin": 5,
+                    "n": 20,
+                    "mean_probability": 0.541742645196975,
+                    "observed_rate": 0.25
+                  },
+                  {
+                    "bin": 6,
+                    "n": 14,
+                    "mean_probability": 0.6642848388654574,
+                    "observed_rate": 0.35714285714285715
+                  },
+                  {
+                    "bin": 7,
+                    "n": 13,
+                    "mean_probability": 0.7375647566426515,
+                    "observed_rate": 0.5384615384615384
+                  },
+                  {
+                    "bin": 8,
+                    "n": 10,
+                    "mean_probability": 0.8559322499683351,
+                    "observed_rate": 0.4
+                  },
+                  {
+                    "bin": 9,
+                    "n": 23,
+                    "mean_probability": 0.9812716264350164,
+                    "observed_rate": 0.9130434782608695
+                  }
+                ],
+                "coverage_95_on_scored": 0.7795138888888888,
+                "mae_in_tolerance_units_on_scored": 0.3181694261496189
+              },
+              "90": {
+                "planned": 576,
+                "scored": 576,
+                "abstentions": 0,
+                "positives_all": 109,
+                "positives_scored": 109,
+                "coverage_fraction": 1.0,
+                "abstention_reasons": {},
+                "brier": 0.12905196704478883,
+                "classification": {
+                  "n": 576,
+                  "tp": 57,
+                  "fp": 53,
+                  "fn": 52,
+                  "tn": 414,
+                  "precision": 0.5181818181818182,
+                  "recall": 0.5229357798165137,
+                  "f1": 0.5205479452054794
+                },
+                "paired": {
+                  "n": 576,
+                  "model_brier": 0.12905196704478883,
+                  "baseline_brier": 0.19270833333333334
+                },
+                "gaussian_persistence_shared_sigma": {
+                  "n": 576,
+                  "model_brier": 0.12905196704478883,
+                  "baseline_brier": 0.15726889713641268
+                },
+                "baseline_own_subset": {
+                  "n": 576,
+                  "abstentions": 0,
+                  "brier": 0.19270833333333334,
+                  "classification": {
+                    "n": 576,
+                    "tp": 22,
+                    "fp": 24,
+                    "fn": 87,
+                    "tn": 443,
+                    "precision": 0.4782608695652174,
+                    "recall": 0.2018348623853211,
+                    "f1": 0.2838709677419355
+                  }
+                },
+                "ece_10_bins": 0.11133704931645615,
+                "reliability_bins": [
+                  {
+                    "bin": 0,
+                    "n": 327,
+                    "mean_probability": 0.011462062199327975,
+                    "observed_rate": 0.0764525993883792
+                  },
+                  {
+                    "bin": 1,
+                    "n": 63,
+                    "mean_probability": 0.1437170308392831,
+                    "observed_rate": 0.19047619047619047
+                  },
+                  {
+                    "bin": 2,
+                    "n": 33,
+                    "mean_probability": 0.24626824615013956,
+                    "observed_rate": 0.12121212121212122
+                  },
+                  {
+                    "bin": 3,
+                    "n": 26,
+                    "mean_probability": 0.345874419866481,
+                    "observed_rate": 0.23076923076923078
+                  },
+                  {
+                    "bin": 4,
+                    "n": 17,
+                    "mean_probability": 0.45411372383828835,
+                    "observed_rate": 0.29411764705882354
+                  },
+                  {
+                    "bin": 5,
+                    "n": 23,
+                    "mean_probability": 0.5481976217394231,
+                    "observed_rate": 0.21739130434782608
+                  },
+                  {
+                    "bin": 6,
+                    "n": 11,
+                    "mean_probability": 0.6536265822604886,
+                    "observed_rate": 0.18181818181818182
+                  },
+                  {
+                    "bin": 7,
+                    "n": 21,
+                    "mean_probability": 0.7424435988788689,
+                    "observed_rate": 0.23809523809523808
+                  },
+                  {
+                    "bin": 8,
+                    "n": 17,
+                    "mean_probability": 0.8539986905160497,
+                    "observed_rate": 0.5882352941176471
+                  },
+                  {
+                    "bin": 9,
+                    "n": 38,
+                    "mean_probability": 0.9785567453552267,
+                    "observed_rate": 0.9210526315789473
+                  }
+                ],
+                "coverage_95_on_scored": 0.7777777777777778,
+                "mae_in_tolerance_units_on_scored": 0.3387098284080923
+              }
+            },
+            "by_scenario": {
+              "cyclic": {
+                "planned": 216,
+                "scored": 216,
+                "abstentions": 0,
+                "positives_all": 41,
+                "positives_scored": 41,
+                "coverage_fraction": 1.0,
+                "abstention_reasons": {},
+                "brier": 0.24941890751137571,
+                "classification": {
+                  "n": 216,
+                  "tp": 5,
+                  "fp": 44,
+                  "fn": 36,
+                  "tn": 131,
+                  "precision": 0.10204081632653061,
+                  "recall": 0.12195121951219512,
+                  "f1": 0.1111111111111111
+                },
+                "paired": {
+                  "n": 216,
+                  "model_brier": 0.24941890751137571,
+                  "baseline_brier": 0.23148148148148148
+                },
+                "gaussian_persistence_shared_sigma": {
+                  "n": 216,
+                  "model_brier": 0.24941890751137571,
+                  "baseline_brier": 0.15847774446227234
+                },
+                "baseline_own_subset": {
+                  "n": 216,
+                  "abstentions": 0,
+                  "brier": 0.23148148148148148,
+                  "classification": {
+                    "n": 216,
+                    "tp": 21,
+                    "fp": 30,
+                    "fn": 20,
+                    "tn": 145,
+                    "precision": 0.4117647058823529,
+                    "recall": 0.5121951219512195,
+                    "f1": 0.45652173913043476
+                  }
+                },
+                "ece_10_bins": 0.2153023678292468,
+                "reliability_bins": [
+                  {
+                    "bin": 0,
+                    "n": 13,
+                    "mean_probability": 0.07325799735420102,
+                    "observed_rate": 0.23076923076923078
+                  },
+                  {
+                    "bin": 1,
+                    "n": 68,
+                    "mean_probability": 0.15223859881232765,
+                    "observed_rate": 0.23529411764705882
+                  },
+                  {
+                    "bin": 2,
+                    "n": 42,
+                    "mean_probability": 0.2384967781701366,
+                    "observed_rate": 0.19047619047619047
+                  },
+                  {
+                    "bin": 3,
+                    "n": 28,
+                    "mean_probability": 0.35693899112003497,
+                    "observed_rate": 0.25
+                  },
+                  {
+                    "bin": 4,
+                    "n": 16,
+                    "mean_probability": 0.45375676490640554,
+                    "observed_rate": 0.125
+                  },
+                  {
+                    "bin": 5,
+                    "n": 18,
+                    "mean_probability": 0.5480440744632799,
+                    "observed_rate": 0.16666666666666666
+                  },
+                  {
+                    "bin": 6,
+                    "n": 9,
+                    "mean_probability": 0.6620714774478497,
+                    "observed_rate": 0.1111111111111111
+                  },
+                  {
+                    "bin": 7,
+                    "n": 12,
+                    "mean_probability": 0.7474225718744038,
+                    "observed_rate": 0.08333333333333333
+                  },
+                  {
+                    "bin": 8,
+                    "n": 8,
+                    "mean_probability": 0.8639285679550585,
+                    "observed_rate": 0.0
+                  },
+                  {
+                    "bin": 9,
+                    "n": 2,
+                    "mean_probability": 0.9173447097239986,
+                    "observed_rate": 0.0
+                  }
+                ],
+                "coverage_95_on_scored": 0.8240740740740741,
+                "mae_in_tolerance_units_on_scored": 0.6660727527792836
+              },
+              "heavy_tail": {
+                "planned": 216,
+                "scored": 216,
+                "abstentions": 0,
+                "positives_all": 22,
+                "positives_scored": 22,
+                "coverage_fraction": 1.0,
+                "abstention_reasons": {},
+                "brier": 0.06575157186243397,
+                "classification": {
+                  "n": 216,
+                  "tp": 12,
+                  "fp": 9,
+                  "fn": 10,
+                  "tn": 185,
+                  "precision": 0.5714285714285714,
+                  "recall": 0.5454545454545454,
+                  "f1": 0.5581395348837209
+                },
+                "paired": {
+                  "n": 216,
+                  "model_brier": 0.06575157186243397,
+                  "baseline_brier": 0.08796296296296297
+                },
+                "gaussian_persistence_shared_sigma": {
+                  "n": 216,
+                  "model_brier": 0.06575157186243397,
+                  "baseline_brier": 0.0900568109537578
+                },
+                "baseline_own_subset": {
+                  "n": 216,
+                  "abstentions": 0,
+                  "brier": 0.08796296296296297,
+                  "classification": {
+                    "n": 216,
+                    "tp": 6,
+                    "fp": 3,
+                    "fn": 16,
+                    "tn": 191,
+                    "precision": 0.6666666666666666,
+                    "recall": 0.2727272727272727,
+                    "f1": 0.3870967741935484
+                  }
+                },
+                "ece_10_bins": 0.06226007953251021,
+                "reliability_bins": [
+                  {
+                    "bin": 0,
+                    "n": 155,
+                    "mean_probability": 0.013126125649312644,
+                    "observed_rate": 0.03225806451612903
+                  },
+                  {
+                    "bin": 1,
+                    "n": 18,
+                    "mean_probability": 0.15337170513405826,
+                    "observed_rate": 0.0
+                  },
+                  {
+                    "bin": 2,
+                    "n": 11,
+                    "mean_probability": 0.2604281410950643,
+                    "observed_rate": 0.09090909090909091
+                  },
+                  {
+                    "bin": 3,
+                    "n": 6,
+                    "mean_probability": 0.35540685739933614,
+                    "observed_rate": 0.3333333333333333
+                  },
+                  {
+                    "bin": 4,
+                    "n": 5,
+                    "mean_probability": 0.4654204128505988,
+                    "observed_rate": 0.4
+                  },
+                  {
+                    "bin": 5,
+                    "n": 5,
+                    "mean_probability": 0.5301607797568252,
+                    "observed_rate": 0.6
+                  },
+                  {
+                    "bin": 6,
+                    "n": 5,
+                    "mean_probability": 0.6488917474846941,
+                    "observed_rate": 0.0
+                  },
+                  {
+                    "bin": 8,
+                    "n": 3,
+                    "mean_probability": 0.8727041073299137,
+                    "observed_rate": 0.3333333333333333
+                  },
+                  {
+                    "bin": 9,
+                    "n": 8,
+                    "mean_probability": 0.9767479948838983,
+                    "observed_rate": 1.0
+                  }
+                ],
+                "coverage_95_on_scored": 0.9166666666666666,
+                "mae_in_tolerance_units_on_scored": 0.19001036313342207
+              },
+              "linear": {
+                "planned": 216,
+                "scored": 216,
+                "abstentions": 0,
+                "positives_all": 35,
+                "positives_scored": 35,
+                "coverage_fraction": 1.0,
+                "abstention_reasons": {},
+                "brier": 0.05007003118251242,
+                "classification": {
+                  "n": 216,
+                  "tp": 26,
+                  "fp": 9,
+                  "fn": 9,
+                  "tn": 172,
+                  "precision": 0.7428571428571429,
+                  "recall": 0.7428571428571429,
+                  "f1": 0.7428571428571429
+                },
+                "paired": {
+                  "n": 216,
+                  "model_brier": 0.05007003118251242,
+                  "baseline_brier": 0.1712962962962963
+                },
+                "gaussian_persistence_shared_sigma": {
+                  "n": 216,
+                  "model_brier": 0.05007003118251242,
+                  "baseline_brier": 0.12502520101838469
+                },
+                "baseline_own_subset": {
+                  "n": 216,
+                  "abstentions": 0,
+                  "brier": 0.1712962962962963,
+                  "classification": {
+                    "n": 216,
+                    "tp": 11,
+                    "fp": 13,
+                    "fn": 24,
+                    "tn": 168,
+                    "precision": 0.4583333333333333,
+                    "recall": 0.3142857142857143,
+                    "f1": 0.3728813559322034
+                  }
+                },
+                "ece_10_bins": 0.053287405598582756,
+                "reliability_bins": [
+                  {
+                    "bin": 0,
+                    "n": 145,
+                    "mean_probability": 0.006408608642460153,
+                    "observed_rate": 0.006896551724137931
+                  },
+                  {
+                    "bin": 1,
+                    "n": 15,
+                    "mean_probability": 0.14580273374426705,
+                    "observed_rate": 0.0
+                  },
+                  {
+                    "bin": 2,
+                    "n": 10,
+                    "mean_probability": 0.24988689990748272,
+                    "observed_rate": 0.4
+                  },
+                  {
+                    "bin": 3,
+                    "n": 6,
+                    "mean_probability": 0.3626271852050123,
+                    "observed_rate": 0.16666666666666666
+                  },
+                  {
+                    "bin": 4,
+                    "n": 5,
+                    "mean_probability": 0.4569657089064146,
+                    "observed_rate": 0.6
+                  },
+                  {
+                    "bin": 5,
+                    "n": 9,
+                    "mean_probability": 0.5571538878520446,
+                    "observed_rate": 0.3333333333333333
+                  },
+                  {
+                    "bin": 6,
+                    "n": 2,
+                    "mean_probability": 0.6794525422093178,
+                    "observed_rate": 0.0
+                  },
+                  {
+                    "bin": 7,
+                    "n": 4,
+                    "mean_probability": 0.7248368614709213,
+                    "observed_rate": 1.0
+                  },
+                  {
+                    "bin": 8,
+                    "n": 5,
+                    "mean_probability": 0.8653500491311619,
+                    "observed_rate": 1.0
+                  },
+                  {
+                    "bin": 9,
+                    "n": 15,
+                    "mean_probability": 0.9808685936743917,
+                    "observed_rate": 0.9333333333333333
+                  }
+                ],
+                "coverage_95_on_scored": 0.9398148148148148,
+                "mae_in_tolerance_units_on_scored": 0.09469922409217267
+              },
+              "maintenance_recent": {
+                "planned": 216,
+                "scored": 216,
+                "abstentions": 0,
+                "positives_all": 1,
+                "positives_scored": 1,
+                "coverage_fraction": 1.0,
+                "abstention_reasons": {},
+                "brier": 0.021861865128337002,
+                "classification": {
+                  "n": 216,
+                  "tp": 0,
+                  "fp": 4,
+                  "fn": 1,
+                  "tn": 211,
+                  "precision": 0.0,
+                  "recall": 0.0,
+                  "f1": 0.0
+                },
+                "paired": {
+                  "n": 216,
+                  "model_brier": 0.021861865128337002,
+                  "baseline_brier": 0.004629629629629629
+                },
+                "gaussian_persistence_shared_sigma": {
+                  "n": 216,
+                  "model_brier": 0.021861865128337002,
+                  "baseline_brier": 0.005613343287082969
+                },
+                "baseline_own_subset": {
+                  "n": 216,
+                  "abstentions": 0,
+                  "brier": 0.004629629629629629,
+                  "classification": {
+                    "n": 216,
+                    "tp": 0,
+                    "fp": 0,
+                    "fn": 1,
+                    "tn": 215,
+                    "precision": null,
+                    "recall": 0.0,
+                    "f1": 0.0
+                  }
+                },
+                "ece_10_bins": 0.06805102474799744,
+                "reliability_bins": [
+                  {
+                    "bin": 0,
+                    "n": 164,
+                    "mean_probability": 0.019011194672697657,
+                    "observed_rate": 0.0
+                  },
+                  {
+                    "bin": 1,
+                    "n": 29,
+                    "mean_probability": 0.13516295980996026,
+                    "observed_rate": 0.0
+                  },
+                  {
+                    "bin": 2,
+                    "n": 9,
+                    "mean_probability": 0.24669308218319885,
+                    "observed_rate": 0.0
+                  },
+                  {
+                    "bin": 3,
+                    "n": 5,
+                    "mean_probability": 0.35191710853086305,
+                    "observed_rate": 0.2
+                  },
+                  {
+                    "bin": 4,
+                    "n": 5,
+                    "mean_probability": 0.4235838315652016,
+                    "observed_rate": 0.0
+                  },
+                  {
+                    "bin": 5,
+                    "n": 2,
+                    "mean_probability": 0.5618944169947968,
+                    "observed_rate": 0.0
+                  },
+                  {
+                    "bin": 6,
+                    "n": 1,
+                    "mean_probability": 0.6447368572186438,
+                    "observed_rate": 0.0
+                  },
+                  {
+                    "bin": 7,
+                    "n": 1,
+                    "mean_probability": 0.7951914534188335,
+                    "observed_rate": 0.0
+                  }
+                ],
+                "coverage_95_on_scored": 0.9444444444444444,
+                "mae_in_tolerance_units_on_scored": 0.2912246938261235
+              },
+              "maintenance_recovered": {
+                "planned": 216,
+                "scored": 216,
+                "abstentions": 0,
+                "positives_all": 17,
+                "positives_scored": 17,
+                "coverage_fraction": 1.0,
+                "abstention_reasons": {},
+                "brier": 0.09059245016422385,
+                "classification": {
+                  "n": 216,
+                  "tp": 15,
+                  "fp": 31,
+                  "fn": 2,
+                  "tn": 168,
+                  "precision": 0.32608695652173914,
+                  "recall": 0.8823529411764706,
+                  "f1": 0.47619047619047616
+                },
+                "paired": {
+                  "n": 216,
+                  "model_brier": 0.09059245016422385,
+                  "baseline_brier": 0.0787037037037037
+                },
+                "gaussian_persistence_shared_sigma": {
+                  "n": 216,
+                  "model_brier": 0.09059245016422385,
+                  "baseline_brier": 0.06702839964654904
+                },
+                "baseline_own_subset": {
+                  "n": 216,
+                  "abstentions": 0,
+                  "brier": 0.0787037037037037,
+                  "classification": {
+                    "n": 216,
+                    "tp": 0,
+                    "fp": 0,
+                    "fn": 17,
+                    "tn": 199,
+                    "precision": null,
+                    "recall": 0.0,
+                    "f1": 0.0
+                  }
+                },
+                "ece_10_bins": 0.15048811516667307,
+                "reliability_bins": [
+                  {
+                    "bin": 0,
+                    "n": 115,
+                    "mean_probability": 0.015043463234408904,
+                    "observed_rate": 0.008695652173913044
+                  },
+                  {
+                    "bin": 1,
+                    "n": 21,
+                    "mean_probability": 0.14183494580023612,
+                    "observed_rate": 0.047619047619047616
+                  },
+                  {
+                    "bin": 2,
+                    "n": 16,
+                    "mean_probability": 0.24164803963740775,
+                    "observed_rate": 0.0
+                  },
+                  {
+                    "bin": 3,
+                    "n": 10,
+                    "mean_probability": 0.33900681887941814,
+                    "observed_rate": 0.0
+                  },
+                  {
+                    "bin": 4,
+                    "n": 8,
+                    "mean_probability": 0.4470424592189054,
+                    "observed_rate": 0.0
+                  },
+                  {
+                    "bin": 5,
+                    "n": 13,
+                    "mean_probability": 0.5329259934491067,
+                    "observed_rate": 0.0
+                  },
+                  {
+                    "bin": 6,
+                    "n": 6,
+                    "mean_probability": 0.6539085272425987,
+                    "observed_rate": 0.16666666666666666
+                  },
+                  {
+                    "bin": 7,
+                    "n": 11,
+                    "mean_probability": 0.7285258724450188,
+                    "observed_rate": 0.09090909090909091
+                  },
+                  {
+                    "bin": 8,
+                    "n": 8,
+                    "mean_probability": 0.8464462160587845,
+                    "observed_rate": 0.625
+                  },
+                  {
+                    "bin": 9,
+                    "n": 8,
+                    "mean_probability": 0.959089894770501,
+                    "observed_rate": 1.0
+                  }
+                ],
+                "coverage_95_on_scored": 0.9768518518518519,
+                "mae_in_tolerance_units_on_scored": 0.19627527095863126
+              },
+              "saturation": {
+                "planned": 216,
+                "scored": 216,
+                "abstentions": 0,
+                "positives_all": 44,
+                "positives_scored": 44,
+                "coverage_fraction": 1.0,
+                "abstention_reasons": {},
+                "brier": 0.05006865305398638,
+                "classification": {
+                  "n": 216,
+                  "tp": 32,
+                  "fp": 3,
+                  "fn": 12,
+                  "tn": 169,
+                  "precision": 0.9142857142857143,
+                  "recall": 0.7272727272727273,
+                  "f1": 0.810126582278481
+                },
+                "paired": {
+                  "n": 216,
+                  "model_brier": 0.05006865305398638,
+                  "baseline_brier": 0.12037037037037036
+                },
+                "gaussian_persistence_shared_sigma": {
+                  "n": 216,
+                  "model_brier": 0.05006865305398638,
+                  "baseline_brier": 0.08899939684832807
+                },
+                "baseline_own_subset": {
+                  "n": 216,
+                  "abstentions": 0,
+                  "brier": 0.12037037037037036,
+                  "classification": {
+                    "n": 216,
+                    "tp": 18,
+                    "fp": 0,
+                    "fn": 26,
+                    "tn": 172,
+                    "precision": 1.0,
+                    "recall": 0.4090909090909091,
+                    "f1": 0.5806451612903226
+                  }
+                },
+                "ece_10_bins": 0.051290429127084224,
+                "reliability_bins": [
+                  {
+                    "bin": 0,
+                    "n": 154,
+                    "mean_probability": 0.008454417950361892,
+                    "observed_rate": 0.006493506493506494
+                  },
+                  {
+                    "bin": 1,
+                    "n": 14,
+                    "mean_probability": 0.14002565447192125,
+                    "observed_rate": 0.14285714285714285
+                  },
+                  {
+                    "bin": 2,
+                    "n": 4,
+                    "mean_probability": 0.23722086771885192,
+                    "observed_rate": 1.0
+                  },
+                  {
+                    "bin": 3,
+                    "n": 3,
+                    "mean_probability": 0.35639820584537035,
+                    "observed_rate": 0.3333333333333333
+                  },
+                  {
+                    "bin": 4,
+                    "n": 6,
+                    "mean_probability": 0.4359241396901921,
+                    "observed_rate": 0.6666666666666666
+                  },
+                  {
+                    "bin": 5,
+                    "n": 4,
+                    "mean_probability": 0.562256514220752,
+                    "observed_rate": 0.75
+                  },
+                  {
+                    "bin": 6,
+                    "n": 5,
+                    "mean_probability": 0.6480897737199578,
+                    "observed_rate": 1.0
+                  },
+                  {
+                    "bin": 7,
+                    "n": 6,
+                    "mean_probability": 0.7511515048105624,
+                    "observed_rate": 1.0
+                  },
+                  {
+                    "bin": 8,
+                    "n": 4,
+                    "mean_probability": 0.8663218056103928,
+                    "observed_rate": 1.0
+                  },
+                  {
+                    "bin": 9,
+                    "n": 16,
+                    "mean_probability": 0.9808760223730969,
+                    "observed_rate": 0.875
+                  }
+                ],
+                "coverage_95_on_scored": 0.8935185185185185,
+                "mae_in_tolerance_units_on_scored": 0.11503227933725364
+              },
+              "stable_correlated": {
+                "planned": 216,
+                "scored": 216,
+                "abstentions": 0,
+                "positives_all": 16,
+                "positives_scored": 16,
+                "coverage_fraction": 1.0,
+                "abstention_reasons": {},
+                "brier": 0.05915394469953544,
+                "classification": {
+                  "n": 216,
+                  "tp": 8,
+                  "fp": 10,
+                  "fn": 8,
+                  "tn": 190,
+                  "precision": 0.4444444444444444,
+                  "recall": 0.5,
+                  "f1": 0.47058823529411764
+                },
+                "paired": {
+                  "n": 216,
+                  "model_brier": 0.05915394469953544,
+                  "baseline_brier": 0.06944444444444445
+                },
+                "gaussian_persistence_shared_sigma": {
+                  "n": 216,
+                  "model_brier": 0.05915394469953544,
+                  "baseline_brier": 0.05351495578062168
+                },
+                "baseline_own_subset": {
+                  "n": 216,
+                  "abstentions": 0,
+                  "brier": 0.06944444444444445,
+                  "classification": {
+                    "n": 216,
+                    "tp": 8,
+                    "fp": 7,
+                    "fn": 8,
+                    "tn": 193,
+                    "precision": 0.5333333333333333,
+                    "recall": 0.5,
+                    "f1": 0.5161290322580645
+                  }
+                },
+                "ece_10_bins": 0.0527581720947235,
+                "reliability_bins": [
+                  {
+                    "bin": 0,
+                    "n": 175,
+                    "mean_probability": 0.007124373626962973,
+                    "observed_rate": 0.017142857142857144
+                  },
+                  {
+                    "bin": 1,
+                    "n": 9,
+                    "mean_probability": 0.14741835838379178,
+                    "observed_rate": 0.2222222222222222
+                  },
+                  {
+                    "bin": 2,
+                    "n": 5,
+                    "mean_probability": 0.24742702335513647,
+                    "observed_rate": 0.0
+                  },
+                  {
+                    "bin": 3,
+                    "n": 6,
+                    "mean_probability": 0.3518930226734495,
+                    "observed_rate": 0.16666666666666666
+                  },
+                  {
+                    "bin": 4,
+                    "n": 3,
+                    "mean_probability": 0.43436410079801746,
+                    "observed_rate": 0.6666666666666666
+                  },
+                  {
+                    "bin": 5,
+                    "n": 3,
+                    "mean_probability": 0.5422543255967642,
+                    "observed_rate": 0.6666666666666666
+                  },
+                  {
+                    "bin": 6,
+                    "n": 3,
+                    "mean_probability": 0.6847762238262699,
+                    "observed_rate": 0.0
+                  },
+                  {
+                    "bin": 7,
+                    "n": 7,
+                    "mean_probability": 0.7508713583688361,
+                    "observed_rate": 0.5714285714285714
+                  },
+                  {
+                    "bin": 8,
+                    "n": 5,
+                    "mean_probability": 0.8480459257880449,
+                    "observed_rate": 0.4
+                  }
+                ],
+                "coverage_95_on_scored": 0.8194444444444444,
+                "mae_in_tolerance_units_on_scored": 0.12241512420538116
+              },
+              "step": {
+                "planned": 216,
+                "scored": 216,
+                "abstentions": 0,
+                "positives_all": 70,
+                "positives_scored": 70,
+                "coverage_fraction": 1.0,
+                "abstention_reasons": {},
+                "brier": 0.19787767002731144,
+                "classification": {
+                  "n": 216,
+                  "tp": 28,
+                  "fp": 3,
+                  "fn": 42,
+                  "tn": 143,
+                  "precision": 0.9032258064516129,
+                  "recall": 0.4,
+                  "f1": 0.5544554455445545
+                },
+                "paired": {
+                  "n": 216,
+                  "model_brier": 0.19787767002731144,
+                  "baseline_brier": 0.3194444444444444
+                },
+                "gaussian_persistence_shared_sigma": {
+                  "n": 216,
+                  "model_brier": 0.19787767002731144,
+                  "baseline_brier": 0.2924049447116889
+                },
+                "baseline_own_subset": {
+                  "n": 216,
+                  "abstentions": 0,
+                  "brier": 0.3194444444444444,
+                  "classification": {
+                    "n": 216,
+                    "tp": 11,
+                    "fp": 10,
+                    "fn": 59,
+                    "tn": 136,
+                    "precision": 0.5238095238095238,
+                    "recall": 0.15714285714285714,
+                    "f1": 0.24175824175824176
+                  }
+                },
+                "ece_10_bins": 0.18910928863720852,
+                "reliability_bins": [
+                  {
+                    "bin": 0,
+                    "n": 168,
+                    "mean_probability": 0.007480889688771616,
+                    "observed_rate": 0.2261904761904762
+                  },
+                  {
+                    "bin": 1,
+                    "n": 5,
+                    "mean_probability": 0.1351928227905376,
+                    "observed_rate": 0.2
+                  },
+                  {
+                    "bin": 2,
+                    "n": 4,
+                    "mean_probability": 0.25293008151701357,
+                    "observed_rate": 0.0
+                  },
+                  {
+                    "bin": 3,
+                    "n": 7,
+                    "mean_probability": 0.3281893707774299,
+                    "observed_rate": 0.42857142857142855
+                  },
+                  {
+                    "bin": 4,
+                    "n": 1,
+                    "mean_probability": 0.4491961980603387,
+                    "observed_rate": 0.0
+                  },
+                  {
+                    "bin": 5,
+                    "n": 1,
+                    "mean_probability": 0.5284431113359751,
+                    "observed_rate": 1.0
+                  },
+                  {
+                    "bin": 6,
+                    "n": 3,
+                    "mean_probability": 0.6547882469878923,
+                    "observed_rate": 0.6666666666666666
+                  },
+                  {
+                    "bin": 7,
+                    "n": 3,
+                    "mean_probability": 0.7395016743259025,
+                    "observed_rate": 0.6666666666666666
+                  },
+                  {
+                    "bin": 8,
+                    "n": 1,
+                    "mean_probability": 0.877866548801516,
+                    "observed_rate": 1.0
+                  },
+                  {
+                    "bin": 9,
+                    "n": 23,
+                    "mean_probability": 0.9899538424669754,
+                    "observed_rate": 0.9565217391304348
+                  }
+                ],
+                "coverage_95_on_scored": 0.2916666666666667,
+                "mae_in_tolerance_units_on_scored": 0.602878906943933
+              }
+            }
+          },
+          "maintenance_policy": {
+            "overall": {
+              "planned": 1728,
+              "scored": 1512,
+              "abstentions": 216,
+              "positives_all": 246,
+              "positives_scored": 245,
+              "coverage_fraction": 0.875,
+              "abstention_reasons": {
+                "INSUFFICIENT_POST_MAINTENANCE_HISTORY": 216
+              },
+              "brier": 0.10807666417133342,
+              "classification": {
+                "n": 1512,
+                "tp": 122,
+                "fp": 97,
+                "fn": 123,
+                "tn": 1170,
+                "precision": 0.5570776255707762,
+                "recall": 0.49795918367346936,
+                "f1": 0.5258620689655172
+              },
+              "paired": {
+                "n": 1512,
+                "model_brier": 0.10807666417133342,
+                "baseline_brier": 0.1541005291005291
+              },
+              "gaussian_persistence_shared_sigma": {
+                "n": 1512,
+                "model_brier": 0.10807666417133342,
+                "baseline_brier": 0.12502946422998695
+              },
+              "baseline_own_subset": {
+                "n": 1728,
+                "abstentions": 0,
+                "brier": 0.13541666666666666,
+                "classification": {
+                  "n": 1728,
+                  "tp": 75,
+                  "fp": 63,
+                  "fn": 171,
+                  "tn": 1419,
+                  "precision": 0.5434782608695652,
+                  "recall": 0.3048780487804878,
+                  "f1": 0.390625
+                }
+              },
+              "ece_10_bins": 0.07175812300974367,
+              "reliability_bins": [
+                {
+                  "bin": 0,
+                  "n": 963,
+                  "mean_probability": 0.010062045322963143,
+                  "observed_rate": 0.056074766355140186
+                },
+                {
+                  "bin": 1,
+                  "n": 139,
+                  "mean_probability": 0.14921317757805655,
+                  "observed_rate": 0.1510791366906475
+                },
+                {
+                  "bin": 2,
+                  "n": 88,
+                  "mean_probability": 0.24473075041192507,
+                  "observed_rate": 0.2159090909090909
+                },
+                {
+                  "bin": 3,
+                  "n": 66,
+                  "mean_probability": 0.3541822980327233,
+                  "observed_rate": 0.24242424242424243
+                },
+                {
+                  "bin": 4,
+                  "n": 37,
+                  "mean_probability": 0.45061445602789646,
+                  "observed_rate": 0.35135135135135137
+                },
+                {
+                  "bin": 5,
+                  "n": 49,
+                  "mean_probability": 0.5473176961834786,
+                  "observed_rate": 0.32653061224489793
+                },
+                {
+                  "bin": 6,
+                  "n": 30,
+                  "mean_probability": 0.6588264167552115,
+                  "observed_rate": 0.3
+                },
+                {
+                  "bin": 7,
+                  "n": 34,
+                  "mean_probability": 0.7461327130483157,
+                  "observed_rate": 0.5294117647058824
+                },
+                {
+                  "bin": 8,
+                  "n": 29,
+                  "mean_probability": 0.8605635731336684,
+                  "observed_rate": 0.4827586206896552
+                },
+                {
+                  "bin": 9,
+                  "n": 77,
+                  "mean_probability": 0.9796801981881632,
+                  "observed_rate": 0.8441558441558441
+                }
+              ],
+              "coverage_95_on_scored": 0.7771164021164021,
+              "mae_in_tolerance_units_on_scored": 0.2825044034503183
+            },
+            "by_horizon": {
+              "30": {
+                "planned": 576,
+                "scored": 504,
+                "abstentions": 72,
+                "positives_all": 49,
+                "positives_scored": 49,
+                "coverage_fraction": 0.875,
+                "abstention_reasons": {
+                  "INSUFFICIENT_POST_MAINTENANCE_HISTORY": 72
+                },
+                "brier": 0.06201986739196275,
+                "classification": {
+                  "n": 504,
+                  "tp": 27,
+                  "fp": 22,
+                  "fn": 22,
+                  "tn": 433,
+                  "precision": 0.5510204081632653,
+                  "recall": 0.5510204081632653,
+                  "f1": 0.5510204081632653
+                },
+                "paired": {
+                  "n": 504,
+                  "model_brier": 0.06201986739196275,
+                  "baseline_brier": 0.06944444444444445
+                },
+                "gaussian_persistence_shared_sigma": {
+                  "n": 504,
+                  "model_brier": 0.06201986739196275,
+                  "baseline_brier": 0.055908288489596426
+                },
+                "baseline_own_subset": {
+                  "n": 576,
+                  "abstentions": 0,
+                  "brier": 0.06076388888888889,
+                  "classification": {
+                    "n": 576,
+                    "tp": 30,
+                    "fp": 16,
+                    "fn": 19,
+                    "tn": 511,
+                    "precision": 0.6521739130434783,
+                    "recall": 0.6122448979591837,
+                    "f1": 0.631578947368421
+                  }
+                },
+                "ece_10_bins": 0.03625105743996041,
+                "reliability_bins": [
+                  {
+                    "bin": 0,
+                    "n": 347,
+                    "mean_probability": 0.009733048110482676,
+                    "observed_rate": 0.005763688760806916
+                  },
+                  {
+                    "bin": 1,
+                    "n": 47,
+                    "mean_probability": 0.15092433536955654,
+                    "observed_rate": 0.0851063829787234
+                  },
+                  {
+                    "bin": 2,
+                    "n": 29,
+                    "mean_probability": 0.23523125744828205,
+                    "observed_rate": 0.2413793103448276
+                  },
+                  {
+                    "bin": 3,
+                    "n": 22,
+                    "mean_probability": 0.3566954097249862,
+                    "observed_rate": 0.22727272727272727
+                  },
+                  {
+                    "bin": 4,
+                    "n": 10,
+                    "mean_probability": 0.4380788002080095,
+                    "observed_rate": 0.4
+                  },
+                  {
+                    "bin": 5,
+                    "n": 10,
+                    "mean_probability": 0.5429722565351607,
+                    "observed_rate": 0.5
+                  },
+                  {
+                    "bin": 6,
+                    "n": 9,
+                    "mean_probability": 0.6554952524008318,
+                    "observed_rate": 0.2222222222222222
+                  },
+                  {
+                    "bin": 7,
+                    "n": 10,
+                    "mean_probability": 0.7479250506302787,
+                    "observed_rate": 0.6
+                  },
+                  {
+                    "bin": 8,
+                    "n": 9,
+                    "mean_probability": 0.8713264616374284,
+                    "observed_rate": 0.4444444444444444
+                  },
+                  {
+                    "bin": 9,
+                    "n": 11,
+                    "mean_probability": 0.9766338586368228,
+                    "observed_rate": 0.9090909090909091
+                  }
+                ],
+                "coverage_95_on_scored": 0.8888888888888888,
+                "mae_in_tolerance_units_on_scored": 0.18148324867750748
+              },
+              "60": {
+                "planned": 576,
+                "scored": 504,
+                "abstentions": 72,
+                "positives_all": 88,
+                "positives_scored": 88,
+                "coverage_fraction": 0.875,
+                "abstention_reasons": {
+                  "INSUFFICIENT_POST_MAINTENANCE_HISTORY": 72
+                },
+                "brier": 0.125672049095626,
+                "classification": {
+                  "n": 504,
+                  "tp": 40,
+                  "fp": 33,
+                  "fn": 48,
+                  "tn": 383,
+                  "precision": 0.547945205479452,
+                  "recall": 0.45454545454545453,
+                  "f1": 0.4968944099378882
+                },
+                "paired": {
+                  "n": 504,
+                  "model_brier": 0.125672049095626,
+                  "baseline_brier": 0.1746031746031746
+                },
+                "gaussian_persistence_shared_sigma": {
+                  "n": 504,
+                  "model_brier": 0.125672049095626,
+                  "baseline_brier": 0.14051212994023962
+                },
+                "baseline_own_subset": {
+                  "n": 576,
+                  "abstentions": 0,
+                  "brier": 0.1527777777777778,
+                  "classification": {
+                    "n": 576,
+                    "tp": 23,
+                    "fp": 23,
+                    "fn": 65,
+                    "tn": 465,
+                    "precision": 0.5,
+                    "recall": 0.26136363636363635,
+                    "f1": 0.34328358208955223
+                  }
+                },
+                "ece_10_bins": 0.09173133342334312,
+                "reliability_bins": [
+                  {
+                    "bin": 0,
+                    "n": 320,
+                    "mean_probability": 0.00925592514535993,
+                    "observed_rate": 0.08125
+                  },
+                  {
+                    "bin": 1,
+                    "n": 49,
+                    "mean_probability": 0.1476537229592771,
+                    "observed_rate": 0.12244897959183673
+                  },
+                  {
+                    "bin": 2,
+                    "n": 27,
+                    "mean_probability": 0.2491344391686027,
+                    "observed_rate": 0.25925925925925924
+                  },
+                  {
+                    "bin": 3,
+                    "n": 23,
+                    "mean_probability": 0.35691922116011476,
+                    "observed_rate": 0.21739130434782608
+                  },
+                  {
+                    "bin": 4,
+                    "n": 12,
+                    "mean_probability": 0.4513468700396901,
+                    "observed_rate": 0.3333333333333333
+                  },
+                  {
+                    "bin": 5,
+                    "n": 17,
+                    "mean_probability": 0.5469804048683657,
+                    "observed_rate": 0.35294117647058826
+                  },
+                  {
+                    "bin": 6,
+                    "n": 12,
+                    "mean_probability": 0.6669055321412495,
+                    "observed_rate": 0.4166666666666667
+                  },
+                  {
+                    "bin": 7,
+                    "n": 11,
+                    "mean_probability": 0.7368619221784614,
+                    "observed_rate": 0.6363636363636364
+                  },
+                  {
+                    "bin": 8,
+                    "n": 6,
+                    "mean_probability": 0.8673005592224103,
+                    "observed_rate": 0.16666666666666666
+                  },
+                  {
+                    "bin": 9,
+                    "n": 27,
+                    "mean_probability": 0.9796282677597828,
+                    "observed_rate": 0.7777777777777778
+                  }
+                ],
+                "coverage_95_on_scored": 0.7222222222222222,
+                "mae_in_tolerance_units_on_scored": 0.31906402778018655
+              },
+              "90": {
+                "planned": 576,
+                "scored": 504,
+                "abstentions": 72,
+                "positives_all": 109,
+                "positives_scored": 108,
+                "coverage_fraction": 0.875,
+                "abstention_reasons": {
+                  "INSUFFICIENT_POST_MAINTENANCE_HISTORY": 72
+                },
+                "brier": 0.13653807602641155,
+                "classification": {
+                  "n": 504,
+                  "tp": 55,
+                  "fp": 42,
+                  "fn": 53,
+                  "tn": 354,
+                  "precision": 0.5670103092783505,
+                  "recall": 0.5092592592592593,
+                  "f1": 0.5365853658536586
+                },
+                "paired": {
+                  "n": 504,
+                  "model_brier": 0.13653807602641155,
+                  "baseline_brier": 0.21825396825396826
+                },
+                "gaussian_persistence_shared_sigma": {
+                  "n": 504,
+                  "model_brier": 0.13653807602641155,
+                  "baseline_brier": 0.1786679742601248
+                },
+                "baseline_own_subset": {
+                  "n": 576,
+                  "abstentions": 0,
+                  "brier": 0.19270833333333334,
+                  "classification": {
+                    "n": 576,
+                    "tp": 22,
+                    "fp": 24,
+                    "fn": 87,
+                    "tn": 443,
+                    "precision": 0.4782608695652174,
+                    "recall": 0.2018348623853211,
+                    "f1": 0.2838709677419355
+                  }
+                },
+                "ece_10_bins": 0.11172653196814482,
+                "reliability_bins": [
+                  {
+                    "bin": 0,
+                    "n": 296,
+                    "mean_probability": 0.011319209139056891,
+                    "observed_rate": 0.08783783783783784
+                  },
+                  {
+                    "bin": 1,
+                    "n": 43,
+                    "mean_probability": 0.14911989525525876,
+                    "observed_rate": 0.2558139534883721
+                  },
+                  {
+                    "bin": 2,
+                    "n": 32,
+                    "mean_probability": 0.24962405352177983,
+                    "observed_rate": 0.15625
+                  },
+                  {
+                    "bin": 3,
+                    "n": 21,
+                    "mean_probability": 0.3485519318822572,
+                    "observed_rate": 0.2857142857142857
+                  },
+                  {
+                    "bin": 4,
+                    "n": 15,
+                    "mean_probability": 0.45838562869838634,
+                    "observed_rate": 0.3333333333333333
+                  },
+                  {
+                    "bin": 5,
+                    "n": 22,
+                    "mean_probability": 0.5495535302216648,
+                    "observed_rate": 0.22727272727272727
+                  },
+                  {
+                    "bin": 6,
+                    "n": 9,
+                    "mean_probability": 0.6513854272615406,
+                    "observed_rate": 0.2222222222222222
+                  },
+                  {
+                    "bin": 7,
+                    "n": 13,
+                    "mean_probability": 0.7525985071828364,
+                    "observed_rate": 0.38461538461538464
+                  },
+                  {
+                    "bin": 8,
+                    "n": 14,
+                    "mean_probability": 0.8507572936289332,
+                    "observed_rate": 0.6428571428571429
+                  },
+                  {
+                    "bin": 9,
+                    "n": 39,
+                    "mean_probability": 0.9805753739992148,
+                    "observed_rate": 0.8717948717948718
+                  }
+                ],
+                "coverage_95_on_scored": 0.7202380952380952,
+                "mae_in_tolerance_units_on_scored": 0.3469659338932609
+              }
+            },
+            "by_scenario": {
+              "cyclic": {
+                "planned": 216,
+                "scored": 216,
+                "abstentions": 0,
+                "positives_all": 41,
+                "positives_scored": 41,
+                "coverage_fraction": 1.0,
+                "abstention_reasons": {},
+                "brier": 0.24941890751137571,
+                "classification": {
+                  "n": 216,
+                  "tp": 5,
+                  "fp": 44,
+                  "fn": 36,
+                  "tn": 131,
+                  "precision": 0.10204081632653061,
+                  "recall": 0.12195121951219512,
+                  "f1": 0.1111111111111111
+                },
+                "paired": {
+                  "n": 216,
+                  "model_brier": 0.24941890751137571,
+                  "baseline_brier": 0.23148148148148148
+                },
+                "gaussian_persistence_shared_sigma": {
+                  "n": 216,
+                  "model_brier": 0.24941890751137571,
+                  "baseline_brier": 0.15847774446227234
+                },
+                "baseline_own_subset": {
+                  "n": 216,
+                  "abstentions": 0,
+                  "brier": 0.23148148148148148,
+                  "classification": {
+                    "n": 216,
+                    "tp": 21,
+                    "fp": 30,
+                    "fn": 20,
+                    "tn": 145,
+                    "precision": 0.4117647058823529,
+                    "recall": 0.5121951219512195,
+                    "f1": 0.45652173913043476
+                  }
+                },
+                "ece_10_bins": 0.2153023678292468,
+                "reliability_bins": [
+                  {
+                    "bin": 0,
+                    "n": 13,
+                    "mean_probability": 0.07325799735420102,
+                    "observed_rate": 0.23076923076923078
+                  },
+                  {
+                    "bin": 1,
+                    "n": 68,
+                    "mean_probability": 0.15223859881232765,
+                    "observed_rate": 0.23529411764705882
+                  },
+                  {
+                    "bin": 2,
+                    "n": 42,
+                    "mean_probability": 0.2384967781701366,
+                    "observed_rate": 0.19047619047619047
+                  },
+                  {
+                    "bin": 3,
+                    "n": 28,
+                    "mean_probability": 0.35693899112003497,
+                    "observed_rate": 0.25
+                  },
+                  {
+                    "bin": 4,
+                    "n": 16,
+                    "mean_probability": 0.45375676490640554,
+                    "observed_rate": 0.125
+                  },
+                  {
+                    "bin": 5,
+                    "n": 18,
+                    "mean_probability": 0.5480440744632799,
+                    "observed_rate": 0.16666666666666666
+                  },
+                  {
+                    "bin": 6,
+                    "n": 9,
+                    "mean_probability": 0.6620714774478497,
+                    "observed_rate": 0.1111111111111111
+                  },
+                  {
+                    "bin": 7,
+                    "n": 12,
+                    "mean_probability": 0.7474225718744038,
+                    "observed_rate": 0.08333333333333333
+                  },
+                  {
+                    "bin": 8,
+                    "n": 8,
+                    "mean_probability": 0.8639285679550585,
+                    "observed_rate": 0.0
+                  },
+                  {
+                    "bin": 9,
+                    "n": 2,
+                    "mean_probability": 0.9173447097239986,
+                    "observed_rate": 0.0
+                  }
+                ],
+                "coverage_95_on_scored": 0.8240740740740741,
+                "mae_in_tolerance_units_on_scored": 0.6660727527792836
+              },
+              "heavy_tail": {
+                "planned": 216,
+                "scored": 216,
+                "abstentions": 0,
+                "positives_all": 22,
+                "positives_scored": 22,
+                "coverage_fraction": 1.0,
+                "abstention_reasons": {},
+                "brier": 0.06575157186243397,
+                "classification": {
+                  "n": 216,
+                  "tp": 12,
+                  "fp": 9,
+                  "fn": 10,
+                  "tn": 185,
+                  "precision": 0.5714285714285714,
+                  "recall": 0.5454545454545454,
+                  "f1": 0.5581395348837209
+                },
+                "paired": {
+                  "n": 216,
+                  "model_brier": 0.06575157186243397,
+                  "baseline_brier": 0.08796296296296297
+                },
+                "gaussian_persistence_shared_sigma": {
+                  "n": 216,
+                  "model_brier": 0.06575157186243397,
+                  "baseline_brier": 0.0900568109537578
+                },
+                "baseline_own_subset": {
+                  "n": 216,
+                  "abstentions": 0,
+                  "brier": 0.08796296296296297,
+                  "classification": {
+                    "n": 216,
+                    "tp": 6,
+                    "fp": 3,
+                    "fn": 16,
+                    "tn": 191,
+                    "precision": 0.6666666666666666,
+                    "recall": 0.2727272727272727,
+                    "f1": 0.3870967741935484
+                  }
+                },
+                "ece_10_bins": 0.06226007953251021,
+                "reliability_bins": [
+                  {
+                    "bin": 0,
+                    "n": 155,
+                    "mean_probability": 0.013126125649312644,
+                    "observed_rate": 0.03225806451612903
+                  },
+                  {
+                    "bin": 1,
+                    "n": 18,
+                    "mean_probability": 0.15337170513405826,
+                    "observed_rate": 0.0
+                  },
+                  {
+                    "bin": 2,
+                    "n": 11,
+                    "mean_probability": 0.2604281410950643,
+                    "observed_rate": 0.09090909090909091
+                  },
+                  {
+                    "bin": 3,
+                    "n": 6,
+                    "mean_probability": 0.35540685739933614,
+                    "observed_rate": 0.3333333333333333
+                  },
+                  {
+                    "bin": 4,
+                    "n": 5,
+                    "mean_probability": 0.4654204128505988,
+                    "observed_rate": 0.4
+                  },
+                  {
+                    "bin": 5,
+                    "n": 5,
+                    "mean_probability": 0.5301607797568252,
+                    "observed_rate": 0.6
+                  },
+                  {
+                    "bin": 6,
+                    "n": 5,
+                    "mean_probability": 0.6488917474846941,
+                    "observed_rate": 0.0
+                  },
+                  {
+                    "bin": 8,
+                    "n": 3,
+                    "mean_probability": 0.8727041073299137,
+                    "observed_rate": 0.3333333333333333
+                  },
+                  {
+                    "bin": 9,
+                    "n": 8,
+                    "mean_probability": 0.9767479948838983,
+                    "observed_rate": 1.0
+                  }
+                ],
+                "coverage_95_on_scored": 0.9166666666666666,
+                "mae_in_tolerance_units_on_scored": 0.19001036313342207
+              },
+              "linear": {
+                "planned": 216,
+                "scored": 216,
+                "abstentions": 0,
+                "positives_all": 35,
+                "positives_scored": 35,
+                "coverage_fraction": 1.0,
+                "abstention_reasons": {},
+                "brier": 0.05007003118251242,
+                "classification": {
+                  "n": 216,
+                  "tp": 26,
+                  "fp": 9,
+                  "fn": 9,
+                  "tn": 172,
+                  "precision": 0.7428571428571429,
+                  "recall": 0.7428571428571429,
+                  "f1": 0.7428571428571429
+                },
+                "paired": {
+                  "n": 216,
+                  "model_brier": 0.05007003118251242,
+                  "baseline_brier": 0.1712962962962963
+                },
+                "gaussian_persistence_shared_sigma": {
+                  "n": 216,
+                  "model_brier": 0.05007003118251242,
+                  "baseline_brier": 0.12502520101838469
+                },
+                "baseline_own_subset": {
+                  "n": 216,
+                  "abstentions": 0,
+                  "brier": 0.1712962962962963,
+                  "classification": {
+                    "n": 216,
+                    "tp": 11,
+                    "fp": 13,
+                    "fn": 24,
+                    "tn": 168,
+                    "precision": 0.4583333333333333,
+                    "recall": 0.3142857142857143,
+                    "f1": 0.3728813559322034
+                  }
+                },
+                "ece_10_bins": 0.053287405598582756,
+                "reliability_bins": [
+                  {
+                    "bin": 0,
+                    "n": 145,
+                    "mean_probability": 0.006408608642460153,
+                    "observed_rate": 0.006896551724137931
+                  },
+                  {
+                    "bin": 1,
+                    "n": 15,
+                    "mean_probability": 0.14580273374426705,
+                    "observed_rate": 0.0
+                  },
+                  {
+                    "bin": 2,
+                    "n": 10,
+                    "mean_probability": 0.24988689990748272,
+                    "observed_rate": 0.4
+                  },
+                  {
+                    "bin": 3,
+                    "n": 6,
+                    "mean_probability": 0.3626271852050123,
+                    "observed_rate": 0.16666666666666666
+                  },
+                  {
+                    "bin": 4,
+                    "n": 5,
+                    "mean_probability": 0.4569657089064146,
+                    "observed_rate": 0.6
+                  },
+                  {
+                    "bin": 5,
+                    "n": 9,
+                    "mean_probability": 0.5571538878520446,
+                    "observed_rate": 0.3333333333333333
+                  },
+                  {
+                    "bin": 6,
+                    "n": 2,
+                    "mean_probability": 0.6794525422093178,
+                    "observed_rate": 0.0
+                  },
+                  {
+                    "bin": 7,
+                    "n": 4,
+                    "mean_probability": 0.7248368614709213,
+                    "observed_rate": 1.0
+                  },
+                  {
+                    "bin": 8,
+                    "n": 5,
+                    "mean_probability": 0.8653500491311619,
+                    "observed_rate": 1.0
+                  },
+                  {
+                    "bin": 9,
+                    "n": 15,
+                    "mean_probability": 0.9808685936743917,
+                    "observed_rate": 0.9333333333333333
+                  }
+                ],
+                "coverage_95_on_scored": 0.9398148148148148,
+                "mae_in_tolerance_units_on_scored": 0.09469922409217267
+              },
+              "maintenance_recent": {
+                "planned": 216,
+                "scored": 0,
+                "abstentions": 216,
+                "positives_all": 1,
+                "positives_scored": 0,
+                "coverage_fraction": 0.0,
+                "abstention_reasons": {
+                  "INSUFFICIENT_POST_MAINTENANCE_HISTORY": 216
+                },
+                "brier": null,
+                "classification": {
+                  "n": 0,
+                  "tp": 0,
+                  "fp": 0,
+                  "fn": 0,
+                  "tn": 0,
+                  "precision": null,
+                  "recall": null,
+                  "f1": null
+                },
+                "paired": {
+                  "n": 0,
+                  "model_brier": null,
+                  "baseline_brier": null
+                },
+                "gaussian_persistence_shared_sigma": {
+                  "n": 0,
+                  "model_brier": null,
+                  "baseline_brier": null
+                },
+                "baseline_own_subset": {
+                  "n": 216,
+                  "abstentions": 0,
+                  "brier": 0.004629629629629629,
+                  "classification": {
+                    "n": 216,
+                    "tp": 0,
+                    "fp": 0,
+                    "fn": 1,
+                    "tn": 215,
+                    "precision": null,
+                    "recall": 0.0,
+                    "f1": 0.0
+                  }
+                },
+                "ece_10_bins": null,
+                "reliability_bins": [],
+                "coverage_95_on_scored": null,
+                "mae_in_tolerance_units_on_scored": null
+              },
+              "maintenance_recovered": {
+                "planned": 216,
+                "scored": 216,
+                "abstentions": 0,
+                "positives_all": 17,
+                "positives_scored": 17,
+                "coverage_fraction": 1.0,
+                "abstention_reasons": {},
+                "brier": 0.08419587086217863,
+                "classification": {
+                  "n": 216,
+                  "tp": 11,
+                  "fp": 19,
+                  "fn": 6,
+                  "tn": 180,
+                  "precision": 0.36666666666666664,
+                  "recall": 0.6470588235294118,
+                  "f1": 0.46808510638297873
+                },
+                "paired": {
+                  "n": 216,
+                  "model_brier": 0.08419587086217863,
+                  "baseline_brier": 0.0787037037037037
+                },
+                "gaussian_persistence_shared_sigma": {
+                  "n": 216,
+                  "model_brier": 0.08419587086217863,
+                  "baseline_brier": 0.06672719583485524
+                },
+                "baseline_own_subset": {
+                  "n": 216,
+                  "abstentions": 0,
+                  "brier": 0.0787037037037037,
+                  "classification": {
+                    "n": 216,
+                    "tp": 0,
+                    "fp": 0,
+                    "fn": 17,
+                    "tn": 199,
+                    "precision": null,
+                    "recall": 0.0,
+                    "f1": 0.0
+                  }
+                },
+                "ece_10_bins": 0.08782468280366514,
+                "reliability_bins": [
+                  {
+                    "bin": 0,
+                    "n": 153,
+                    "mean_probability": 0.012863155129547894,
+                    "observed_rate": 0.0196078431372549
+                  },
+                  {
+                    "bin": 1,
+                    "n": 10,
+                    "mean_probability": 0.1477586763520813,
+                    "observed_rate": 0.0
+                  },
+                  {
+                    "bin": 2,
+                    "n": 12,
+                    "mean_probability": 0.2465103240219991,
+                    "observed_rate": 0.16666666666666666
+                  },
+                  {
+                    "bin": 3,
+                    "n": 10,
+                    "mean_probability": 0.35956573141538484,
+                    "observed_rate": 0.1
+                  },
+                  {
+                    "bin": 4,
+                    "n": 1,
+                    "mean_probability": 0.4328626871490717,
+                    "observed_rate": 0.0
+                  },
+                  {
+                    "bin": 5,
+                    "n": 9,
+                    "mean_probability": 0.5427058597988454,
+                    "observed_rate": 0.1111111111111111
+                  },
+                  {
+                    "bin": 6,
+                    "n": 3,
+                    "mean_probability": 0.6478810342471051,
+                    "observed_rate": 0.3333333333333333
+                  },
+                  {
+                    "bin": 7,
+                    "n": 2,
+                    "mean_probability": 0.7592901874216351,
+                    "observed_rate": 0.5
+                  },
+                  {
+                    "bin": 8,
+                    "n": 3,
+                    "mean_probability": 0.838889703135684,
+                    "observed_rate": 0.3333333333333333
+                  },
+                  {
+                    "bin": 9,
+                    "n": 13,
+                    "mean_probability": 0.9700552493956559,
+                    "observed_rate": 0.5384615384615384
+                  }
+                ],
+                "coverage_95_on_scored": 0.7546296296296297,
+                "mae_in_tolerance_units_on_scored": 0.18642217366078212
+              },
+              "saturation": {
+                "planned": 216,
+                "scored": 216,
+                "abstentions": 0,
+                "positives_all": 44,
+                "positives_scored": 44,
+                "coverage_fraction": 1.0,
+                "abstention_reasons": {},
+                "brier": 0.05006865305398638,
+                "classification": {
+                  "n": 216,
+                  "tp": 32,
+                  "fp": 3,
+                  "fn": 12,
+                  "tn": 169,
+                  "precision": 0.9142857142857143,
+                  "recall": 0.7272727272727273,
+                  "f1": 0.810126582278481
+                },
+                "paired": {
+                  "n": 216,
+                  "model_brier": 0.05006865305398638,
+                  "baseline_brier": 0.12037037037037036
+                },
+                "gaussian_persistence_shared_sigma": {
+                  "n": 216,
+                  "model_brier": 0.05006865305398638,
+                  "baseline_brier": 0.08899939684832807
+                },
+                "baseline_own_subset": {
+                  "n": 216,
+                  "abstentions": 0,
+                  "brier": 0.12037037037037036,
+                  "classification": {
+                    "n": 216,
+                    "tp": 18,
+                    "fp": 0,
+                    "fn": 26,
+                    "tn": 172,
+                    "precision": 1.0,
+                    "recall": 0.4090909090909091,
+                    "f1": 0.5806451612903226
+                  }
+                },
+                "ece_10_bins": 0.051290429127084224,
+                "reliability_bins": [
+                  {
+                    "bin": 0,
+                    "n": 154,
+                    "mean_probability": 0.008454417950361892,
+                    "observed_rate": 0.006493506493506494
+                  },
+                  {
+                    "bin": 1,
+                    "n": 14,
+                    "mean_probability": 0.14002565447192125,
+                    "observed_rate": 0.14285714285714285
+                  },
+                  {
+                    "bin": 2,
+                    "n": 4,
+                    "mean_probability": 0.23722086771885192,
+                    "observed_rate": 1.0
+                  },
+                  {
+                    "bin": 3,
+                    "n": 3,
+                    "mean_probability": 0.35639820584537035,
+                    "observed_rate": 0.3333333333333333
+                  },
+                  {
+                    "bin": 4,
+                    "n": 6,
+                    "mean_probability": 0.4359241396901921,
+                    "observed_rate": 0.6666666666666666
+                  },
+                  {
+                    "bin": 5,
+                    "n": 4,
+                    "mean_probability": 0.562256514220752,
+                    "observed_rate": 0.75
+                  },
+                  {
+                    "bin": 6,
+                    "n": 5,
+                    "mean_probability": 0.6480897737199578,
+                    "observed_rate": 1.0
+                  },
+                  {
+                    "bin": 7,
+                    "n": 6,
+                    "mean_probability": 0.7511515048105624,
+                    "observed_rate": 1.0
+                  },
+                  {
+                    "bin": 8,
+                    "n": 4,
+                    "mean_probability": 0.8663218056103928,
+                    "observed_rate": 1.0
+                  },
+                  {
+                    "bin": 9,
+                    "n": 16,
+                    "mean_probability": 0.9808760223730969,
+                    "observed_rate": 0.875
+                  }
+                ],
+                "coverage_95_on_scored": 0.8935185185185185,
+                "mae_in_tolerance_units_on_scored": 0.11503227933725364
+              },
+              "stable_correlated": {
+                "planned": 216,
+                "scored": 216,
+                "abstentions": 0,
+                "positives_all": 16,
+                "positives_scored": 16,
+                "coverage_fraction": 1.0,
+                "abstention_reasons": {},
+                "brier": 0.05915394469953544,
+                "classification": {
+                  "n": 216,
+                  "tp": 8,
+                  "fp": 10,
+                  "fn": 8,
+                  "tn": 190,
+                  "precision": 0.4444444444444444,
+                  "recall": 0.5,
+                  "f1": 0.47058823529411764
+                },
+                "paired": {
+                  "n": 216,
+                  "model_brier": 0.05915394469953544,
+                  "baseline_brier": 0.06944444444444445
+                },
+                "gaussian_persistence_shared_sigma": {
+                  "n": 216,
+                  "model_brier": 0.05915394469953544,
+                  "baseline_brier": 0.05351495578062168
+                },
+                "baseline_own_subset": {
+                  "n": 216,
+                  "abstentions": 0,
+                  "brier": 0.06944444444444445,
+                  "classification": {
+                    "n": 216,
+                    "tp": 8,
+                    "fp": 7,
+                    "fn": 8,
+                    "tn": 193,
+                    "precision": 0.5333333333333333,
+                    "recall": 0.5,
+                    "f1": 0.5161290322580645
+                  }
+                },
+                "ece_10_bins": 0.0527581720947235,
+                "reliability_bins": [
+                  {
+                    "bin": 0,
+                    "n": 175,
+                    "mean_probability": 0.007124373626962973,
+                    "observed_rate": 0.017142857142857144
+                  },
+                  {
+                    "bin": 1,
+                    "n": 9,
+                    "mean_probability": 0.14741835838379178,
+                    "observed_rate": 0.2222222222222222
+                  },
+                  {
+                    "bin": 2,
+                    "n": 5,
+                    "mean_probability": 0.24742702335513647,
+                    "observed_rate": 0.0
+                  },
+                  {
+                    "bin": 3,
+                    "n": 6,
+                    "mean_probability": 0.3518930226734495,
+                    "observed_rate": 0.16666666666666666
+                  },
+                  {
+                    "bin": 4,
+                    "n": 3,
+                    "mean_probability": 0.43436410079801746,
+                    "observed_rate": 0.6666666666666666
+                  },
+                  {
+                    "bin": 5,
+                    "n": 3,
+                    "mean_probability": 0.5422543255967642,
+                    "observed_rate": 0.6666666666666666
+                  },
+                  {
+                    "bin": 6,
+                    "n": 3,
+                    "mean_probability": 0.6847762238262699,
+                    "observed_rate": 0.0
+                  },
+                  {
+                    "bin": 7,
+                    "n": 7,
+                    "mean_probability": 0.7508713583688361,
+                    "observed_rate": 0.5714285714285714
+                  },
+                  {
+                    "bin": 8,
+                    "n": 5,
+                    "mean_probability": 0.8480459257880449,
+                    "observed_rate": 0.4
+                  }
+                ],
+                "coverage_95_on_scored": 0.8194444444444444,
+                "mae_in_tolerance_units_on_scored": 0.12241512420538116
+              },
+              "step": {
+                "planned": 216,
+                "scored": 216,
+                "abstentions": 0,
+                "positives_all": 70,
+                "positives_scored": 70,
+                "coverage_fraction": 1.0,
+                "abstention_reasons": {},
+                "brier": 0.19787767002731144,
+                "classification": {
+                  "n": 216,
+                  "tp": 28,
+                  "fp": 3,
+                  "fn": 42,
+                  "tn": 143,
+                  "precision": 0.9032258064516129,
+                  "recall": 0.4,
+                  "f1": 0.5544554455445545
+                },
+                "paired": {
+                  "n": 216,
+                  "model_brier": 0.19787767002731144,
+                  "baseline_brier": 0.3194444444444444
+                },
+                "gaussian_persistence_shared_sigma": {
+                  "n": 216,
+                  "model_brier": 0.19787767002731144,
+                  "baseline_brier": 0.2924049447116889
+                },
+                "baseline_own_subset": {
+                  "n": 216,
+                  "abstentions": 0,
+                  "brier": 0.3194444444444444,
+                  "classification": {
+                    "n": 216,
+                    "tp": 11,
+                    "fp": 10,
+                    "fn": 59,
+                    "tn": 136,
+                    "precision": 0.5238095238095238,
+                    "recall": 0.15714285714285714,
+                    "f1": 0.24175824175824176
+                  }
+                },
+                "ece_10_bins": 0.18910928863720852,
+                "reliability_bins": [
+                  {
+                    "bin": 0,
+                    "n": 168,
+                    "mean_probability": 0.007480889688771616,
+                    "observed_rate": 0.2261904761904762
+                  },
+                  {
+                    "bin": 1,
+                    "n": 5,
+                    "mean_probability": 0.1351928227905376,
+                    "observed_rate": 0.2
+                  },
+                  {
+                    "bin": 2,
+                    "n": 4,
+                    "mean_probability": 0.25293008151701357,
+                    "observed_rate": 0.0
+                  },
+                  {
+                    "bin": 3,
+                    "n": 7,
+                    "mean_probability": 0.3281893707774299,
+                    "observed_rate": 0.42857142857142855
+                  },
+                  {
+                    "bin": 4,
+                    "n": 1,
+                    "mean_probability": 0.4491961980603387,
+                    "observed_rate": 0.0
+                  },
+                  {
+                    "bin": 5,
+                    "n": 1,
+                    "mean_probability": 0.5284431113359751,
+                    "observed_rate": 1.0
+                  },
+                  {
+                    "bin": 6,
+                    "n": 3,
+                    "mean_probability": 0.6547882469878923,
+                    "observed_rate": 0.6666666666666666
+                  },
+                  {
+                    "bin": 7,
+                    "n": 3,
+                    "mean_probability": 0.7395016743259025,
+                    "observed_rate": 0.6666666666666666
+                  },
+                  {
+                    "bin": 8,
+                    "n": 1,
+                    "mean_probability": 0.877866548801516,
+                    "observed_rate": 1.0
+                  },
+                  {
+                    "bin": 9,
+                    "n": 23,
+                    "mean_probability": 0.9899538424669754,
+                    "observed_rate": 0.9565217391304348
+                  }
+                ],
+                "coverage_95_on_scored": 0.2916666666666667,
+                "mae_in_tolerance_units_on_scored": 0.602878906943933
+              }
+            }
+          },
+          "head_comparison_on_common_forecasts": {
+            "n": 1512,
+            "core_ols_brier": 0.10899046121448273,
+            "maintenance_policy_brier": 0.10807666417133342
+          }
+        },
+        "python": "3.14.4",
+        "manifest_sha256": "108b3eafbd145385c9d05c4acb02d9382a2d979c819518060019e4895b734cb1"
+      }
+    },
+    "EXP-06": {
+      "source_filename": "report.json",
+      "source_sha256": "90ced0429e2096f2f9cdf8143b0f8bbf5d2e79f002bf92eca013b76fcaeb2fff",
+      "selected_report_fields": {
+        "execution_status": "COMPLETE",
+        "experiment": "EXP-06",
+        "scope": "Controlled synthetic technical round-trip, not final validation",
+        "cases": [
+          {
+            "aas_id": "AAS_PTWIN_EXP06_101",
+            "sdk_normalization": {
+              "result": "PASS",
+              "expected_critical_entries": 129,
+              "preserved": 129,
+              "preserved_fraction": 1.0,
+              "missing": [],
+              "extra": [],
+              "changed": []
+            },
+            "aasx_read": {
+              "result": "PASS",
+              "expected_critical_entries": 129,
+              "preserved": 129,
+              "preserved_fraction": 1.0,
+              "missing": [],
+              "extra": [],
+              "changed": []
+            },
+            "target_read": {
+              "result": "PASS",
+              "expected_critical_entries": 129,
+              "preserved": 129,
+              "preserved_fraction": 1.0,
+              "missing": [],
+              "extra": [],
+              "changed": []
+            },
+            "source_critical_sha256": "887db2a4cf918a6ed0ec32f9f3350d4f523be3b197dbb98e096274c36c74a04b",
+            "package_file": "AAS_PTWIN_EXP06_101.aasx",
+            "package_sha256": "74b6159797dce8f0f922b2e69875caebe98d383b999b4fb7868a67e49ba28a3e",
+            "calibration_events": 2,
+            "accepted_document_references": 2
+          },
+          {
+            "aas_id": "AAS_PTWIN_EXP06_102",
+            "sdk_normalization": {
+              "result": "PASS",
+              "expected_critical_entries": 43,
+              "preserved": 43,
+              "preserved_fraction": 1.0,
+              "missing": [],
+              "extra": [],
+              "changed": []
+            },
+            "aasx_read": {
+              "result": "PASS",
+              "expected_critical_entries": 43,
+              "preserved": 43,
+              "preserved_fraction": 1.0,
+              "missing": [],
+              "extra": [],
+              "changed": []
+            },
+            "target_read": {
+              "result": "PASS",
+              "expected_critical_entries": 43,
+              "preserved": 43,
+              "preserved_fraction": 1.0,
+              "missing": [],
+              "extra": [],
+              "changed": []
+            },
+            "source_critical_sha256": "f42d70c4ab0fbdb5236decc71f09e8f5742c9bba5521d892d0c216c4a53f8d8f",
+            "package_file": "AAS_PTWIN_EXP06_102.aasx",
+            "package_sha256": "29e6cb0ce40c59ada025202d2a45b0c4b141da4c3b7e4230cd7c50a2228d1be6",
+            "calibration_events": 0,
+            "accepted_document_references": 0
+          }
+        ],
+        "criterion": "100% of declared critical entries preserved at every checked boundary",
+        "git": {
+          "commit": "f0978fbc77dfc346de79eeedd67c2afc094386ec",
+          "working_tree_dirty": null,
+          "source": "caller_supplied_not_verified"
+        },
+        "python": "3.11.18",
+        "fixture_sha256": "6fceb1363e7827b8d6c8cd1c3c96c98cf636e0154d54f63a8e9693a525882185"
+      }
+    },
+    "EXP-03-complementary": {
+      "source_filename": "exp03-complementario.xml",
+      "source_sha256": "c0cba8ff9682e311d8ea7860160caab93c07dfca48494b5d34727a3312ba3197",
+      "tests": [
+        {
+          "name": "test_duplicate_pdf_rejected",
+          "passed": true
+        },
+        {
+          "name": "test_accept_out_of_tolerance",
+          "passed": true
+        }
+      ]
+    },
+    "EXP-07": {
+      "source": "Participant-reported task completion recorded in the project archive",
+      "tasks": [
+        "CERT",
+        "TRACE"
+      ],
+      "completed": true,
+      "reported_upper_bounds_minutes": [
+        3,
+        5
+      ],
+      "exact_timing": false,
+      "comparative_study": false
+    }
+  }
+}

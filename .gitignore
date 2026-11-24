@@ -1,5 +1,6 @@
 # Environment
 .env
+compose.ensayo.yml
 
 # Python
 __pycache__/
