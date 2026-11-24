@@ -22,4 +22,3 @@ The entries below are historical checkpoints, not the current delivery status.
 - Definition of Done, Contributing guide, Issue/PR templates.
 
 <!-- Add a new "## [Sprint N]" section at the end of each sprint. -->
-
