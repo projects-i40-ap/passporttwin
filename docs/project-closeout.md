@@ -1,6 +1,6 @@
 # Plan operativo de cierre · 02/11/2026
 
-> Estado histórico de planificación. El alcance completado y los límites del MVP a 24/11/2026 se describen en el [README](../README.md) y en el [cierre de evaluación](experiments/mvp-final-results.md).
+> Historical planning status. The completed scope and limitations of the MVP as of 24 November 2026 are described in the [README](../README.md) and [evaluation closeout](experiments/mvp-final-results.md).
 
 Encargo de Pau: comenzar la comprobación integrada y preparación del cierre; incluir mejoras de frontend/usabilidad, experimentos, memoria, metodología y defensa. **Los datos reales son opcionales y no bloquean**. Por defecto se trabaja con sintéticos identificados como tales. Encontrar datos reales no los convierte automáticamente en una muestra suficiente para todos los EXP.
 
