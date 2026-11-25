@@ -1,35 +1,35 @@
-# Cierre de evaluación del MVP
+# MVP evaluation closeout
 
-Actualizado el 24/11/2026 a partir de los informes conservados para la memoria. La tarjeta de experimentos se cerró con los siete recorridos y el alcance acordado. No se han repetido esos experimentos al actualizar esta documentación.
+Updated on 24 November 2026 from the reports archived for the thesis. The experiments task was closed after the seven workflows, within the agreed scope. These experiments have not been rerun for this documentation update.
 
-## Resultados y conclusiones
+## Results and conclusions
 
-| EXP | Evidencia | Interpretación y límite |
+| EXP | Evidence | Interpretation and limitation |
 | --- | --- | --- |
-| 01 | 168/168 coincidencias: 162 valores presentes y seis ausencias esperadas, en 24 PDF sintéticos de tres diseños. | Resultado del extractor determinista sobre el corpus ensayado. No mide OCR ni extracción asistida por LLM de documentos arbitrarios. |
-| 02 | 27 casos: 18 vinculaciones y nueve abstenciones correctas; tres series ausentes, tres desconocidas y tres ambiguas. | Se preserva la decisión humana cuando no existe identidad inequívoca. Catálogo sintético de tres instrumentos. |
-| 03 | Reglas esperadas en 24 PDF: 21 alertas y tres casos sin alerta. Dos comprobaciones complementarias superadas. | Mismo PDF con otro nombre rechazado con HTTP 409/R-DUP-01; aceptación de error −0,128 bar con tolerancia 0,1 bar registrada como fuera de tolerancia en calibración, instrumento y auditoría. No demuestra exclusión de duplicados bajo concurrencia. |
-| 04 | 576 trayectorias; MAE normalizado global M1 0,285 frente a B0/B1 0,329. | A 30 días: 0,198 frente a 0,160. Mejora a 60/90 días, pero no cumple mejora comparativa en todos los horizontes. |
-| 05 | Brier pareado 0,108 frente a 0,154 sobre 1.512 predicciones; 216 abstenciones y cobertura de estimación 87,5 %. | Precisión 55,7 %, sensibilidad 49,8 % y F1 0,526 al umbral 0,5. Intervalos nominales del 95 % con cobertura observada 77,7 %: no se presentan probabilidades calibradas para uso industrial. |
-| 06 | Dos casos AASX: 129/129 y 43/43 entradas críticas preservadas en cada frontera evaluada. | Perfil controlado entre dos repositorios BaSyx vacíos. El resultado no certifica cualquier implementación AAS/IDTA ni cualquier contenido binario. |
-| 07 | CERT y TRACE completadas; tiempos comunicados inferiores a 3 y 5 minutos. | Comprobación práctica del participante, sin cronometraje exacto. Se da por cerrada en ese alcance; no es un estudio comparativo AB/BA ni una demostración estadística de ahorro de tiempo. |
+| 01 | 168/168 matches: 162 present values and six expected missing values, across 24 synthetic PDFs in three layouts. | Deterministic extractor results on the evaluated corpus. Does not measure OCR or LLM-assisted extraction from arbitrary documents. |
+| 02 | 27 cases: 18 correct links and nine correct abstentions; three missing, three unknown and three ambiguous serial numbers. | Preserves human decision-making when identity is not unambiguous. Synthetic catalog of three instruments. |
+| 03 | Expected rules in 24 PDFs: 21 alerts and three cases without alerts. Two supplementary checks passed. | The same PDF under a different filename was rejected with HTTP 409/R-DUP-01; acceptance of an error of −0.128 bar against a tolerance of 0.1 bar was recorded as out of tolerance in the calibration, instrument and audit trail. Does not demonstrate duplicate prevention under concurrency. |
+| 04 | 576 trajectories; overall normalized MAE of 0.285 for M1 versus 0.329 for B0/B1. | At 30 days: 0.198 versus 0.160. Improves at 60/90 days, but does not meet the comparative improvement criterion at every horizon. |
+| 05 | Paired Brier score of 0.108 versus 0.154 across 1,512 predictions; 216 abstentions and estimation coverage of 87.5%. | Precision 55.7%, recall 49.8% and F1 0.526 at a threshold of 0.5. Nominal 95% intervals achieved 77.7% observed coverage: probabilities are not presented as calibrated for industrial use. |
+| 06 | Two AASX cases: 129/129 and 43/43 critical entries preserved at every evaluated boundary. | Controlled profile between two empty BaSyx repositories. Does not certify every AAS/IDTA implementation or arbitrary binary content. |
+| 07 | CERT and TRACE completed; reported times below 3 and 5 minutes. | Practical participant check without exact timing. Closed within that scope; not an AB/BA comparative study or statistical evidence of time savings. |
 
-## Procedencia y versiones
+## Provenance and versions
 
-Los informes documentales y AASX registran `f0978fbc77dfc346de79eeedd67c2afc094386ec`. En el informe AASX, el commit es un dato aportado por el ejecutor (`caller_supplied_not_verified`), no una verificación independiente del árbol de trabajo. Las pruebas complementarias de EXP-03 registran la misma revisión.
+The document and AASX reports record `f0978fbc77dfc346de79eeedd67c2afc094386ec`. In the AASX report, the commit was supplied by the operator (`caller_supplied_not_verified`), not independently verified against the working tree. The supplementary EXP-03 tests record the same revision.
 
-La síntesis pública de los informes automatizados se conserva en [el paquete de resultados](../../experiments/results/mvp-closeout-2026-11-24.json). Incluye métricas seleccionadas sin recalcularlas y el SHA-256 de cada informe fuente local. Es una publicación resumida, no el corpus completo ni una promesa de reproducción a partir de ese JSON. Los originales, corpus y capturas se archivaron para la memoria; no se publican aquí rutas personales, certificados reales ni credenciales.
+The public summary of the automated reports is preserved in the [results package](../../experiments/results/mvp-closeout-2026-11-24.json). It contains selected metrics without recalculation and the SHA-256 of each local source report. This is a summarized publication, not the complete corpus or a promise of reproducibility from that JSON alone. Originals, the corpus and screenshots were archived for the thesis; personal paths, real certificates and credentials are not published here.
 
-EXP-04/05 utilizaron una cohorte sintética de tres familias y ocho escenarios, con 24 trayectorias por combinación, ocho observaciones históricas y tres futuras por trayectoria. Los horizontes de una trayectoria están correlacionados. EXP-04 ejecutó métodos numéricos extraídos del código; EXP-05 importó servicios de riesgo. No fueron pruebas de extremo a extremo de la aplicación desplegada.
+EXP-04/05 used a synthetic cohort of three families and eight scenarios, with 24 trajectories per combination, eight historical observations and three future observations per trajectory. Horizons from the same trajectory are correlated. EXP-04 executed numerical methods extracted from the code; EXP-05 imported risk services. They were not end-to-end tests of the deployed application.
 
-EXP-07 se sustenta en el registro de tareas y el resultado comunicado por Pau. No se han inventado tiempos exactos, participantes adicionales ni observaciones de un estudio formal.
+EXP-07 is supported by the task record and the outcome reported by Pau. No exact times, additional participants or observations from a formal study have been invented.
 
-## Relación con los protocolos anteriores
+## Relationship to earlier protocols
 
-Los documentos [de preparación](final-execution-readiness.md) y la [matriz histórica](final-experiments-matrix.md) reflejan el estado de planificación del 2 de noviembre y anteriores. Se conservan como antecedentes. El protocolo formal de [EXP-07](exp07-traceability-study.md) tiene un alcance mayor que la comprobación finalmente realizada; ese estudio comparativo sigue siendo una posible evaluación futura.
+The [readiness document](final-execution-readiness.md) and [historical matrix](final-experiments-matrix.md) reflect planning on 2 November and earlier. They are retained as background. The formal [EXP-07 protocol](exp07-traceability-study.md) has a broader scope than the check ultimately performed; that comparative study remains a possible future evaluation.
 
-Los runners y sus guías permanecen disponibles para nuevas evaluaciones. Una nueva ejecución debe registrar su propio commit, datos, fecha, parámetros y desviaciones. No trasladar los resultados de esta cohorte a otros formatos, modelos, versiones o instalaciones sin comprobarlo.
+The runners and their guides remain available for new evaluations. Each new run must record its own commit, data, date, parameters and deviations. Do not transfer this cohort's results to other formats, models, versions or installations without verification.
 
-## Qué queda fuera del cierre
+## Outside the closeout scope
 
-La validación con flotas industriales, certificación metrológica, calibración de probabilidades en datos reales, evaluación completa de IA/OCR/RAG, concurrencia, restauración productiva y estudio formal de usabilidad quedan fuera de las conclusiones del MVP. El cierre académico tampoco acredita una patente ni un producto industrial certificado.
+Validation with industrial fleets, metrological certification, probability calibration on real data, comprehensive AI/OCR/RAG evaluation, concurrency, production restoration and a formal usability study are outside the MVP's conclusions. Academic completion also does not establish a granted patent or a certified industrial product.
