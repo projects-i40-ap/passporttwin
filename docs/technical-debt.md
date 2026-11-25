@@ -1,6 +1,6 @@
 # Registro de deuda técnica de PassportTwin
 
-> Nota de lectura, 24/11/2026: este registro conserva el estado histórico de noviembre. El [README actual](../README.md) y el [cierre de evaluación](experiments/mvp-final-results.md) describen el MVP terminado. No se han revalidado aquí todos los hallazgos ni se declaran resueltas las deudas de robustez industrial por cerrar el MVP.
+> Reading note, 24 November 2026: this register preserves the historical November status. The [current README](../README.md) and [evaluation closeout](experiments/mvp-final-results.md) describe the completed MVP. Not all findings have been revalidated here, and completing the MVP does not resolve industrial robustness debt.
 
 Actualizado: **02/11/2026**. Inventario técnico central; incluye defectos confirmados, deuda de robustez/mantenimiento y revisiones pendientes, indicando la diferencia. No equivale al estado oficial de tarjetas de Notion ni declara tareas asignadas. Fuente: `main` `823a4bb`, [comprobación integrada](verification/integrated-2026-11-02.md) e inspección del código/configuración. Crear este registro no corrige hallazgos: consultar el estado y los commits de cada fila. Integraciones verificadas después en `main` `602b659`: #33 ha propagado #30/#31 a main.
 

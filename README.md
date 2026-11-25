@@ -1,104 +1,104 @@
 # PassportTwin
 
-**Pasaporte digital para la trazabilidad y el seguimiento del estado de instrumentos.**
+**A digital passport for instrument traceability and condition monitoring.**
 
-Trabajo de Fin de Máster en Industria 4.0 · Universitat Politècnica de Catalunya (UPC) · 2026
+Master's Final Project in Industry 4.0 · Universitat Politècnica de Catalunya (UPC) · 2026
 
-Desarrollado por **[Alexander Castillo](https://github.com/alexanderj-castillo)** y **[Pau Modolell](https://github.com/paumr90)**.
+Developed by **[Alexander Castillo](https://github.com/alexanderj-castillo)** and **[Pau Modolell](https://github.com/paumr90)**.
 
-**Estado a 24 de noviembre de 2026: MVP académico completado.** La plataforma integra inventario, pasaportes, revisión de certificados, historial de calibración, auditoría, proyección AAS e indicadores de estado. La evaluación acordada EXP-01–07 está cerrada con el alcance y las limitaciones descritos abajo. La memoria del TFM ha sido entregada. Este cierre no supone certificación metrológica, validación industrial ni disponibilidad de un servicio comercial.
+**Status as of 24 November 2026: academic MVP completed.** The platform integrates inventory, passports, certificate review, calibration history, audit trails, AAS projections and condition indicators. The agreed EXP-01–07 evaluation is complete within the scope and limitations described below. The Master's thesis has been submitted. This milestone does not imply metrological certification, industrial validation or the availability of a commercial service.
 
-[Puesta en marcha](#puesta-en-marcha) · [Resultados](docs/experiments/mvp-final-results.md) · [Operación y entornos](docs/mvp-operation.md) · [Dashboard](bi/README.md) · [Próximos pasos](#límites-y-próximos-pasos)
+[Getting started](#getting-started) · [Results](docs/experiments/mvp-final-results.md) · [Operations and environments](docs/mvp-operation.md) · [Dashboard](bi/README.md) · [Next steps](#limitations-and-next-steps)
 
-## Qué resuelve
+## The problem it addresses
 
-La identidad de un instrumento, sus certificados y su historial suelen quedar repartidos entre archivos y aplicaciones. PassportTwin reúne esa información en un pasaporte consultable y conserva la relación entre el documento original, los datos revisados y el estado del activo.
+Instrument identity, certificates and history are often scattered across files and applications. PassportTwin brings this information together in a searchable passport and preserves the relationship between the original document, reviewed data and asset state.
 
-Un recorrido completo permite localizar un instrumento con calibración vencida, incorporar un certificado, detectar una discrepancia de identidad, corregir el dato mediante revisión humana y registrar la nueva calibración. El pasaporte refleja el historial actualizado; la auditoría permite reconstruir la corrección y la incorporación sin modificar el PDF original.
+A complete workflow allows an operator to find an instrument with an overdue calibration, upload a certificate, detect an identity mismatch, correct the data through human review and record the new calibration. The passport reflects the updated history; the audit trail makes it possible to reconstruct the correction and ingestion without modifying the original PDF.
 
-El piloto contiene **16 instrumentos sintéticos**: ocho transmisores de presión (PT-101–108), cuatro sondas de temperatura (TT-201–204) y cuatro electrodos de pH (PH-301–304). Incluye vencimiento, revisión documental, historial insuficiente, mantenimiento, incidencias y retirada. Son casos de demostración, no una flota industrial validada.
+The pilot contains **16 synthetic instruments**: eight pressure transmitters (PT-101–108), four temperature probes (TT-201–204) and four pH electrodes (PH-301–304). It covers overdue calibration, document review, insufficient history, maintenance, incidents and retirement. These are demonstration cases, not a validated industrial fleet.
 
-## Funcionalidades implementadas
+## Implemented capabilities
 
-| Área | Funcionalidad disponible |
+| Area | Available functionality |
 | --- | --- |
-| Inicio e inventario | Búsqueda por nombre, etiqueta, serie o ubicación; agrupación por ubicación, filtros y prioridad por estado de calibración. |
-| Pasaporte | Identificación, fabricante, ubicación, estado operativo, calibración, Health Score y riesgo; vistas separadas para los historiales y regreso al resumen. |
-| Documentos | Carga y procesamiento, visor y descarga del original, extracción, revisión, corrección, revalidación e incorporación explícita al historial. |
-| Trazabilidad | SHA-256, valores extraídos y revisados, eventos de auditoría y consulta de cambios. El hash permite comprobar integridad; no acredita por sí solo la autenticidad del emisor. |
-| Ciclo de vida | Calibraciones, mantenimiento e incidencias. La vigencia se distingue del estado operativo y del resultado metrológico. |
-| Interoperabilidad | Cuatro submodelos AAS en Eclipse BaSyx y reconstrucción desde el estado canónico; herramienta experimental de intercambio AASX. |
-| Acceso | UUID público estable y descarga de QR/etiqueta. Soporte de fotografía; la última revisión simplifica la cabecera del pasaporte. |
-| Analítica | Health Score explicable, riesgo experimental a 30/60/90 días y métodos de referencia para evaluar deriva. |
-| Panel de flota | Metabase con indicadores, prioridades, vencimientos, filtros, enlaces al pasaporte y control de vigencia de resultados guardados. |
-| IA documental | Extracción asistida y consulta con recuperación de evidencias; integración opcional con un servidor local compatible con `llama.cpp`. |
+| Home and inventory | Search by name, plant tag, serial number or location; location groups, filters and prioritization by calibration status. |
+| Passport | Identity, manufacturer, location, operational state, calibration, Health Score and risk; separate history views with navigation back to the summary. |
+| Documents | Upload and processing, original PDF viewer and download, extraction, review, correction, revalidation and explicit ingestion into the history. |
+| Traceability | SHA-256, extracted and reviewed values, audit events and change inspection. A hash supports integrity checks; it does not by itself establish issuer authenticity. |
+| Lifecycle | Calibrations, maintenance and incidents. Calibration validity is distinguished from operational state and metrological results. |
+| Interoperability | Four AAS submodels in Eclipse BaSyx and reconstruction from canonical state; an experimental AASX exchange tool. |
+| Access | Stable public UUID and QR/label download. Instrument photo support; the latest revision simplifies the passport header. |
+| Analytics | Explainable Health Score, experimental risk at 30/60/90 days and reference methods for drift evaluation. |
+| Fleet dashboard | Metabase indicators, priorities, deadlines, filters, passport links and freshness checks for saved results. |
+| Document AI | Assisted extraction and queries with evidence retrieval; optional integration with a local server compatible with `llama.cpp`. |
 
-Superar las reglas documentales y **añadir una calibración al historial son pasos distintos**. La validación documental no certifica metrológicamente el instrumento. Los documentos incorporados se consultan en modo de solo lectura en el flujo de revisión.
+Passing document rules and **adding a calibration to the history are separate steps**. Document validation does not provide metrological certification of the instrument. Ingested documents are read-only in the review workflow.
 
-## Arquitectura y enfoque RAMI 4.0
+## Architecture and RAMI 4.0 approach
 
-RAMI 4.0 se utilizó como marco para ordenar la relación entre activo físico, integración, comunicación, información, funciones y uso operativo. La organización por capas es una decisión de diseño inspirada en ese marco; no constituye certificación de conformidad.
+RAMI 4.0 provided a framework for organizing the relationship between the physical asset, integration, communication, information, functions and operational use. The layered organization is a design choice informed by that framework; it is not a certification of compliance.
 
 ```mermaid
 flowchart LR
-    Input[Instrumentos, CSV y documentos] --> API[FastAPI: extracción, reglas y revisión]
-    UI[React: inventario y pasaporte] <--> API
-    API <--> DB[(PostgreSQL: estado canónico)]
-    API --> AAS[Proyección AAS en Eclipse BaSyx]
-    DB --> Models[Health Score y riesgo experimental]
+    Input[Instruments, CSV and documents] --> API[FastAPI: extraction, rules and review]
+    UI[React: inventory and passport] <--> API
+    API <--> DB[(PostgreSQL: canonical state)]
+    API --> AAS[AAS projection in Eclipse BaSyx]
+    DB --> Models[Health Score and experimental risk]
     Models --> UI
-    Models --> Snapshots[Snapshots analíticos]
-    DB --> BI[Metabase: flota]
+    Models --> Snapshots[Analytical snapshots]
+    DB --> BI[Metabase: fleet]
     Snapshots --> BI
-    DB --> Retrieval[Recuperación de evidencias]
-    Retrieval --> LLM[LLM local opcional]
+    DB --> Retrieval[Evidence retrieval]
+    Retrieval --> LLM[Optional local LLM]
 ```
 
-**PostgreSQL es la fuente de verdad.** BaSyx representa una proyección reconstruible. `POST /api/v1/instruments/{id}/sync` reconstruye `Nameplate`, `OperationalState`, `CalibrationHistory` y `DocumentProvenance`; `SYNCED` exige completar las cuatro proyecciones.
+**PostgreSQL is the source of truth.** BaSyx holds a reconstructible projection. `POST /api/v1/instruments/{id}/sync` rebuilds `Nameplate`, `OperationalState`, `CalibrationHistory` and `DocumentProvenance`; `SYNCED` requires all four projections to complete.
 
-`Nameplate` utiliza una referencia semántica externa. Los otros tres submodelos emplean identificadores propios del MVP: no son plantillas IDTA normalizadas. El intercambio evaluado usa AAS v2 y un perfil crítico explícito.
+`Nameplate` uses an external semantic reference. The other three submodels use MVP-specific identifiers: they are not standardized IDTA templates. The evaluated exchange uses AAS v2 and an explicit profile of critical entries.
 
-La implementación combina **Python/FastAPI, PostgreSQL, React/Vite, Eclipse BaSyx, Metabase y Docker Compose**. No incluye adquisición continua de sensores ni control automático del instrumento físico.
+The implementation combines **Python/FastAPI, PostgreSQL, React/Vite, Eclipse BaSyx, Metabase and Docker Compose**. It does not include continuous sensor acquisition or automatic control of the physical instrument.
 
-## Cómo interpretar los indicadores
+## Interpreting the indicators
 
-### Calibración y Health Score
+### Calibration and Health Score
 
-El pasaporte distingue calibración vencida, próxima a vencer, en plazo y ausencia de historial. El Health Score de ciclo de vida combina penalizaciones configurables: estado de calibración (30 %), riesgo estimado (30 %), incidencias recientes (20 %) y calidad de datos (20 %). Son los pesos por defecto, no una norma metrológica. Si falta un componente requerido, el resultado se declara no calculable.
+The passport distinguishes overdue calibration, calibration due soon, current calibration and missing history. The lifecycle Health Score combines configurable penalties: calibration status (30%), estimated risk (30%), recent incidents (20%) and data quality (20%). These are default weights, not a metrological standard. If a required component is missing, the result is reported as not calculable.
 
-El contrato del pasaporte es `GET /api/v1/instruments/{id}/health-score`. El endpoint histórico de predicciones conserva otro contrato analítico y no debe confundirse con este Health Score.
+The passport contract is `GET /api/v1/instruments/{id}/health-score`. The legacy predictions endpoint retains a different analytical contract and must not be confused with this Health Score.
 
-### Riesgo experimental
+### Experimental risk
 
-El modelo ajusta una tendencia lineal del error y una aproximación gaussiana de la incertidumbre predictiva. Estima la probabilidad de superar la tolerancia **en las fechas objetivo** a 30, 60 y 90 días, no la probabilidad acumulada de cualquier fallo durante el intervalo. Tras mantenimiento utiliza el historial posterior y puede abstenerse por datos insuficientes.
+The model fits a linear error trend and a Gaussian approximation of predictive uncertainty. It estimates the probability of exceeding tolerance **at the target dates** 30, 60 and 90 days ahead, not the cumulative probability of any failure during the interval. After maintenance, it uses subsequent history and may abstain when data is insufficient.
 
-Un instrumento puede estar vencido y tener riesgo estimado bajo. Una nueva calibración puede mejorar el Health Score sin cambiar el riesgo redondeado en pantalla. Un 0,0 % mostrado no garantiza ausencia de riesgo.
+An instrument can have overdue calibration and low estimated risk. A new calibration may improve the Health Score without changing the rounded risk shown on screen. A displayed 0.0% does not guarantee the absence of risk.
 
-### Pasaporte y Metabase
+### Passport and Metabase
 
-El pasaporte calcula con los datos disponibles en la consulta. Metabase utiliza también snapshots persistidos: cambiar los datos canónicos no renueva automáticamente todos los resultados analíticos guardados. Los estados de vigencia distinguen resultados actuales, ausentes y desactualizados.
+The passport calculates using the data available at query time. Metabase also uses persisted snapshots: changing canonical data does not automatically refresh every saved analytical result. Freshness states distinguish current, missing and stale results.
 
-Contratos: [Health Score](docs/architecture/lifecycle-health-v2.md), [riesgo](docs/architecture/tolerance-risk.md) y [snapshots](docs/architecture/analytics-snapshots.md).
+Contracts: [Health Score](docs/architecture/lifecycle-health-v2.md), [risk](docs/architecture/tolerance-risk.md) and [snapshots](docs/architecture/analytics-snapshots.md).
 
-## Evaluación del MVP
+## MVP evaluation
 
-Los siete experimentos se cerraron con datos sintéticos y una comprobación práctica de trazabilidad. El cierre describe el trabajo realizado; no significa que todos los modelos superasen todos los criterios comparativos.
+The seven experiments were completed using synthetic data and a practical traceability check. Completion describes the work performed; it does not mean every model met every comparative criterion.
 
-| Experimento | Resultado y límite principal |
+| Experiment | Result and main limitation |
 | --- | --- |
-| EXP-01 · Extracción | 168/168 coincidencias en 24 PDF de tres diseños sintéticos, incluidas seis ausencias esperadas. Evalúa el extractor determinista, no el rendimiento general de OCR/LLM. |
-| EXP-02 · Vinculación | 18 vínculos y nueve abstenciones correctos en 27 casos; identidades ambiguas enviadas a revisión. |
-| EXP-03 · Reglas | Reglas esperadas en los 24 PDF y dos comprobaciones complementarias superadas: duplicado por hash y aceptación fuera de tolerancia. |
-| EXP-04 · Deriva | MAE normalizado global 0,285 frente a 0,329 de las referencias. Mejoró a 60/90 días y empeoró a 30 días. |
-| EXP-05 · Riesgo | Brier pareado 0,108 frente a 0,154; cobertura de estimación 87,5 %. Los intervalos nominales del 95 % cubrieron el 77,7 % de las observaciones puntuadas. |
-| EXP-06 · AASX | Preservadas 129/129 y 43/43 entradas críticas en los dos casos y cada frontera evaluada. No certifica interoperabilidad universal. |
-| EXP-07 · Trazabilidad | CERT y TRACE completadas según el registro del participante. Tiempos estimados inferiores a 3 y 5 minutos; sin cronometraje exacto ni comparación formal de usabilidad. |
+| EXP-01 · Extraction | 168/168 matches across 24 PDFs in three synthetic layouts, including six expected missing values. Evaluates the deterministic extractor, not general OCR/LLM performance. |
+| EXP-02 · Matching | 18 correct links and nine correct abstentions across 27 cases; ambiguous identities sent for review. |
+| EXP-03 · Rules | Expected rules in all 24 PDFs and two supplementary checks passed: hash-based duplicates and out-of-tolerance acceptance. |
+| EXP-04 · Drift | Overall normalized MAE of 0.285 versus 0.329 for the baselines. Improved at 60/90 days and worsened at 30 days. |
+| EXP-05 · Risk | Paired Brier score of 0.108 versus 0.154; estimation coverage of 87.5%. Nominal 95% intervals covered 77.7% of scored observations. |
+| EXP-06 · AASX | 129/129 and 43/43 critical entries preserved in the two cases at every evaluated boundary. Does not certify universal interoperability. |
+| EXP-07 · Traceability | CERT and TRACE completed according to the participant record. Estimated times below 3 and 5 minutes; no exact timing or formal usability comparison. |
 
-El [informe de cierre](docs/experiments/mvp-final-results.md) identifica procedencia, alcance y límites. Son resultados de las revisiones registradas durante la evaluación, no una nueva ejecución sobre el último commit. Las funciones de IA añadidas posteriormente no heredan automáticamente esa validación.
+The [evaluation report](docs/experiments/mvp-final-results.md) identifies provenance, scope and limitations. These results belong to the revisions recorded during evaluation, not to a new run against the latest commit. AI capabilities added later do not automatically inherit that validation.
 
-## Puesta en marcha
+## Getting started
 
-Requisitos: Git, Docker con Compose v2 compatible con `up --wait` y Python 3.10+ para el lanzador. Las dependencias de aplicación se ejecutan en contenedores.
+Requirements: Git, Docker with Compose v2 supporting `up --wait`, and Python 3.10+ for the launcher. Application dependencies run in containers.
 
 ```powershell
 git clone https://github.com/projects-i40-ap/passporttwin.git
@@ -106,67 +106,67 @@ cd passporttwin
 py tools/dev.py start
 ```
 
-En Linux/macOS, sustituir `py` por `python3`. `start` crea `.env` desde `.env.example` solo si no existe, arranca PostgreSQL, aplica las migraciones de identidad/modelo, prepara la base interna de Metabase y construye/inicia los servicios. Las vistas BI se instalan por separado siguiendo su guía.
+On Linux/macOS, replace `py` with `python3`. `start` creates `.env` from `.env.example` only if it does not exist, starts PostgreSQL, applies the identity/model migrations, prepares Metabase's internal database and builds/starts the services. BI views are installed separately following their guide.
 
-| Servicio | URL local por defecto |
+| Service | Default local URL |
 | --- | --- |
-| Aplicación | http://localhost:5173 |
+| Application | http://localhost:5173 |
 | API / OpenAPI | http://localhost:8000/docs |
 | Metabase | http://localhost:3003 |
 
-Revisar `.env` antes de arrancar si se necesitan otros puertos o URLs. No publicar credenciales. Comprobar el arranque con `docker compose ps`.
+Review `.env` before starting if different ports or URLs are needed. Do not publish credentials. Check startup with `docker compose ps`.
 
-### Elegir los datos de demostración
+### Choosing demonstration data
 
-- **Piloto de 16 instrumentos:** seguir [operación del MVP](docs/mvp-operation.md), instalar las vistas y ejecutar el generador del piloto únicamente en un entorno aislado con fecha explícita.
-- **Demo mínima de cuatro instrumentos:** `py tools/dev.py demo` prepara vistas, genera `PTWIN-DEMO-*` y sus snapshots. Es una alternativa; no es necesaria para el piloto de 16. Ejecutarla sobre el piloto añade los cuatro casos al inventario.
+- **16-instrument pilot:** follow [MVP operations](docs/mvp-operation.md), install the views and run the pilot generator only in an isolated environment with an explicit reference date.
+- **Minimal four-instrument demo:** `py tools/dev.py demo` prepares views, creates `PTWIN-DEMO-*` and their snapshots. This is an alternative; it is not required for the 16-instrument pilot. Running it on the pilot adds the four cases to the inventory.
 
-Los generadores conservan registros existentes y no son comandos de restauración. No avanzan automáticamente las fechas de los casos ya creados.
+The generators preserve existing records and are not restore commands. They do not automatically advance the dates of cases that already exist.
 
-### Dashboard e IA opcional
+### Dashboard and optional AI
 
-Metabase necesita configuración inicial, conexión de datos y provisión de tarjetas: [instrucciones](bi/README.md). Arrancar contenedores no instala por sí solo el dashboard. Su ID depende de cada instancia.
+Metabase requires initial setup, a data connection and card provisioning: [instructions](bi/README.md). Starting containers does not install the dashboard by itself. Its ID depends on the instance.
 
-La IA local es opcional y está desactivada por defecto mediante `AI_LEGO_ENABLED`. Requiere configurar el servidor/modelo en `.env`. La consulta recupera evidencias y, si el modelo no está disponible, puede devolverlas sin respuesta generada (`OFFLINE_RETRIEVAL_ONLY`). Ver [.env.example](.env.example), [configuración](backend/app/core/config.py) y [servicio de consulta](backend/app/services/rag_service.py). No se garantiza compatibilidad con cualquier modelo ni interpretación correcta de cualquier PDF.
+Local AI is optional and disabled by default through `AI_LEGO_ENABLED`. It requires server/model configuration in `.env`. Queries retrieve evidence and, if the model is unavailable, can return it without a generated answer (`OFFLINE_RETRIEVAL_ONLY`). See [.env.example](.env.example), [configuration](backend/app/core/config.py) and the [query service](backend/app/services/rag_service.py). Compatibility with every model or correct interpretation of every PDF is not guaranteed.
 
-### Comprobaciones
+### Checks
 
-Ejecutar pruebas contra una base desechable, nunca sobre los datos de una demostración que se quiera conservar. Ver [pruebas backend](backend/tests/README.md), [BI](bi/README.md) y [.github/workflows](.github/workflows). Los informes históricos describen ejecuciones concretas, no un contador permanente de pruebas aprobadas.
+Run tests against a disposable database, never against demonstration data that must be preserved. See [backend tests](backend/tests/README.md), [BI](bi/README.md) and [.github/workflows](.github/workflows). Historical reports describe specific runs, not a permanent count of passing tests.
 
-## Límites y próximos pasos
+## Limitations and next steps
 
-El MVP queda cerrado en su alcance académico. La evolución industrial requiere:
+The MVP is complete within its academic scope. Industrial deployment requires:
 
-- Evaluación con certificados e historiales reales, diversidad de formatos, OCR y modelos locales; calibración de probabilidades y estudio formal de usabilidad.
-- Autenticación, autorización, secretos, despliegue seguro y observabilidad adecuados al entorno de destino.
-- Persistencia y recuperación AAS verificadas: BaSyx usa memoria en desarrollo; PostgreSQL conserva el estado canónico.
-- Reintentos de sincronización, restauración conjunta de base y originales, y pruebas de concurrencia en la incorporación documental.
-- Mayor alineación con plantillas semánticas estandarizadas y mantenimiento del entorno experimental AASX heredado.
-- Validación de criterios de reutilización y reacondicionamiento. El motor de recomendaciones de circularidad es una línea futura, no una función terminada.
+- Evaluation with real certificates and histories, varied formats, OCR and local models; probability calibration and a formal usability study.
+- Authentication, authorization, secret management, secure deployment and observability appropriate to the target environment.
+- Verified AAS persistence and recovery: BaSyx uses in-memory storage in development; PostgreSQL retains canonical state.
+- Synchronization retries, joint restoration of the database and original files, and concurrency tests for document ingestion.
+- Closer alignment with standardized semantic templates and maintenance of the legacy AASX experimental environment.
+- Validation of reuse and refurbishment criteria. The circularity recommendation engine is future work, not a completed feature.
 
-El [registro histórico de deuda técnica](docs/technical-debt.md) conserva hallazgos de desarrollo. Sus estados no deben confundirse con un inventario de defectos actuales revalidado íntegramente.
+The [historical technical debt register](docs/technical-debt.md) preserves development findings. Its statuses must not be mistaken for a fully revalidated inventory of current defects.
 
-## Desarrollo colaborativo y uso de IA
+## Collaborative development and AI use
 
-Ambos autores han trabajado mediante Git/PR y revisión de cambios, con asistencia de IA para diseño, implementación y comprobaciones. Las propuestas se contrastan con código, pruebas e informes: una respuesta generada no es evidencia de validación.
+Both authors worked through Git/PR and change review, with AI assistance for design, implementation and checks. Proposals are checked against code, tests and reports: a generated response is not validation evidence.
 
-Se distinguen la **IA incorporada al producto**, como asistencia documental y modelos analíticos, y la **IA utilizada durante el desarrollo**, bajo decisión y revisión humana. La metodología y sus aprendizajes forman parte del TFM. [Guía de contribución](CONTRIBUTING.md).
+The project distinguishes **AI incorporated into the product**, including document assistance and analytical models, from **AI used during development**, under human decision-making and review. The methodology and lessons learned form part of the thesis. [Contribution guide](CONTRIBUTING.md).
 
-## Estructura del repositorio
+## Repository structure
 
-| Directorio | Contenido |
+| Directory | Contents |
 | --- | --- |
-| `backend/` | API, modelos canónicos, servicios, scripts y pruebas. |
-| `frontend/` | Aplicación React/Vite. |
-| `bi/` | Vistas SQL y provisión de Metabase. |
-| `experiments/` | Protocolos, evaluadores, fixtures y resultados seleccionados. |
-| `ai/` | Desarrollo analítico y recursos de modelos. |
-| `infra/` | Esquema y migraciones PostgreSQL. |
-| `tools/` | Arranque local. |
-| `docs/` | Arquitectura, operación, evaluación y checkpoints históricos. |
+| `backend/` | API, canonical models, services, scripts and tests. |
+| `frontend/` | React/Vite application. |
+| `bi/` | SQL views and Metabase provisioning. |
+| `experiments/` | Protocols, evaluators, fixtures and selected results. |
+| `ai/` | Analytical development and model resources. |
+| `infra/` | PostgreSQL schema and migrations. |
+| `tools/` | Local startup utilities. |
+| `docs/` | Architecture, operations, evaluation and historical checkpoints. |
 
-## Autores y licencia
+## Authors and license
 
-**Alexander Castillo** y **Pau Modolell Rodríguez** · TFM del Máster en Industria 4.0, UPC.
+**Alexander Castillo** and **Pau Modolell Rodríguez** · Master's Final Project in Industry 4.0, UPC.
 
-Copyright © 2026. **Todos los derechos reservados.** Se comparte para revisión académica, demostración y portfolio. Reutilización, modificación, redistribución o comercialización requieren permiso escrito de ambos autores conforme a [LICENSE](LICENSE). Publicar el código no implica licencia de software libre ni acredita una patente concedida.
+Copyright © 2026. **All rights reserved.** Shared for academic review, demonstration and portfolio purposes. Reuse, modification, redistribution or commercialization require written permission from both authors under [LICENSE](LICENSE). Publishing the code does not grant an open-source license or establish that a patent has been granted.

@@ -1,12 +1,12 @@
-# Operación del MVP y separación de entornos
+# MVP operations and environment separation
 
-Estado documental: 24/11/2026. Esta guía acompaña al [README](../README.md). No ejecuta migraciones, siembras ni restauraciones por sí misma.
+Documentation status: 24 November 2026. This guide accompanies the [README](../README.md). It does not itself execute migrations, seed data or restore operations.
 
-## Un código, configuraciones y datos independientes
+## Shared code, independent configuration and data
 
-La copia principal, el ensayo y GitHub deben identificar el mismo commit cuando se quiera comparar su comportamiento. Tener el mismo código no implica tener las mismas bases de datos, PDFs, snapshots, modelos locales ni configuración de Metabase.
+The main local copy, rehearsal environment and GitHub should identify the same commit when comparing their behavior. Identical code does not imply identical databases, PDFs, snapshots, local models or Metabase configuration.
 
-Antes de actualizar cada copia:
+Before updating each copy:
 
 ```powershell
 git status --short --branch
@@ -16,13 +16,13 @@ git merge --ff-only origin/main
 git rev-parse HEAD
 ```
 
-Si hay cambios locales, revisarlos y preservarlos antes de integrar. Si no es posible el avance directo, resolver la divergencia en una rama; no usar un reset destructivo para igualar copias. Conservar `.env`, originales y volúmenes. Tras un cambio de código, reconstruir los servicios afectados si la instalación usa imágenes sin montaje de fuentes; un commit sincronizado no acredita que los contenedores estén usando la imagen actual.
+Review and preserve local changes before integration. If fast-forward is not possible, resolve the divergence on a branch; do not use a destructive reset to align copies. Preserve `.env`, originals and volumes. After code changes, rebuild affected services if the installation uses images without source mounts; matching commits do not prove that containers are running the current image.
 
-## Ensayo aislado
+## Isolated rehearsal environment
 
-En el entorno de ensayo utilizado para la demostración, el proyecto Compose se llama `ptwin-ensayo`. Un archivo local `compose.ensayo.yml` separa puertos de la instalación principal:
+The rehearsal environment used for the demonstration has the Compose project name `ptwin-ensayo`. A local `compose.ensayo.yml` file separates its ports from the main installation:
 
-| Servicio | Principal por defecto | Ensayo utilizado |
+| Service | Main installation defaults | Rehearsal environment used |
 | --- | --- | --- |
 | Frontend | 5173 | 15173 |
 | Backend | 8000 | 18000 |
@@ -30,9 +30,9 @@ En el entorno de ensayo utilizado para la demostración, el proyecto Compose se 
 | BaSyx | 4001 | 14001 |
 | Metabase | 3003 | 13003 |
 
-El override debe retirar los `container_name` fijos y sustituir, no añadir, los mapeos de puertos. El archivo es local y no se versiona. No basta cambiar el puerto del frontend: comprobar también proyectos, volúmenes y URLs del backend, QR y pasaporte.
+The override must remove fixed `container_name` values and replace, rather than append to, port mappings. This file is local and is not versioned. Changing only the frontend port is insufficient: also check projects, volumes and backend, QR and passport URLs.
 
-Si el override ya está configurado, en la terminal PowerShell del ensayo se pueden fijar las variables de Compose para que también las utilice `tools/dev.py`:
+If the override is already configured, set Compose variables in the rehearsal PowerShell terminal so that `tools/dev.py` also uses them:
 
 ```powershell
 $env:COMPOSE_PROJECT_NAME = 'ptwin-ensayo'
@@ -41,14 +41,14 @@ $env:COMPOSE_FILE = 'docker-compose.yml;compose.ensayo.yml'
 docker compose ps
 ```
 
-Estas variables afectan a esa terminal. Usar otra terminal para la instalación principal o retirarlas al cambiar de entorno. El estado del override y de `.env` debe verificarse antes de ejecutar comandos que escriban en la base de datos.
+These variables affect that terminal. Use a different terminal for the main installation or remove them when switching environments. Check the override and `.env` before running commands that write to the database.
 
-## Preparar el piloto de 16 instrumentos
+## Preparing the 16-instrument pilot
 
-Este procedimiento es para un entorno aislado preparado para datos sintéticos. No es necesario repetirlo para abrir una instalación que ya contiene el piloto.
+This procedure is for an isolated environment prepared for synthetic data. It does not need to be repeated to open an installation that already contains the pilot.
 
-1. Arrancar con `py tools/dev.py start`.
-2. Instalar las tablas/vistas analíticas sin generar los cuatro casos de la demo mínima. En PowerShell, con el usuario y base locales por defecto:
+1. Start with `py tools/dev.py start`.
+2. Install analytical tables/views without generating the four minimal-demo cases. In PowerShell, using the default local database user and name:
 
 ```powershell
 Get-Content -Raw infra/postgres/analytics_snapshot.sql | docker compose exec -T postgres psql -v ON_ERROR_STOP=1 -U passporttwin -d passporttwin
@@ -56,42 +56,42 @@ Get-Content -Raw bi/sql/fleet_overview.sql | docker compose exec -T postgres psq
 Get-Content -Raw bi/sql/fleet_analytics.sql | docker compose exec -T postgres psql -v ON_ERROR_STOP=1 -U passporttwin -d passporttwin
 ```
 
-Ejecutar cada paso comprobando que termina sin errores; adaptar usuario/base si la configuración no usa esos valores. No instalar vistas de aplicación en la base interna de Metabase.
+Check that each step completes without errors; adapt the user/database if the configuration uses different values. Do not install application views in Metabase's internal database.
 
-3. Crear el piloto con una fecha explícita. Este ejemplo reproduce el punto de referencia histórico del 10 de noviembre; no pretende que todos los estados permanezcan iguales al avanzar el calendario:
+3. Create the pilot with an explicit date. This example reproduces the historical reference point of 10 November; it does not imply that all statuses remain unchanged as time passes:
 
 ```powershell
 docker compose run --rm backend python -m scripts.seed_pilot_fleet --as-of 2026-11-10 --confirm-isolated
 ```
 
-El generador conserva los instrumentos existentes y muestra sus URLs. El parámetro `--confirm-isolated` expresa una confirmación del operador: no sustituye comprobar a qué base se conecta. No usar `py tools/dev.py demo` si se quiere conservar un inventario de solo 16: ese comando añade los cuatro `PTWIN-DEMO-*`.
+The generator preserves existing instruments and prints their URLs. `--confirm-isolated` expresses operator confirmation: it does not replace checking the database connection. Do not run `py tools/dev.py demo` if the inventory must remain at 16 instruments: that command adds the four `PTWIN-DEMO-*` cases.
 
-4. Configurar Metabase y provisionar las tarjetas según [bi/README.md](../bi/README.md). Los dashboards y sus identificadores pertenecen a cada instancia.
+4. Configure Metabase and provision its cards following [bi/README.md](../bi/README.md). Dashboards and their identifiers belong to each instance.
 
-## Actualizar resultados analíticos guardados
+## Refreshing saved analytical results
 
-El pasaporte consulta datos actuales; el panel de flota puede tener resultados guardados con fecha anterior. Para generar snapshots de toda la flota a la fecha actual del proceso:
+The passport queries current data; the fleet dashboard may contain results saved on an earlier date. To generate fleet-wide snapshots using the process's current date:
 
 ```powershell
 docker compose run --rm backend python -m scripts.refresh_analytics_snapshots --all
 ```
 
-Para un instrumento usar `--instrument-id ID`, obteniendo el ID en esa instalación. `--as-of AAAA-MM-DD` permite declarar una referencia explícita. Refrescar las consultas del dashboard después. Un snapshot actualizado no sustituye la validación de los datos que lo alimentan.
+For one instrument, use `--instrument-id ID`, obtaining the ID from that installation. `--as-of YYYY-MM-DD` sets an explicit reference date. Refresh dashboard queries afterwards. An up-to-date snapshot does not replace validation of its input data.
 
-## Demostración de revisión e incorporación
+## Demonstrating review and ingestion
 
-1. Comprobar estado, historial e indicadores del instrumento antes de empezar.
-2. Subir un certificado sintético con una discrepancia intencionada y procesarlo.
-3. Comparar el original con la referencia de identidad del caso; corregir el valor revisado, guardar y revalidar.
-4. Incorporar al historial y verificar que solo se crea una nueva calibración.
-5. Consultar el pasaporte y la auditoría; el original y su hash se conservan.
+1. Check the instrument's state, history and indicators before starting.
+2. Upload and process a synthetic certificate with an intentional discrepancy.
+3. Compare the original with the case's identity reference; correct the reviewed value, save and revalidate.
+4. Ingest it into the history and verify that only one new calibration is created.
+5. Inspect the passport and audit trail; the original and its hash are preserved.
 
-Si la identidad del documento no puede justificarse, no corregirla solo para que supere la regla. En una demostración, declarar la evidencia simulada. En operación real, resolver la discrepancia con evidencia autorizada.
+If the document's identity cannot be justified, do not correct it merely to pass a rule. In a demonstration, identify simulated evidence as such. In real operation, resolve the discrepancy using authorized evidence.
 
-Una prueba completa modifica el estado del caso. Para repetirla, usar una copia independiente respaldada o un instrumento de prueba distinto; no borrar la auditoría ni alterar fechas para aparentar una primera ejecución.
+A complete test changes the case's state. To repeat it, use a separate backed-up copy or a different test instrument; do not delete the audit trail or alter dates to make it look like a first run.
 
-## Conservación y límites
+## Preservation and limitations
 
-Respaldar la base PostgreSQL junto con los archivos originales y la configuración necesaria para restaurarlos. Una exportación de tablas por sí sola no contiene los PDFs ni la configuración de Metabase. Conservar el commit y las versiones de las imágenes de cada entrega.
+Back up PostgreSQL together with the original files and configuration needed to restore them. A table export alone does not contain the PDFs or Metabase configuration. Preserve the commit and image versions for each delivery.
 
-Los ensayos históricos y sus resultados no se regeneran por arrancar la aplicación. Las pruebas automatizadas se ejecutan en bases desechables. No se debe reinicializar un volumen ni regenerar casos como parte de una actualización ordinaria del código.
+Starting the application does not regenerate historical experiments or their results. Automated tests run in disposable databases. Do not reinitialize a volume or regenerate cases as part of a routine code update.

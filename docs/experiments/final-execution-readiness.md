@@ -1,6 +1,6 @@
 # Preparación del ensayo final · 02/11/2026
 
-> Documento histórico de preparación. Para los resultados y el alcance final acordado, consultar el [cierre de evaluación del MVP](mvp-final-results.md), actualizado el 24/11/2026. Las tareas pendientes descritas abajo corresponden a este checkpoint.
+> Historical readiness document. For the results and agreed final scope, see the [MVP evaluation closeout](mvp-final-results.md), updated on 24 November 2026. Pending tasks below refer to this checkpoint.
 
 Política confirmada por Pau: **sintéticos como ruta de trabajo; reales si se consiguen, sin bloquear**. Los reales se presentan como una cohorte separada con alcance explícito. Datos reales sin historial suficiente no validan deriva ni probabilidad futura. Esta entrega prepara decisiones y condiciones; no declara un nuevo dataset congelado, nuevos umbrales aprobados ni experimentos finales completados.
 
